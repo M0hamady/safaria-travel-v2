@@ -1,0 +1,24 @@
+/* English: Montserrat */
+@font-face {
+  font-family: "Montserrat";
+  src: url("./assets/Fonts/Montserrat-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("./assets/Fonts/Montserrat-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* You can continue for other weights like Medium, Light, etc. */
+
+/* Arabic fallback (optional example using 'Cairo') */
+@font-face {
+  font-family: "Cairo";
+  src: url("./assets/Fonts/Cairo-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}

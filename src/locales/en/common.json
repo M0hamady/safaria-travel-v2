@@ -1,0 +1,271 @@
+{
+  "welcome_to_safaria": "Welcome to Safaria",
+  "travel_anywhere": "Travel anywhere a click away",
+  "welcome_image_alt ": "welcome to Safaria",
+  "direct_routes": "Direct routes inside and outside Egypt",
+  "our_partners": "Our Partners",
+  "partners_description": "Elevating Success Together: Our Trusted Partners in Achievement.",
+  "we_are_with_you": "We’re with you every step",
+  "home": "Home",
+  "about": "About us",
+  "contact": "Contact us",
+  "language": "Language",
+  "signIn": "Sign in",
+  "joinUs": "Join us",
+  "logout": "Logout",
+  "profile": "Profile",
+  "booking": "Booking",
+  "Find the biggest brands with the best deals": "Find the biggest brands with the best deals",
+    "Search without worry": "Search without worry",
+    "Trusted and free": "Trusted and free",
+    "Why Safaria?": "Why Safaria?",
+    "App Store": "App Store",
+    "Google Play": "Google Play",
+  "Steps Title": "Steps Title",
+    "The World in a click:": "The World in a click:",
+    "Using Safaria Application, you can plan and book your trips and instantly compare rates to identify the best choice. Download the application and explore the world.": "Using Safaria Application, you can plan and book your trips and instantly compare rates to identify the best choice. Download the application and explore the world.",
+    "Get the Safaria app": "Get the Safaria app",
+    "high_quality": "High Quality",
+  "high_quality_description": "Our products are made from the best materials to ensure durability.",
+  "fast_shipping": "Fast Shipping",
+  "fast_shipping_description": "We deliver your orders quickly and efficiently.",
+  "support": "24/7 Support",
+  "support_description": "Our team is always available to help with your inquiries.",
+  "explore": "Explore",
+    "resources": "Resources",
+    "get_in_touch": "Get In Touch",
+    "bus": "Bus",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy",
+    "faqs": "FAQs",
+    "contact_us": "Contact Us",
+    "about_us": "Who We Are",
+    "tagline": "Your go-to travel partner for the best experiences.",
+    "copyright": "Telefreik. All rights reserved.",
+    "contact_form": {
+      "title": "CONTACT US",
+      "subtitle": "It is our pleasure and honor to help you",
+      "name_label": "Full Name",
+      "name_placeholder": "Enter your full name",
+      "email_label": "Email Address",
+      "email_placeholder": "Enter your email",
+      "phone_label": "Phone Number",
+      "phone_placeholder": "Enter your phone number",
+      "message_label": "Question / Message",
+      "message_placeholder": "Write your message here...",
+      "success_message": "Your message has been sent successfully!",
+      "error_message": "Failed to send message. Please try again later.",
+      "loading": "Sending...",
+      "send_button": "Send"},
+      "about_Us": {
+    "section_title": "About Us",
+    "description": "Safaria is a website and application that simplifies trip planning by allowing users to book accommodations seamlessly through our platforms. Compare transportation options, prices, dates, and reserve your entire journey from the comfort of your home. We revolutionize travel with an extensive range of transportation means like buses, ferries, planes, and private bookings. Partnering with renowned companies like Webus, Bluebus, Bulman, and more, Safaria offers diverse travel options.",
+    "image_alt": "Safaria Logo",
+    "preview_image_alt": "`Making it easier to experience the travel. Find tickets for flight, bus and private car you won't see anywhere else. Check out`",
+    "preview_image_alt2": "`Making it easier to experience the travel. Find tickets for flight, bus and private car you won't see anywhere else. Check out our",
+    "preview_description": "Making it easier to experience the travel. Find tickets for flight, bus, and private car you won't see anywhere else. Check out our",
+    "mobile_app_link": "Mobile App"
+  },
+  "what_we_do": {
+    "title": "What We Do",
+    "description": "Safaria, a pioneering transportation company in Egypt, has emerged as a game-changer in the industry. With a comprehensive range of services, including buses, ferries, flights, and private trips, Safaria connects cities across the country, making travel convenient and hassle-free."
+  },
+  "our_vision": {
+    "title": "Our Vision",
+    "description": "We at Safaria aspire to a world filled with the wonder of discovery and the comfort of travel. Our vision is to make dreams come true and empower your travels in unparalleled style."
+  },
+  "why_safaria": {
+    "title": "Why Safaria?",
+    "description": "Safaria stands out by providing real-time comparisons, personalized recommendations, and an easy-to-use interface to ensure a hassle-free booking experience."
+  },  "login": {
+    "title": "Login",
+    "signup": "Sign up",
+    "mobile_label": "Mobile number",
+    "mobile_placeholder": "Phone Number",
+    "password_label": "Password",
+    "password_placeholder": "Enter Password",
+    "button": "Login",
+    "forgot_password": "Forgot Password?",
+    "error": "Login failed. Please try again."
+  },  "register": {
+    "title": "Sign up",
+    "login": "Login",
+    "mobile_label": "Mobile number",
+    "mobile_placeholder": "Phone Number",
+    "name_label": "Full Name",
+    "name_placeholder": "Enter your full name",
+    "password_label": "Password",
+    "password_placeholder": "Enter Password",
+    "confirm_password_label": "Confirm Password",
+    "confirm_password_placeholder": "Re-enter Password",
+    "button": "Register",
+    "error_mobile": "Invalid mobile number. It must be 10-15 digits.",
+    "error_password": "Password must be at least 6 characters long and include a number.",
+    "error_confirm_password": "Passwords do not match.",
+    "already_have_account": "Already have an account?",
+    "registering": "Registering...",
+    "otp_verification": "Verify OTP",
+    "resend_otp": "Resend OTP",
+    "otp_success": "OTP verified successfully! Redirecting..."
+  },
+  "transport": {
+    "bus": "Bus",
+    "private": "Private"
+  },
+  "tripType": {
+    "oneWay": "One way",
+    "round": "Round"
+  },
+  "searchForm": {
+    "from": "From",
+    "to": "To",
+    "departure": "Departure",
+    "return": "Return",
+    "noReturnTripWarning": "No return trips available for the selected date. Please choose another date."
+  },
+"warning_select_return_trip": "⚠️ Please select a return date 🗓️🔙",
+"toast": {
+  "round_trip_info": "Round trip selected. Please select your return date.",
+  "one_way_info": "One way trip selected.",
+  "bus_selection_info": "Bus transport selected. Search for available bus routes.",
+  "private_selection_info": "Private transport selected. Search for available vehicles.",
+  "please_select_return_date": "Please don't forget to select your return date."
+},
+  "validation": {
+    "required": "Required field"
+  },"welcome": "Welcome to Safaria",
+  "travelMessage": "Travel anywhere a click away",
+  "directRoutes": "Direct routes inside and outside Egypt",
+  "searchResults": {
+    "returnTrips": "Return Trips"
+  }, "busSearchTrips": {
+    "noBusesFound": "No buses found.",
+    "results": "{{count}} results",
+    "allTickets": "All tickets",
+    "sortOptions": {
+      "lowestPrice": "Lowest Price",
+      "highestPrice": "Highest Price",
+      "arrivalTime": "Earliest Arrival",
+      "departureTime": "Earliest Departure"
+    },
+    "departureStation": "Departure Station",
+    "noDepartureStation": "No departure station available.",
+    "arrivalStation": "Arrival Station",
+    "noArrivalStation": "No arrival station available.",
+    "seatsFree": "seats free",
+    "LE": "LE",
+    "pricePerPerson": "Price per person",
+    "select": "Select"
+  }, "filters": "Filters",
+  "open_filters": "open filters",
+  "companies": "Companies",
+  "departureStations": "Departure Stations",
+  "arrivalStations": "Arrival Stations",
+  "priceRange": "Price Range",
+  "resultAll": "Reset all",
+  "openFilters": "Open Filters",
+  "apply": "Apply",
+  "close": "Close",
+  "open": "open",
+  "Summary": "Summary",
+  "Selected Seats": "Selected Seats",
+  "Total Seats": "Total Seats",
+  "Confirm Reservation": "Confirm Reservation",
+  "Go to Login": "Go to Login",
+  "You must log in to confirm your reservation.": "You must log in to confirm your reservation.",
+  "Loading": "Loading...",
+  "Trip not found": "Trip not found",
+  "Trip Details": "Trip Details",
+  "Seat Selection": "Seat Selection",
+  "Ticket Summary": "Ticket Summary",
+  "Company": "Company",
+  "Bus Code": "Bus Code",
+  "From": "From",
+  "To": "To",
+  "successReservation": "Reservation confirmed successfully!",
+  "errReservation": "Error confirming reservation. Please try again.",
+  "Seats": "Seats",
+  "terms_line":"pease confirm accepting our terms and condition",
+  "Next: Confirm Reservation": "Next: Confirm Reservation",
+  "submit": "submit",
+  "cancel": "cancel",
+  
+  "common": {
+    "edit": "Edit"
+  },
+  "reservation": {
+    "confirming": "Confirming your reservation...",
+    "confirmationSuccess": "Reservation confirmed successfully!"
+  },
+  "ticket": {
+    "summary": "Ticket Summary"
+  },
+  "company": {
+    "logoAlt": "Company Logo"
+  },
+  "seat": {
+    "label": "Seat",
+    "iconAlt": "Seat Icon"
+  },
+  "passengers": {
+    "title": "{{count}} Passenger",
+    "title_plural": "{{count}} Passengers"
+  },
+  "trip": {
+    "details": "Trip Details"
+  },
+  "payment": {
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "fees": "Fees",
+    "total": "Total",
+    "proceed": "Proceed to Payment",
+    "generatingLink": "Generating payment link...",
+    "generateLink": "Generate Payment Link",
+    "retry": "Retry Payment"
+  },
+  "termsRe": {
+    "agreement": "I agree to the",
+    "conditions": "Terms and Conditions",
+    "confirmRequired": "Please confirm terms and conditions to proceed to payment"
+  },
+  "currency": "LE",
+  "errors": {
+    "paymentLinkFailed": "Failed to fetch payment link. Please retry.",
+    "paymentLinkNotFound": "Payment link not found"
+  },
+  "order": {
+    "pay": "Pay",
+    "cancel": "Cancel",
+    "viewTrip": "View Trip",
+    "viewTicket": "View Ticket",
+    "feedback": "Feedback",
+    "canceled": "Canceled",
+    "addReview":"add review",
+    "commentPlaceholder":"add your feedback",
+    "comment":"Your Feedback Matters"
+
+  },
+  "bookings": {
+    "allBookings": "All Bookings",
+    "noBookings": "No bookings available.",
+    "CurrentBookings": "Current Bookings",
+    "all": "all orders" ,
+    "current": "current orders",
+    "pending": "pending orders",
+    "previous": "previous orders",
+    "addReview":"add review"
+  },
+  "dashboard": {
+    "profile": "Profile",
+    "booking": "Booking",
+    "addresses": "Addresses",
+    "changePassword": "Change Password",
+    "deleteAccount": "Delete Account",
+    "logout": "Logout",
+    "greeting": "Hi there,",
+    "defaultName": "User",
+    "back": "back"
+
+  }
+}

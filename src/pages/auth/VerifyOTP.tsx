@@ -1,0 +1,397 @@
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+interface VerifyOTPProps {
+  mobile: string;
+  onVerify: (mobile: string, otp: string) => Promise<void>;
+  resendOTP: (mobile: string) => Promise<void>;
+  redirectPath?: string;
+  prev?: string;
+  onBack: () => void;
+}
+
+const VerifyOTP: React.FC<VerifyOTPProps> = ({
+  mobile,
+  onVerify,
+  resendOTP,
+  redirectPath,
+  onBack,
+  prev
+}) => {
+  const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", ""]);
+  const [error, setError] = useState<string | null>(null);
+  const [prevPage, setPrevPage] = useState<string | undefined >(prev);
+  const [message, setMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isResending, setIsResending] = useState<boolean>(false);
+  // New state for the countdown timer (in seconds)
+  const [resendTimer, setResendTimer] = useState<number>(0);
+  const navigate = useNavigate();
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Countdown effect for resend timer
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendTimer > 0) {
+      timer = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [resendTimer]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    // Allow only digits (but now also allow empty string)
+    const value = e.target.value.replace(/\D/g, "");
+    const newOtp = [...otpDigits];
+    newOtp[index] = value;
+    setOtpDigits(newOtp);
+    
+    // If a digit was entered (non-empty), move focus to the next input
+    if (value && index < inputRefs.current.length - 1) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+  
+
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    if (e.key === "Backspace" && otpDigits[index] === "") {
+      // Move focus to previous input if current is empty
+      if (index > 0 && inputRefs.current[index - 1]) {
+        inputRefs.current[index - 1]?.focus();
+      }
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setMessage(null);
+
+    const otp = otpDigits.join("");
+    if (otp.length !== 4) {
+      setError("Please enter a 4-digit OTP");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await onVerify(mobile, otp);
+      navigate(prevPage || "/");
+    } catch (err: any) {
+      setError(err.message || "OTP verification failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    setError(null);
+    setMessage(null);
+    setIsResending(true);
+    try {
+      await resendOTP(mobile);
+      setMessage("OTP has been resent");
+      // Set the countdown timer to 4 minutes (240 seconds)
+      setResendTimer(240);
+    } catch (err: any) {
+      setError(err.message || "Failed to resend OTP. Please try again.");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  // Format timer display as mm:ss
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  return (
+    <div className="container mx-auto w-md bg-white p-4 rounded-xl translate-y-20">
+              <div className="max-w-sm mx-auto flex">
+      <svg
+          width="450"
+          height="300"
+          viewBox="0 0 450 300"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g clipPath="url(#clip0_792_18588)">
+            <path
+              d="M335.319 78.3998C335.322 63.2148 325.8 49.6598 311.514 44.5123L255.071 24.1923L255.41 23.2518L255.071 24.1928C235.84 17.2691 214.797 17.2691 195.566 24.1928L139.049 44.5493C124.776 49.6923 115.257 63.2293 115.245 78.4008V169.079C115.245 192.163 131.41 212.401 151.62 228.658C171.792 244.883 195.76 256.955 210.886 263.733L210.888 263.734C215.412 265.776 220.319 266.833 225.282 266.833C230.245 266.833 235.152 265.776 239.675 263.734L239.678 263.733C254.803 256.955 278.772 244.865 298.944 228.63C319.155 212.364 335.319 192.126 335.319 169.079V78.3998Z"
+              fill="white"
+              stroke="#E1E4E5"
+              stroke-width="4"
+            />
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M316.989 164.525V89.6317C316.992 76.7422 308.909 65.2357 296.783 60.8662L250.165 44.0837C234.101 38.3002 216.524 38.3002 200.46 44.0837L153.781 60.8967C141.665 65.2627 133.585 76.7532 133.575 89.6317V164.525C133.575 203.44 188.018 232.236 213.054 243.455C216.897 245.19 221.066 246.087 225.282 246.087C229.498 246.087 233.667 245.19 237.509 243.455C262.545 232.236 316.989 203.379 316.989 164.525Z"
+              fill="url(#paint0_linear_792_18588)"
+            />
+            <path
+              d="M267.5 119.5L219.688 167L191 138.5"
+              stroke="white"
+              stroke-width="17"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M89.215 153.819C68.1465 153.819 51.067 136.74 51.067 115.671C51.067 94.6029 68.1465 77.5234 89.215 77.5234C110.284 77.5234 127.363 94.6029 127.363 115.671C127.363 136.74 110.284 153.819 89.215 153.819Z"
+              fill="url(#paint1_linear_792_18588)"
+            />
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M102.37 129.018V130.896C102.369 131.394 102.171 131.871 101.819 132.223C101.466 132.575 100.989 132.773 100.491 132.773H77.94C77.442 132.773 76.9643 132.575 76.6119 132.223C76.2596 131.871 76.0614 131.394 76.061 130.896V128.988C76.061 123.308 82.559 119.618 89.215 119.618C95.8715 119.618 102.37 123.31 102.37 128.988M93.866 103.128C96.4345 105.697 96.4345 109.861 93.866 112.43C91.2975 114.998 87.133 114.998 84.5645 112.43C81.996 109.861 81.996 105.697 84.5645 103.128C87.133 100.56 91.2975 100.56 93.866 103.128Z"
+              fill="white"
+            />
+            <path
+              d="M93.1501 59.4086C99.3081 62.4636 107.482 58.5356 107.482 58.5356C107.482 58.5356 105.666 49.6561 99.5036 46.6056C93.3451 43.5506 85.1746 47.4741 85.1746 47.4741C85.1746 47.4741 86.9916 56.3536 93.1501 59.4086Z"
+              fill="url(#paint2_linear_792_18588)"
+            />
+            <path
+              d="M293.635 272.294C286.01 276.864 275.07 272.639 275.07 272.639C275.07 272.639 276.501 261.007 284.13 256.442C291.756 251.872 302.691 256.091 302.691 256.091C302.691 256.091 301.26 267.724 293.635 272.294Z"
+              fill="url(#paint3_linear_792_18588)"
+            />
+            <path
+              d="M54.182 59.6892C56.4917 59.6892 58.364 61.5616 58.364 63.8712C58.364 66.1809 56.4917 68.0532 54.182 68.0532C51.8723 68.0532 50 66.1809 50 63.8712C50 61.5616 51.8723 59.6892 54.182 59.6892Z"
+              fill="url(#paint4_linear_792_18588)"
+            />
+            <path
+              d="M350.777 25.771C355.121 25.771 358.643 29.2925 358.643 33.6365C358.643 37.9804 355.121 41.502 350.777 41.502C346.433 41.502 342.912 37.9804 342.912 33.6365C342.912 29.2925 346.433 25.771 350.777 25.771Z"
+              fill="url(#paint5_linear_792_18588)"
+            />
+            <path
+              d="M367.587 112.26C369.896 112.26 371.767 110.388 371.767 108.079C371.767 105.771 369.896 103.899 367.587 103.899C365.278 103.899 363.406 105.771 363.406 108.079C363.406 110.388 365.278 112.26 367.587 112.26Z"
+              fill="url(#paint6_linear_792_18588)"
+            />
+            <path
+              d="M133.492 257.637C136.755 257.637 139.4 254.991 139.4 251.728C139.4 248.465 136.755 245.82 133.492 245.82C130.229 245.82 127.583 248.465 127.583 251.728C127.583 254.991 130.229 257.637 133.492 257.637Z"
+              fill="#E1E4E5"
+            />
+            <path
+              d="M57.427 185.747C61.5288 185.747 64.854 182.421 64.854 178.32C64.854 174.218 61.5288 170.893 57.427 170.893C53.3252 170.893 50 174.218 50 178.32C50 182.421 53.3252 185.747 57.427 185.747Z"
+              fill="#E1E4E5"
+            />
+            <path
+              d="M350.307 135.508C349.464 138.655 351.331 141.89 354.478 142.733C357.625 143.576 360.86 141.709 361.703 138.562C362.546 135.415 360.679 132.18 357.532 131.337C354.385 130.494 351.15 132.361 350.307 135.508Z"
+              fill="#E1E4E5"
+            />
+            <path
+              d="M85.6021 195.722C88.9359 195.722 91.6385 193.56 91.6385 190.893C91.6385 188.226 88.9359 186.064 85.6021 186.064C82.2682 186.064 79.5656 188.226 79.5656 190.893C79.5656 193.56 82.2682 195.722 85.6021 195.722Z"
+              fill="#E1E4E5"
+            />
+            <path
+              d="M72.6295 229.845C72.6295 235.166 76.9431 239.479 82.2641 239.479C87.585 239.479 91.8986 235.166 91.8986 229.845C91.8986 224.524 87.585 220.21 82.2641 220.21C76.9431 220.21 72.6295 224.524 72.6295 229.845Z"
+              fill="#E1E4E5"
+            />
+            <path
+              d="M367.487 60.921H367.401C366.892 68.136 361.526 68.247 361.526 68.247C361.526 68.247 367.443 68.3625 367.443 76.699C367.443 68.3625 373.36 68.247 373.36 68.247C373.36 68.247 367.997 68.136 367.487 60.921ZM119.435 18H119.352C118.864 25.1935 113.712 25.304 113.712 25.304C113.712 25.304 119.393 25.419 119.393 33.7315C119.393 25.4195 125.073 25.3045 125.073 25.3045C125.073 25.3045 119.924 25.193 119.435 18Z"
+              fill="#E1E4E5"
+            />
+            <path
+              d="M334.088 224.469H391.991V268.263H334.088V224.469Z"
+              fill="url(#paint7_linear_792_18588)"
+            />
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M363.186 225.669C355.936 225.669 349.476 225.933 344.199 226.269C339.194 226.587 335.346 230.406 334.987 235.376C334.731 238.911 334.553 242.637 334.553 246.122C334.553 249.606 334.731 253.332 334.987 256.867C335.346 261.837 339.194 265.656 344.199 265.974C356.845 266.774 369.527 266.774 382.172 265.974C387.177 265.656 391.026 261.837 391.385 256.867C391.641 253.332 391.819 249.606 391.819 246.122C391.819 242.637 391.641 238.911 391.385 235.376C391.026 230.406 387.177 226.587 382.172 226.269C375.852 225.869 369.52 225.669 363.186 225.669ZM343.681 218.104C334.609 218.681 327.482 225.72 326.827 234.786C326.562 238.445 326.372 242.379 326.372 246.122C326.372 249.864 326.562 253.798 326.827 257.457C327.482 266.523 334.609 273.562 343.681 274.139C356.671 274.961 369.701 274.961 382.691 274.139C391.763 273.562 398.89 266.523 399.545 257.457C399.81 253.798 400 249.864 400 246.122C400 242.379 399.81 238.445 399.545 234.786C398.89 225.72 391.763 218.681 382.691 218.104C369.7 217.283 356.671 217.283 343.681 218.104Z"
+              fill="url(#paint8_linear_792_18588)"
+            />
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M367.276 249.118C369.721 247.703 371.367 245.059 371.367 242.031C371.367 237.513 367.704 233.85 363.186 233.85C358.668 233.85 355.005 237.513 355.005 242.031C355.005 245.059 356.65 247.703 359.095 249.118V254.302C359.095 254.839 359.201 255.371 359.407 255.868C359.612 256.364 359.914 256.815 360.293 257.195C360.673 257.575 361.124 257.876 361.621 258.081C362.117 258.287 362.649 258.393 363.186 258.393C363.723 258.393 364.255 258.287 364.751 258.081C365.248 257.876 365.699 257.575 366.079 257.195C366.458 256.815 366.76 256.364 366.965 255.868C367.171 255.371 367.277 254.839 367.276 254.302V249.118Z"
+              fill="white"
+            />
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M342.734 205.217C342.734 193.922 351.891 184.765 363.186 184.765C374.482 184.765 383.638 193.922 383.638 205.217V221.579C383.638 222.664 383.207 223.704 382.44 224.471C381.673 225.238 380.632 225.669 379.548 225.669C378.463 225.669 377.422 225.238 376.655 224.471C375.888 223.704 375.457 222.664 375.457 221.579V205.217C375.457 198.44 369.963 192.946 363.186 192.946C356.409 192.946 350.915 198.44 350.915 205.217V221.579C350.915 222.664 350.484 223.704 349.716 224.471C348.949 225.238 347.909 225.669 346.824 225.669C345.739 225.669 344.699 225.238 343.932 224.471C343.164 223.704 342.734 222.664 342.734 221.579V205.217Z"
+              fill="url(#paint9_linear_792_18588)"
+            />
+          </g>
+          <defs>
+            <linearGradient
+              id="paint0_linear_792_18588"
+              x1="133.575"
+              y1="142.917"
+              x2="316.989"
+              y2="142.917"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stop-color="#D4CFBF" />
+              <stop offset="1" stop-color="#D5CC9F" />
+            </linearGradient>
+            <linearGradient
+              id="paint1_linear_792_18588"
+              x1="127.363"
+              y1="115.671"
+              x2="51.067"
+              y2="115.671"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stop-color="#D4CFBF" />
+              <stop offset="1" stop-color="#D5CC9F" />
+            </linearGradient>
+            <linearGradient
+              id="paint2_linear_792_18588"
+              x1="116.799"
+              y1="68.9376"
+              x2="66.0041"
+              y2="28.7586"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stop-color="white" />
+              <stop offset="1" stop-color="#EEEEEE" />
+            </linearGradient>
+            <linearGradient
+              id="paint3_linear_792_18588"
+              x1="264.128"
+              y1="287.005"
+              x2="325.483"
+              y2="229.998"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stop-color="white" />
+              <stop offset="1" stop-color="#EEEEEE" />
+            </linearGradient>
+            <linearGradient
+              id="paint4_linear_792_18588"
+              x1="50"
+              y1="63.8712"
+              x2="58.364"
+              y2="63.8712"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stop-color="#D4CFBF" />
+              <stop offset="1" stop-color="#D5CC9F" />
+            </linearGradient>
+            <linearGradient
+              id="paint5_linear_792_18588"
+              x1="342.912"
+              y1="33.6365"
+              x2="358.643"
+              y2="33.6365"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stop-color="#D4CFBF" />
+              <stop offset="1" stop-color="#D5CC9F" />
+            </linearGradient>
+            <linearGradient
+              id="paint6_linear_792_18588"
+              x1="363.406"
+              y1="108.079"
+              x2="371.767"
+              y2="108.079"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stop-color="#D4CFBF" />
+              <stop offset="1" stop-color="#D5CC9F" />
+            </linearGradient>
+            <linearGradient
+              id="paint7_linear_792_18588"
+              x1="334.088"
+              y1="246.366"
+              x2="391.991"
+              y2="246.366"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stop-color="#D4CFBF" />
+              <stop offset="1" stop-color="#D5CC9F" />
+            </linearGradient>
+            <linearGradient
+              id="paint8_linear_792_18588"
+              x1="326.372"
+              y1="246.122"
+              x2="400"
+              y2="246.122"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stop-color="#D4CFBF" />
+              <stop offset="1" stop-color="#D5CC9F" />
+            </linearGradient>
+            <linearGradient
+              id="paint9_linear_792_18588"
+              x1="342.734"
+              y1="205.217"
+              x2="383.638"
+              y2="205.217"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stop-color="#D4CFBF" />
+              <stop offset="1" stop-color="#D5CC9F" />
+            </linearGradient>
+            <clipPath id="clip0_792_18588">
+              <rect width="450" height="300" fill="white" />
+            </clipPath>
+          </defs>
+        </svg>
+      </div>
+      <h1 className="text-3xl font-bold mb-4 text-center">Verify OTP</h1>
+      {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+      {message && <p className="text-green-500 mb-4 text-center">{message}</p>}
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col space-y-4 items-center"
+      >
+        <p className="text-center">An OTP has been sent to your mobile.</p>
+        <div className="flex justify-center space-x-2">
+          {otpDigits.map((digit, index) => (
+            <input
+  key={index}
+  type="text"
+  inputMode="numeric"
+  pattern="\d*"
+  maxLength={1}
+  className="w-12 h-12 text-center border rounded focus:outline-none focus:border-primary"
+  style={{ direction: 'ltr' }}  // Explicitly set LTR direction
+  value={digit}
+  onChange={(e) => handleChange(e, index)}
+  onKeyDown={(e) => handleKeyDown(e, index)}
+  ref={(el) => {
+    inputRefs.current[index] = el;
+  }}
+/>
+          ))}
+        </div>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="bg-primary text-white p-2 rounded hover:bg-primary transition transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? "Verifying..." : "Verify OTP"}
+        </button>
+      </form>
+      <div className="mt-4 flex flex-col-reverse justify-between max-w-sm mx-auto">
+        <button
+          onClick={handleResendOTP}
+          disabled={isResending || resendTimer > 0}
+          className="text-primary hover:underline disabled:opacity-50"
+        >
+          {isResending
+            ? "Resending..."
+            : resendTimer > 0
+            ? `Resend OTP in ${formatTime(resendTimer)}`
+            : "Resend OTP"}
+        </button>
+        <button onClick={onBack} className="text-gray-600 hover:underline">
+          Back to Login
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default VerifyOTP;
