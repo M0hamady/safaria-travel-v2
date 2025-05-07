@@ -9,7 +9,7 @@ export interface TransportOption {
   hasRoundTrip: boolean;
 }
 
-export   type SearchType = 'bus' | 'private';
+export   type SearchType = 'bus' | 'private' | 'train';
 export interface PrivateTrip {
   id: number;
   company_name: string;

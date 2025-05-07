@@ -3,6 +3,7 @@ import { TransportOption } from "../../types/types";
 import {
   DirectionsBus,
   DirectionsCar,
+  DirectionsRailway,
 } from "@mui/icons-material";
 
 export const transportOptions: TransportOption[] = [
@@ -18,6 +19,13 @@ export const transportOptions: TransportOption[] = [
     label: "transport.private",
     icon: <DirectionsCar />,
     value: "private",
+    hasRoundTrip: true,
+  },
+  {
+    id: 3,
+    label: "transport.train",
+    icon: <DirectionsRailway />,
+    value: "train",
     hasRoundTrip: true,
   },
 ];

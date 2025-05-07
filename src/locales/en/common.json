@@ -110,7 +110,8 @@
   },
   "transport": {
     "bus": "Bus",
-    "private": "Private"
+    "private": "Private",
+    "train": "train"
   },
   "tripType": {
     "oneWay": "One way",
@@ -191,7 +192,10 @@
   "cancel": "cancel",
   
   "common": {
-    "edit": "Edit"
+    "edit": "Edit",
+    "changeLocation": "change location",
+    "searchStations": "search station"
+
   },
   "reservation": {
     "confirming": "Confirming your reservation...",

@@ -125,7 +125,8 @@
   },
   "transport": {
     "bus": "حافلة",
-    "private": "خاص"
+    "private": "خاص",
+    "train": "قطارات"
   },
   "tripType": {
     "oneWay": "اتجاه واحد",
@@ -211,7 +212,10 @@
   "cancel": "الغاء",
 
   "common": {
-    "edit": "تعديل"
+    "edit": "تعديل",
+    "changeLocation": "تعديل المحافظة",
+    "searchStations": "البحث  عن محطة"
+
   },
   "reservation": {
     "confirming": "جاري تأكيد الحجز...",

@@ -1,4 +1,4 @@
-import { JSX, useEffect, useState } from "react";
+import { JSX, useContext, useEffect, useState } from "react";
 import { useSearchContext } from "../context/SearchContext";
 import { usePrivateSearchContext } from "../context/PrivateSearchContext";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ import { useSearchType } from "../context/SearchTypeContext";
 import { useToast } from "../context/ToastContext";
 import { SearchValues } from "../types/types";
 import { useNavigate } from "react-router-dom";
+import { TrainsContext } from "../context/TrainsContext";
 
 const SearchBar = () => {
   const { searchType, setSearchType } = useSearchType();
@@ -29,7 +30,8 @@ const SearchBar = () => {
     setTripType: setTripType_private,
     locations: locations_private,
   } = privateContext;
-
+    const { searchTrips } = useContext(TrainsContext);
+  
   // State for each context value
   const [currentSearchValues, setCurrentSearchValues] = useState<SearchValues>(
     searchType === "bus" ? busContext.searchValues : privateSearchValues
@@ -225,8 +227,8 @@ const SearchBar = () => {
             : swapLocations_private
         }
         handleSearch={
-          searchType === "bus" ? busContext.handleSearch : handleSearch_private
-        }
+          searchType === "bus" ? busContext.handleSearch : searchType === "private"  ?  handleSearch_private  : searchTrips 
+         }
         loading={searchType === "bus" ? busContext.loading : loading_private}
         errors={searchType === "bus" ? busContext.errors : errors_private}
         tripType={currentTripType}
