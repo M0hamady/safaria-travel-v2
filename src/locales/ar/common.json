@@ -56,6 +56,16 @@
     "about_us": "من نحن",
     "tagline": "شريكك الموثوق للسفر وتجارب لا تُنسى.",
     "copyright": "تليفريك. جميع الحقوق محفوظة.",
+    
+      "train_number": "رقم القطار",
+      "departure": "المغادرة",
+      "arrival": "الوصول",
+      "duration": "المدة",
+      "starting_price": "يبدأ من",
+      "price_unit": "جنيه مصري",
+      "class_options": "خيارات الدرجة",
+      "view_trip": "عرض الرحلة",
+      "railway_track": "مسار السكك الحديدية",    
     "contact_form": {
       "title": "تواصل معنا",
       "subtitle": "يسرنا ويشرفنا مساعدتك",

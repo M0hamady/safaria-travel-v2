@@ -32,6 +32,7 @@ const TrainTripDetailsPage = () => {
       <h2 className="text-xl font-bold mb-4">Trip Details</h2>
       <p><strong>From:</strong> {trip.station_from.name}</p>
       <p><strong>To:</strong> {trip.station_to.name}</p>
+      
       <p><strong>Departure:</strong> {trip.start_time}</p>
       <p><strong>Arrival:</strong> {trip.finish_time}</p>
       <p><strong>Duration:</strong> {trip.duration}</p>

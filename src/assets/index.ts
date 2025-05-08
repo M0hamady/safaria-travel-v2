@@ -16,6 +16,8 @@ import Im_404 from "./Images/illustration.png";
 import paymentSuccess from "./Images/paymentSuccess.png";
 import Secured from "./Images/Secured.png";
 import safariaMobile from "./Images/safariaMobile.png";
+import railWay from "./Images/RAILWAY.png";
+import trainSafaria from "./Images/TRAINSAFARIA.png";
 
 const images = {
   bus_horizontal,
@@ -35,7 +37,9 @@ const images = {
   Im_404,
   paymentSuccess,
   Secured,
-  safariaMobile
+  safariaMobile,
+  trainSafaria,
+  railWay
 };
 
 export default images;
