@@ -45,7 +45,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
   const [toLocationTrain, setToLocationTrain] = useState<TrainLocation>();
   const [toLocation, setToLocation] = useState<Location>();
   const lang = i18n.language;
-  const { trainLocations,setSearchBody, searchBody } = useContext(TrainsContext);
+  const { trainLocations,setSearchBody, searchBody, setSelectedDepartureLocation, setSelectedArrivalLocation, setArrivalStation, setDepartureStation, selectedArrivalLocation, selectedDepartureLocation, selectedArrivalStation, selectedDepartureStation } = useContext(TrainsContext);
   const { searchType,  } = useSearchType();
   
   const handleInputTrain = (field: string | keyof SearchValues, value: string) => {
@@ -60,6 +60,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
       
       setFromLocationTrain(foundLocation);
     } else if (field === "to") {
+      setSelectedArrivalLocation(foundLocation)
        
       setToLocationTrain(foundLocation);
     }
@@ -147,18 +148,21 @@ export const SearchForm: React.FC<SearchFormProps> = ({
               ...searchBody,  // <-- keep existing values
               from_station_id: `${station.id}`, // <-- update the date only
             })
+            location && setSelectedDepartureLocation(location)
+
+            station && setDepartureStation(station)
             if (location) {
               
               location && handleInputTrain("from", `${location}`)
             }
           }}
-    
+          
           value={fromLocationTrain?.name ?fromLocationTrain?.name :  ""}
           className="col-span-7 max-sm:col-span-12 w-full"
-        />      <button
-        onClick={swapLocations}
-        className="flex  h-[55px] md:w-[45px] w-[55px] md:m-auto col-span-1 items-center justify-center rounded-sm border-2 hover:bg-gray-300 max-sm:absolute top-[30px] ltr:right-0 rtl:left-3 z-50 bg-white  max-sm:rounded-full "
-      >
+          />      <button
+          onClick={swapLocations}
+          className="flex  h-[55px] md:w-[45px] w-[55px] md:m-auto col-span-1 items-center justify-center rounded-sm border-2 hover:bg-gray-300 max-sm:absolute top-[30px] ltr:right-0 rtl:left-3 z-50 bg-white  max-sm:rounded-full "
+          >
         <SwapHoriz fontSize="large" className="m-auto" />
       </button>
       <TrainLocationsTextField
@@ -167,6 +171,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
         locations={trainLocations}
         onSelect={(location, station, stationId) =>{
           location && handleInputTrain("to", `${location.id}`)
+          station && setArrivalStation(station)
           station && setSearchBody({
             ...searchBody,  // <-- keep existing values
             to_station_id: `${station.id}`, // <-- update the date only

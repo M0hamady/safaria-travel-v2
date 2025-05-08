@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { Station, Location } from "../../types/trainTypes";
 import {
   CancelOutlined,
@@ -12,6 +12,7 @@ import {
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { useToast } from "../../context/ToastContext";
+import { TrainsContext } from "../../context/TrainsContext";
 
 interface TrainLocationsTextFieldProps {
   icon: React.ReactNode;
@@ -44,6 +45,7 @@ const TrainLocationsTextField = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { addToast } = useToast();
+  const { trainLocations,setSearchBody, searchBody, setSelectedDepartureLocation, setSelectedArrivalLocation, setArrivalStation, setDepartureStation, selectedArrivalLocation, selectedDepartureLocation, selectedArrivalStation, selectedDepartureStation } = useContext(TrainsContext);
 
   useEffect(() => {
     if (selectedStation) {

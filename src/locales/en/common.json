@@ -9,6 +9,7 @@
   "home": "Home",
   "about": "About us",
   "contact": "Contact us",
+  "km": "km",
   "language": "Language",
   "signIn": "Sign in",
   "joinUs": "Join us",
@@ -40,6 +41,8 @@
   "class_options": "Class options",
   "view_trip": "View Trip",
   "railway_track": "Railway Track",
+  "available_seats": "available seats",    
+
   "explore": "Explore",
     "resources": "Resources",
     "get_in_touch": "Get In Touch",

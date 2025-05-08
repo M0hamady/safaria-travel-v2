@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
-import { Location, Station, Trip } from "../types/trainTypes";
+import { Location, Station, TrainClass, Trip } from "../types/trainTypes";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
@@ -44,9 +44,21 @@ interface Filters {
 
 interface TrainsContextProps {
   trainLocations: Location[];
+  selectedClass:TrainClass | null ;
+  selectedDepartureLocation: Location | null;
+  setSelectedDepartureLocation: (location: Location) => void;
+  setSelectedClass: (trainClass: TrainClass) => void;
+  selectedArrivalLocation: Location | null;
+  setSelectedArrivalLocation: (location: Location) => void;
   stations: Station[];
+  selectedDepartureStation: Station | null;
+  setDepartureStation: (station: Station) => void;
+  selectedArrivalStation: Station | null;
+  setArrivalStation: (station: Station) => void;
   trips: Trip[];
-  filteredTrips: Trip[]; // NEW
+  selectedTrip: Trip | null;
+  setSelectedTrip: (trip: Trip) => void;
+  filteredTrips: Trip[];
   filters: Filters;
   setFilters: (filters: Filters) => void;
   searchBody: SearchBody;
@@ -63,8 +75,20 @@ interface TrainsContextProps {
 // -------------------------
 export const TrainsContext = createContext<TrainsContextProps>({
   trainLocations: [],
+  selectedDepartureLocation: null,
+  setSelectedDepartureLocation: () => {},
+  selectedArrivalLocation: null,
+  setSelectedArrivalLocation: () => {},
+  setSelectedClass: () => {},
   stations: [],
+  selectedDepartureStation: null,
+  setDepartureStation: () => {},
+  selectedArrivalStation: null,
+  setArrivalStation: () => {},
   trips: [],
+  selectedClass:null,
+  selectedTrip: null,
+  setSelectedTrip: () => {},
   filteredTrips: [],
   filters: {
     from_station_id: "",
@@ -94,8 +118,15 @@ export const TrainsContext = createContext<TrainsContextProps>({
 // -------------------------
 export const TrainsProvider = ({ children }: { children: ReactNode }) => {
   const [trainLocations, setTrainLocations] = useState<Location[]>([]);
+  const [selectedClass, setSelectedClass] = useState<TrainClass | null>(null);
+  const [selectedDepartureLocation, setSelectedDepartureLocation] = useState<Location | null>(null);
+  const [selectedArrivalLocation, setSelectedArrivalLocation] = useState<Location | null>(null);
   const [stations, setStations] = useState<Station[]>([]);
+  const [selectedDepartureStation, setDepartureStation] = useState<Station | null>(null);
+  const [selectedArrivalStation, setArrivalStation] = useState<Station | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]);
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+
   const [filters, setFilters] = useState<Filters>({
     from_station_id: "",
     to_station_id: "",
@@ -142,11 +173,7 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await axios.post(
         `${API_BASE_URL}/search`,
-        {
-          from_station_id: searchBody.from_station_id,
-          to_station_id: searchBody.to_station_id,
-          date: searchBody.date,
-        },
+        searchBody,
         {
           headers: {
             "Accept-Language": i18n.language,
@@ -179,40 +206,6 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const filteredTrips = useMemo(() => {
-    return trips.filter((trip) => {
-      const minPrice = Math.min(...trip.train.classes.map((cls) => cls.cost));
-      const matchesPrice =
-        !filters.priceRange ||
-        (minPrice >= filters.priceRange[0] && minPrice <= filters.priceRange[1]);
-
-      const matchesClass =
-        !filters.coach_class_id ||
-        trip.train.classes.some((cls) => cls.id === filters.coach_class_id);
-
-      const matchesStartTime =
-        !filters.start_time || trip.start_time >= filters.start_time;
-
-      const matchesFinishTime =
-        !filters.finish_time || trip.finish_time <= filters.finish_time;
-
-      const matchesFromStation =
-        !filters.from_station_id || trip.station_from.id === filters.from_station_id;
-
-      const matchesToStation =
-        !filters.to_station_id || trip.station_to.id === filters.to_station_id;
-
-      return (
-        matchesPrice &&
-        matchesClass &&
-        matchesStartTime &&
-        matchesFinishTime &&
-        matchesFromStation &&
-        matchesToStation
-      );
-    });
-  }, [trips, filters]);
-
   useEffect(() => {
     fetchStations();
   }, []);
@@ -221,9 +214,21 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
     <TrainsContext.Provider
       value={{
         trainLocations,
+        selectedDepartureLocation,
+        setSelectedDepartureLocation,
+        selectedArrivalLocation,
+        setSelectedArrivalLocation,
+        selectedClass,
+        setSelectedClass,
         stations,
+        selectedDepartureStation,
+        setDepartureStation,
+        selectedArrivalStation,
+        setArrivalStation,
         trips,
-        filteredTrips,
+        selectedTrip,
+        setSelectedTrip,
+        filteredTrips: [],
         filters,
         setFilters,
         searchBody,
