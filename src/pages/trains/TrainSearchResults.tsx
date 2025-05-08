@@ -1,86 +1,96 @@
-// pages/TrainSearchResults.tsx
-import React, { useContext, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { TrainsContext } from "../../context/TrainsContext";
-import { Trip } from "../../types/trainTypes";
+import React from 'react';
+import { TrainsContext } from '../../context/TrainsContext';
+import { Trip } from '../../types/trainTypes';
+import TripList from './TripList';
 
-const TrainSearchResults = () => {
-  const { trips, filters, searchTrips, loading, error } = useContext(TrainsContext);
-  const navigate = useNavigate();
-  const location = useLocation();
+interface Props {
+  navigate: (path: string) => void;
+  locationKey: string;
+}
 
-  useEffect(() => {
-    // Use the actual property names from your Filters interface
+class TrainSearchResults extends React.Component<Props> {
+  static contextType = TrainsContext;
+  context!: React.ContextType<typeof TrainsContext>;
+
+  componentDidMount() {
+    this.fetchIfReady();
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.locationKey !== this.props.locationKey) {
+      this.fetchIfReady();
+    }
+  }
+
+  fetchIfReady() {
+    const { filters, searchTrips } = this.context;
     if (filters.from_station_id && filters.to_station_id && filters.date) {
       searchTrips();
     }
-  }, [filters, location.key]);
+  }
 
-  if (loading) return <div className="p-4 text-center">Loading available trips...</div>;
-  if (error) return <div className="p-4 text-red-500">{error}</div>;
-
-  const getMinPrice = (trip: Trip) => {
+  getMinPrice(trip: Trip): number {
     return Math.min(...trip.train.classes.map(cls => cls.cost));
-  };
+  }
 
-  return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Available Trips</h2>
-        <div className="text-sm text-gray-600">
-          {trips.length} {trips.length === 1 ? 'trip' : 'trips'} found
+  filterTrips(trips: Trip[]): Trip[] {
+    const { filters } = this.context;
+
+    return trips.filter((trip) => {
+      const minPrice = this.getMinPrice(trip);
+
+      const matchesStart =
+        filters.start_time ? trip.start_time >= filters.start_time : true;
+
+      const matchesFinish =
+        filters.finish_time ? trip.finish_time <= filters.finish_time : true;
+
+      const matchesPrice = filters.priceRange
+        ? minPrice >= filters.priceRange[0] && minPrice <= filters.priceRange[1]
+        : true;
+
+      return matchesStart && matchesFinish && matchesPrice;
+    });
+  }
+
+  render() {
+    const { trips, loading, error } = this.context;
+    const { navigate } = this.props;
+
+    if (loading) {
+      return <div className="p-4 text-center">Loading available trips...</div>;
+    }
+
+    if (error) {
+      return <div className="p-4 text-red-500">{error}</div>;
+    }
+
+    const filteredTrips = this.filterTrips(trips);
+
+    return (
+      <div className="p-4 max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Available Trips</h2>
+          <div className="text-sm text-gray-600">
+            {filteredTrips.length} {filteredTrips.length === 1 ? 'trip' : 'trips'} found
+          </div>
         </div>
+
+        {filteredTrips.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-lg">No trips found for your search criteria.</p>
+            <p className="text-gray-600">Try adjusting your search filters.</p>
+          </div>
+        ) : (
+          <TripList
+            trips={filteredTrips}
+            onSelect={(id) => navigate(`/train-search/trip/${id}`)}
+            getMinPrice={(trip) => this.getMinPrice(trip)}
+          />
+        )}
       </div>
-
-      {trips.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-lg">No trips found for your search criteria.</p>
-          <p className="text-gray-600">Try adjusting your search filters.</p>
-        </div>
-      ) : (
-        <ul className="space-y-4">
-          {trips.map((trip: Trip) => (
-            <li
-              key={trip.id}
-              className="p-6 border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => navigate(`/trips/${trip.id}`)}
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold text-lg">{trip.train.name}</h3>
-                  <div className="flex items-center space-x-4 mt-2">
-                    <div>
-                      <p className="text-gray-500 text-sm">Departure</p>
-                      <p className="font-medium">
-                        {new Date(trip.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                      <p className="text-sm">{trip.station_from.name}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-gray-500 text-sm">Duration</p>
-                      <p>{trip.duration}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 text-sm">Arrival</p>
-                      <p className="font-medium">
-                        {new Date(trip.finish_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                      <p className="text-sm">{trip.station_to.name}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-gray-500 text-sm">Starting from</p>
-                  <p className="text-2xl font-bold text-blue-600">{getMinPrice(trip)} EGP</p>
-                  <p className="text-sm text-gray-500 mt-1">{trip.train.classes.length} class options</p>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-};
+    );
+  }
+}
 
 export default TrainSearchResults;

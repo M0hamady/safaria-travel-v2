@@ -3,6 +3,7 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useMemo,
   ReactNode,
 } from "react";
 import axios from "axios";
@@ -36,12 +37,16 @@ interface Filters {
   to_station_id: string;
   date: string;
   coach_class_id?: string;
+  start_time?: string;
+  finish_time?: string;
+  priceRange?: [number, number];
 }
 
 interface TrainsContextProps {
   trainLocations: Location[];
   stations: Station[];
   trips: Trip[];
+  filteredTrips: Trip[]; // NEW
   filters: Filters;
   setFilters: (filters: Filters) => void;
   searchBody: SearchBody;
@@ -60,11 +65,15 @@ export const TrainsContext = createContext<TrainsContextProps>({
   trainLocations: [],
   stations: [],
   trips: [],
+  filteredTrips: [],
   filters: {
     from_station_id: "",
     to_station_id: "",
     date: "",
     coach_class_id: "",
+    start_time: "",
+    finish_time: "",
+    priceRange: [0, 1000],
   },
   setFilters: () => {},
   searchBody: {
@@ -92,6 +101,9 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
     to_station_id: "",
     date: "",
     coach_class_id: "",
+    start_time: "",
+    finish_time: "",
+    priceRange: [0, 1000],
   });
 
   const [searchBody, setSearchBody] = useState<SearchBody>({
@@ -99,12 +111,11 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
     to_station_id: "",
     date: "",
   });
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { i18n } = useTranslation();
-
   const { user } = useContext(AuthContext);
   const token = user?.api_token;
 
@@ -129,17 +140,21 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.post(`${API_BASE_URL}/search`,  {
-        from_station_id: searchBody.from_station_id,
-        to_station_id: searchBody.to_station_id,
-        date: searchBody.date,
-      }, {
-        headers: {
-          "Accept-Language": i18n.language,
+      const res = await axios.post(
+        `${API_BASE_URL}/search`,
+        {
+          from_station_id: searchBody.from_station_id,
+          to_station_id: searchBody.to_station_id,
+          date: searchBody.date,
         },
-      });
-      setTrips(res.data);
-      navigate('/train-search')
+        {
+          headers: {
+            "Accept-Language": i18n.language,
+          },
+        }
+      );
+      setTrips(res.data.data);
+      navigate("/train-search");
     } catch (err) {
       setError("Trip search failed.");
     } finally {
@@ -151,22 +166,52 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post(
-        `${API_BASE_URL}/trips/${tripId}/create-ticket`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Accept-Language": i18n.language,
-          },
-        }
-      );
+      await axios.post(`${API_BASE_URL}/trips/${tripId}/create-ticket`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Accept-Language": i18n.language,
+        },
+      });
     } catch (err) {
       setError("Failed to book ticket.");
     } finally {
       setLoading(false);
     }
   };
+
+  const filteredTrips = useMemo(() => {
+    return trips.filter((trip) => {
+      const minPrice = Math.min(...trip.train.classes.map((cls) => cls.cost));
+      const matchesPrice =
+        !filters.priceRange ||
+        (minPrice >= filters.priceRange[0] && minPrice <= filters.priceRange[1]);
+
+      const matchesClass =
+        !filters.coach_class_id ||
+        trip.train.classes.some((cls) => cls.id === filters.coach_class_id);
+
+      const matchesStartTime =
+        !filters.start_time || trip.start_time >= filters.start_time;
+
+      const matchesFinishTime =
+        !filters.finish_time || trip.finish_time <= filters.finish_time;
+
+      const matchesFromStation =
+        !filters.from_station_id || trip.station_from.id === filters.from_station_id;
+
+      const matchesToStation =
+        !filters.to_station_id || trip.station_to.id === filters.to_station_id;
+
+      return (
+        matchesPrice &&
+        matchesClass &&
+        matchesStartTime &&
+        matchesFinishTime &&
+        matchesFromStation &&
+        matchesToStation
+      );
+    });
+  }, [trips, filters]);
 
   useEffect(() => {
     fetchStations();
@@ -178,6 +223,7 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
         trainLocations,
         stations,
         trips,
+        filteredTrips,
         filters,
         setFilters,
         searchBody,

@@ -44,5 +44,7 @@ export interface Station {
     duration: string; // format: "HH:mm"
     distance: string; // e.g. "203" kilometers
     train: Train;
+    price: number;
+
   }
   

@@ -61,6 +61,7 @@ import "./App.css";
 import { TrainsProvider } from "./context/TrainsContext";
 import TrainSearchResults from "./pages/trains/TrainSearchResults";
 import TrainTripDetailsPage from "./pages/trains/TrainTripDetailsPage";
+import TrainSearchResultsContainer from "./pages/trains/TrainSearchResultsContainer";
 
 const App: React.FC = () => {
   const currentLanguage = i18next.language;
@@ -104,7 +105,7 @@ const App: React.FC = () => {
 
                         {/* ------------------- Train Routes (Planned) ------------------- */}
                         {/* Add your train routes here */}
-                            <Route path="/train-search" element={<TrainSearchResults />} />
+                            <Route path="/train-search" element={<TrainSearchResultsContainer />} />
                             <Route path="/train-search/trip/:tripId" element={<TrainTripDetailsPage />} />
 
                         {/* ------------------- Auth Routes ------------------- */}
