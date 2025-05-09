@@ -11,6 +11,8 @@ import { AuthContext } from "./AuthContext";
 import { Location, Station, TrainClass, Trip } from "../types/trainTypes";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "./ToastContext";
+import { TicketOrder } from "../pages/bus/pages/ConfirmReservationPage";
 
 // -------------------------
 // API Base
@@ -136,6 +138,7 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
     finish_time: "",
     priceRange: [0, 1000],
   });
+  const { addToast } = useToast();
 
   const [searchBody, setSearchBody] = useState<SearchBody>({
     from_station_id: "",
@@ -147,8 +150,8 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { i18n } = useTranslation();
-  const { user } = useContext(AuthContext);
-  const token = user?.api_token;
+  const { user, } = useContext(AuthContext);
+const token = user?.api_token || localStorage.getItem('authToken');
 
   const fetchStations = async () => {
     setLoading(true);
@@ -189,22 +192,89 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const bookTicket = async (tripId: string, payload: TicketPayload) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await axios.post(`${API_BASE_URL}/trips/${tripId}/create-ticket`, payload, {
+const bookTicket = async (tripId: string, payload: TicketPayload) => {
+  setLoading(true);
+
+  const token = user?.api_token || localStorage.getItem('authToken');
+
+  if (!token) {
+    console.log(user);
+    addToast({
+      id: "authorization",
+      message: "Authorization token not found.",
+      type: "error",
+    });
+    setLoading(false);
+    return;
+  }
+
+  addToast({
+    id: "booking-start",
+    message: "Processing your ticket booking...",
+    type: "info",
+  });
+
+  try {
+    const response = await axios.post<TicketOrder>(
+      `${API_BASE_URL}/trips/${tripId}/create-ticket`,
+      payload,
+      {
         headers: {
           Authorization: `Bearer ${token}`,
           "Accept-Language": i18n.language,
+          Accept: "application/json",
         },
+      }
+    );
+
+    addToast({
+      id: "booking-success",
+      message: "Ticket booked successfully. Redirecting to payment...",
+      type: "success",
+    });
+    console.log(response.data);
+    const paymentUrl = response.data.payment_url;
+
+    // Send POST request to the payment URL
+    const paymentResponse = await axios.post(
+      paymentUrl,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      }
+    );
+
+    const finalUrl = paymentResponse.data?.url;
+
+    if (finalUrl) {
+      addToast({
+        id: "redirect-payment",
+        message: "Redirecting to payment gateway...",
+        type: "success",
       });
-    } catch (err) {
-      setError("Failed to book ticket.");
-    } finally {
-      setLoading(false);
+      window.location.href = finalUrl;
+    } else {
+      addToast({
+        id: "payment-error",
+        message: "Payment URL not received.",
+        type: "error",
+      });
     }
-  };
+
+  } catch (err) {
+    console.error(err);
+    addToast({
+      id: "booking-failure",
+      message: "Failed to book ticket. Please try again later.",
+      type: "error",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchStations();

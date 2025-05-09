@@ -206,7 +206,6 @@ const SearchBar = () => {
       </div>
 
       <div className="md:hidden">
-        
         <TripTypeSelector
           tripType={currentTripType}
           setTripType={
