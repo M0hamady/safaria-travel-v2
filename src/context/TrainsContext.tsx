@@ -27,7 +27,12 @@ interface SearchBody {
   to_station_id: string;
   date: string;
 }
-
+export interface TicketOrderResponse {
+  status: number;
+  message: string;
+  errors: Record<string, any>;
+  data: TicketOrder;
+}
 interface TicketPayload {
   national_id: string;
   seats_no: number;
@@ -65,11 +70,14 @@ interface TrainsContextProps {
   setFilters: (filters: Filters) => void;
   searchBody: SearchBody;
   setSearchBody: (body: SearchBody) => void;
+  setPayment_url: (payment_url:string) => void;
   fetchStations: () => Promise<void>;
   searchTrips: () => Promise<void>;
   bookTicket: (tripId: string, payload: TicketPayload) => Promise<void>;
   loading: boolean;
   error: string | null;
+  payment_url: string | null;
+  paymentResponse: TicketOrder | null;
 }
 
 // -------------------------
@@ -108,11 +116,14 @@ export const TrainsContext = createContext<TrainsContextProps>({
     date: "",
   },
   setSearchBody: () => {},
+  setPayment_url: () => {},
   fetchStations: async () => {},
   searchTrips: async () => {},
   bookTicket: async () => {},
   loading: false,
   error: null,
+  payment_url: null,
+  paymentResponse: null,
 });
 
 // -------------------------
@@ -128,7 +139,7 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
   const [selectedArrivalStation, setArrivalStation] = useState<Station | null>(null);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
-
+  const [paymentResponse, setPaymentResponse] = useState<TicketOrder | null>(null)
   const [filters, setFilters] = useState<Filters>({
     from_station_id: "",
     to_station_id: "",
@@ -139,6 +150,7 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
     priceRange: [0, 1000],
   });
   const { addToast } = useToast();
+  const { t } = useTranslation();
 
   const [searchBody, setSearchBody] = useState<SearchBody>({
     from_station_id: "",
@@ -149,6 +161,7 @@ export const TrainsProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [payment_url, setPayment_url] = useState<string | null>(null);
   const { i18n } = useTranslation();
   const { user, } = useContext(AuthContext);
 const token = user?.api_token || localStorage.getItem('authToken');
@@ -215,7 +228,7 @@ const bookTicket = async (tripId: string, payload: TicketPayload) => {
   });
 
   try {
-    const response = await axios.post<TicketOrder>(
+    const response = await axios.post<TicketOrderResponse>(
       `${API_BASE_URL}/trips/${tripId}/create-ticket`,
       payload,
       {
@@ -232,37 +245,42 @@ const bookTicket = async (tripId: string, payload: TicketPayload) => {
       message: "Ticket booked successfully. Redirecting to payment...",
       type: "success",
     });
-    console.log(response.data);
-    const paymentUrl = response.data.payment_url;
+    console.log(response.data.data.payment_url);
+    setPaymentResponse(response.data.data)
+    const paymentUrl = response.data.data.payment_url;
 
     // Send POST request to the payment URL
-    const paymentResponse = await axios.post(
-      paymentUrl,
-      {},
-      {
+  const responsePayment = await fetch(paymentUrl, {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          Accept: "application/json",
+          redirect: "follow"
         },
+        body: JSON.stringify({}),
+      });
+
+      if (!responsePayment.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    );
 
-    const finalUrl = paymentResponse.data?.url;
-
+      const data = await responsePayment.json();
+      const finalUrl = data.data?.url;
+      setPayment_url(finalUrl)
     if (finalUrl) {
       addToast({
-        id: "redirect-payment",
-        message: "Redirecting to payment gateway...",
-        type: "success",
-      });
+          id: "payment-url-success",
+          message: t("toast.paymentUrlSuccess"),
+          type: "success",
+        });
       window.location.href = finalUrl;
-    } else {
-      addToast({
-        id: "payment-error",
-        message: "Payment URL not received.",
-        type: "error",
-      });
-    }
+
+      } else {
+        addToast({
+          id: "payment-url-missing",
+          message: t("toast.paymentUrlMissing"),
+          type: "error",
+        });
+      }
 
   } catch (err) {
     console.error(err);
@@ -308,6 +326,9 @@ const bookTicket = async (tripId: string, payload: TicketPayload) => {
         bookTicket,
         loading,
         error,
+        payment_url,
+        paymentResponse,
+        setPayment_url,
       }}
     >
       {children}

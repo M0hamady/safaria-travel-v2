@@ -3,6 +3,9 @@ import { useTranslation } from "react-i18next";
 import { TrainsContext } from "../../context/TrainsContext";
 import ConfirmAndAuthCheck from "../../components/utilies/ConfirmAndAuthCheck";
 import i18n from "../../i18n";
+import axios from "axios";
+import { useToast } from "../../context/ToastContext";
+import { AuthContext } from "../../context/AuthContext";
 
 interface Props {
   onBook: (nationalId: string, seatsNo: number, classId: string) => void;
@@ -15,9 +18,78 @@ export const TicketBookingForm = ({ onBook, loading }: Props) => {
   const [seatsNo, setSeatsNo] = useState(1);
   const [errors, setErrors] = useState<string[]>([]);
   const isRTL = i18n.language === "ar"; // Check if the current language is Arabic
+  const { addToast } = useToast();
+  const { user, } = useContext(AuthContext);
 
-  const { selectedTrip, selectedClass } = useContext(TrainsContext);
+  const { selectedTrip, selectedClass, paymentResponse, payment_url, setPayment_url, loading: loadinProcess } = useContext(TrainsContext);
   const maxSeats = 4;
+const handleGetPaymentUrl = async () => {
+  try {
+    const token = user?.api_token || localStorage.getItem('authToken');
+
+    if (!token) {
+      addToast({
+        id: "auth-missing",
+        message: t("toast.authMissing"),
+        type: "error",
+      });
+      return;
+    }
+
+    if (paymentResponse?.payment_url) {
+      const response = await fetch(paymentResponse.payment_url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          redirect: "follow"
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const finalUrl = data.data?.url;
+
+      if (finalUrl) {
+        setPayment_url(finalUrl);
+        addToast({
+          id: "payment-url-success",
+          message: t("toast.paymentUrlSuccess"),
+          type: "success",
+        });
+      } else {
+        addToast({
+          id: "payment-url-missing",
+          message: t("toast.paymentUrlMissing"),
+          type: "error",
+        });
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    addToast({
+      id: "payment-fetch-failure",
+      message: t("toast.paymentFetchFailure"),
+      type: "error",
+    });
+  }
+};
+
+
+  const handleRedirectToPayment = () => {
+    if (payment_url) {
+      window.location.href = payment_url;
+    } else {
+      addToast({
+        id: "payment-url-missing",
+        message: "Payment URL is not available.",
+        type: "error",
+      });
+    }
+  };
 
   const handleSubmit = () => {
     const validationErrors: string[] = [];
@@ -91,7 +163,7 @@ export const TicketBookingForm = ({ onBook, loading }: Props) => {
         <div className="bg-gray-50 border rounded px-4 py-3">
           <p className="text-sm text-gray-700">
             <span className="font-medium">{t("Class")}:</span>
-            {isRTL  ? selectedClass.arDesc :selectedClass.enDesc  }
+            {isRTL ? selectedClass.arDesc : selectedClass.enDesc}
           </p>
           <p className="text-sm text-gray-700">
             <span className="font-medium">{t("Cost")}:</span> {selectedClass.cost} EGP
@@ -108,6 +180,27 @@ export const TicketBookingForm = ({ onBook, loading }: Props) => {
           label={t("Book Ticket")}
         />
       </div>
+      {paymentResponse && !loading && (
+  <>
+    {!payment_url ? (
+      <button
+        onClick={handleGetPaymentUrl}
+        className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+      >
+        {t("button.getPaymentUrl")}
+      </button>
+    ) : (
+      <button
+        onClick={handleRedirectToPayment}
+        className="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+      >
+        {t("button.proceedToPayment")}
+      </button>
+    )}
+  </>
+)}
+
+
     </div>
   );
 };

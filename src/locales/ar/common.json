@@ -298,7 +298,11 @@
     "logout": "تسجيل الخروج",
     "greeting": "مرحباً،",
     "defaultName": "مستخدم",
-    "back": "الرجوع"
+    "back": "الرجوع",
+     "authMissing": "لم يتم العثور على رمز التفويض.",
+    "paymentUrlSuccess": "تم استرداد رابط الدفع بنجاح.",
+    "paymentUrlMissing": "لم يتم استلام رابط الدفع.",
+    "paymentFetchFailure": "فشل في استرداد رابط الدفع."
   },
   "I agree to the Terms and Conditions": "أوافق على الشروط والأحكام",
   "Processing...": "جاري المعالجة...",
@@ -325,5 +329,9 @@
     "arrival": "الوصول",
     "distance": "المسافة",
     "selectedClass": "الدرجة المحددة"
+  },
+   "button": {
+    "getPaymentUrl": "الحصول على رابط الدفع",
+    "proceedToPayment": "المتابعة إلى الدفع"
   }
 }

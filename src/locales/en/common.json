@@ -142,7 +142,11 @@
   "one_way_info": "One way trip selected.",
   "bus_selection_info": "Bus transport selected. Search for available bus routes.",
   "private_selection_info": "Private transport selected. Search for available vehicles.",
-  "please_select_return_date": "Please don't forget to select your return date."
+  "please_select_return_date": "Please don't forget to select your return date.",
+  "authMissing": "Authorization token not found.",
+    "paymentUrlSuccess": "Payment URL retrieved successfully.",
+    "paymentUrlMissing": "Payment URL not received.",
+    "paymentFetchFailure": "Failed to retrieve payment URL."
 },
   "validation": {
     "required": "Required field"
@@ -309,5 +313,10 @@
     "arrival": "Arrival",
     "distance": "Distance",
     "selectedClass": "Selected Class"
+  },
+
+  "button": {
+    "getPaymentUrl": "Get Payment URL",
+    "proceedToPayment": "Proceed to Payment"
   }
 }
