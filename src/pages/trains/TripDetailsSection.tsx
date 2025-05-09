@@ -8,8 +8,6 @@ import {
   FormControl,
   InputLabel,
   Chip,
-  Skeleton,
-  SelectChangeEvent,
 } from "@mui/material";
 import {
   LocationOn,
@@ -21,6 +19,8 @@ import {
 import { Helmet } from "react-helmet-async";
 import { TrainsContext } from "../../context/TrainsContext";
 import { Trip, TrainClass } from "../../types/trainTypes";
+import TripNotFound from "./TripNotFound";
+import { useTranslation } from "react-i18next";  // Import useTranslation hook
 
 type Props = {
   trip: Trip | null;
@@ -52,7 +52,7 @@ const ClassSelector = ({
         labelId="class-select-label"
         value={selected}
         label="Select Class"
-        onChange={(e: SelectChangeEvent<string>) => onSelect(e.target.value)}
+        onChange={(e) => onSelect(e.target.value)}
       >
         {options}
       </Select>
@@ -65,6 +65,7 @@ export const TripDetailsSection = ({ trip }: Props) => {
     useContext(TrainsContext);
   const [editing, setEditing] = useState(false);
   const [localClassId, setLocalClassId] = useState(selectedClass?.id || "");
+  const { t } = useTranslation();  // Use the translation hook
 
   useEffect(() => {
     if (!editing && selectedClass) {
@@ -88,30 +89,20 @@ export const TripDetailsSection = ({ trip }: Props) => {
   };
 
   if (!trip) {
-    return <Skeleton variant="rectangular" height={300} />;
+    return <TripNotFound onBack={() => window.history.back()} />;
   }
 
   return (
     <>
       <Helmet>
         <title>
-          Trip from {trip.station_from.name} to {trip.station_to.name}
+          {t('tripDetails.title')} from {trip.station_from.name} to {trip.station_to.name}
         </title>
         <meta
           name="description"
-          content={`Train from ${trip.station_from.name} to ${trip.station_to.name}, departs at ${trip.start_time}, arrives at ${trip.finish_time}`}
+          content={`${t('tripDetails.train')}: ${trip.station_from.name} to ${trip.station_to.name}, departs at ${trip.start_time}, arrives at ${trip.finish_time}`}
         />
         <meta name="keywords" content="train, booking, trip details, travel" />
-        <meta
-          property="og:title"
-          content={`Trip: ${trip.station_from.name} ➜ ${trip.station_to.name}`}
-        />
-        <meta
-          property="og:description"
-          content={`From ${trip.station_from.name} to ${trip.station_to.name}. Departure: ${trip.start_time}`}
-        />
-        <meta property="og:image" content="/assets/train-trip-preview.png" />
-        <link rel="canonical" href={`/trips/${trip.id}`} />
       </Helmet>
 
       <Box
@@ -126,35 +117,35 @@ export const TripDetailsSection = ({ trip }: Props) => {
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h5" fontWeight="bold" gutterBottom>
-            Trip Details
+            {t('tripDetails.title')}
           </Typography>
           <Button size="small" onClick={handleEditToggle}>
-            {editing ? "Cancel" : "Edit Class"}
+            {editing ? t('tripDetails.cancel') : t('tripDetails.editClass')}
           </Button>
         </Box>
 
         <Typography variant="body1" sx={{ my: 0.5 }}>
-          <TrainIcon color="primary" sx={{ mr: 1 }} /> <strong>Train:</strong>{" "}
+          <TrainIcon color="primary" sx={{ mr: 1 }} /> <strong>{t('tripDetails.train')}:</strong>{" "}
           {trip.train.name}
         </Typography>
         <Typography variant="body1" sx={{ my: 0.5 }}>
-          <LocationOn color="primary" sx={{ mr: 1 }} /> <strong>From:</strong>{" "}
+          <LocationOn color="primary" sx={{ mr: 1 }} /> <strong>{t('tripDetails.from')}:</strong>{" "}
           {trip.station_from.name}
         </Typography>
         <Typography variant="body1" sx={{ my: 0.5 }}>
-          <LocationOn color="error" sx={{ mr: 1 }} /> <strong>To:</strong>{" "}
+          <LocationOn color="error" sx={{ mr: 1 }} /> <strong>{t('tripDetails.to')}:</strong>{" "}
           {trip.station_to.name}
         </Typography>
         <Typography variant="body1" sx={{ my: 0.5 }}>
-          <Event color="success" sx={{ mr: 1 }} /> <strong>Departure:</strong>{" "}
+          <Event color="success" sx={{ mr: 1 }} /> <strong>{t('tripDetails.departure')}:</strong>{" "}
           {trip.start_time}
         </Typography>
         <Typography variant="body1" sx={{ my: 0.5 }}>
-          <Event color="secondary" sx={{ mr: 1 }} /> <strong>Arrival:</strong>{" "}
+          <Event color="secondary" sx={{ mr: 1 }} /> <strong>{t('tripDetails.arrival')}:</strong>{" "}
           {trip.finish_time}
         </Typography>
         <Typography variant="body1" sx={{ my: 0.5 }}>
-          <AccessTime color="warning" sx={{ mr: 1 }} /> <strong>Distance:</strong>{" "}
+          <AccessTime color="warning" sx={{ mr: 1 }} /> <strong>{t('tripDetails.distance')}:</strong>{" "}
           {selectedTrip?.distance} km
         </Typography>
 
@@ -166,13 +157,13 @@ export const TripDetailsSection = ({ trip }: Props) => {
               onSelect={handleClassChange}
             />
             <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-              Currently: {selectedClass?.name} — {selectedClass?.cost} EGP
+              {t('tripDetails.selectedClass')}: {selectedClass?.name} — {selectedClass?.cost} EGP
             </Typography>
           </>
         ) : (
           <Typography variant="body1" sx={{ my: 0.5 }}>
             <PriceChange color="disabled" sx={{ mr: 1 }} />{" "}
-            <strong>Selected Class:</strong>{" "}
+            <strong>{t('tripDetails.selectedClass')}:</strong>{" "}
             <Chip label={`${selectedClass?.name} (${selectedClass?.cost} EGP)`} />
           </Typography>
         )}

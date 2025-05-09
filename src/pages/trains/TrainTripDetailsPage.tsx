@@ -6,6 +6,8 @@ import { TrainInfoSection } from "./TrainInfoSection";
 import { TicketBookingForm } from "./TicketBookingForm";
 import { TripHeader } from "./TripHeader";
 import { Helmet } from "react-helmet-async";
+import TripNotFound from "./TripNotFound";
+import BookingFailed from "./BookingFailed";
 
 const TrainTripDetailsPage = () => {
   const { tripId } = useParams<{ tripId: string }>();
@@ -28,18 +30,15 @@ const TrainTripDetailsPage = () => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-[50vh] text-red-500 font-semibold text-lg">
-        {error}
+      <div className="flex items-center justify-center p-9 text-red-500 font-semibold text-lg">
+        <BookingFailed />
       </div>
     );
   }
 
   if (!trip) {
-    return (
-      <div className="flex items-center justify-center h-[50vh] text-gray-600 font-medium text-lg">
-        Trip not found.
-      </div>
-    );
+    // Assuming you can distinguish between not found vs failed booking, adjust logic accordingly
+    return <TripNotFound onBack={() => window.history.back()} />;
   }
 
   const handleBook = async (
@@ -87,7 +86,7 @@ const TrainTripDetailsPage = () => {
 
       <TripHeader />
 
-      <section aria-labelledby="trip-details">
+      <section aria-labelledby="trip-details" className="max-sm:px-4">
         <TripDetailsSection trip={trip} />
       </section>
 
@@ -98,6 +97,7 @@ const TrainTripDetailsPage = () => {
       <section
         aria-labelledby="ticket-booking-form"
         id="form-section-train-reserve"
+         className="max-sm:px-4"
       >
         <TicketBookingForm onBook={handleBook} loading={loading} />
       </section>

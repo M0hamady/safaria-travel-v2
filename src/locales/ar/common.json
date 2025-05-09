@@ -299,5 +299,31 @@
     "greeting": "مرحباً،",
     "defaultName": "مستخدم",
     "back": "الرجوع"
+  },
+  "I agree to the Terms and Conditions": "أوافق على الشروط والأحكام",
+  "Processing...": "جاري المعالجة...",
+  "Book Your Ticket": "احجز تذكرتك",
+  "National ID": "الرقم القومي",
+  "Enter your national ID": "أدخل الرقم القومي الخاص بك",
+  "Number of Seats": "عدد المقاعد",
+  "1 to 4": "من 1 إلى 4",
+  "Class": "الدرجة",
+  "Cost": "السعر",
+  "Available Seats": "المقاعد المتاحة",
+  "Book Ticket": "احجز التذكرة",
+  "National ID is required.": "الرقم القومي مطلوب.",
+  "No class selected.": "لم يتم اختيار الدرجة.",
+  "You can book between 1 to {{max}} seats.": "يمكنك الحجز بين 1 إلى {{max}} مقعد.",
+  "tripDetails": {
+    "title": "تفاصيل الرحلة",
+    "editClass": "تعديل الدرجة",
+    "cancel": "إلغاء",
+    "train": "القطار",
+    "from": "من",
+    "to": "إلى",
+    "departure": "المغادرة",
+    "arrival": "الوصول",
+    "distance": "المسافة",
+    "selectedClass": "الدرجة المحددة"
   }
 }

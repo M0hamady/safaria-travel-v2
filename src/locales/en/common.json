@@ -283,5 +283,31 @@
     "defaultName": "User",
     "back": "back"
 
+  },
+  "I agree to the Terms and Conditions": "I agree to the Terms and Conditions",
+  "Processing...": "Processing...",
+  "Book Your Ticket": "Book Your Ticket",
+  "National ID": "National ID",
+  "Enter your national ID": "Enter your national ID",
+  "Number of Seats": "Number of Seats",
+  "1 to 4": "1 to 4",
+  "Class": "Class",
+  "Cost": "Cost",
+  "Available Seats": "Available Seats",
+  "Book Ticket": "Book Ticket",
+  "National ID is required.": "National ID is required.",
+  "No class selected.": "No class selected.",
+  "You can book between 1 to {{max}} seats.": "You can book between 1 to {{max}} seats.",
+  "tripDetails": {
+    "title": "Trip Details",
+    "editClass": "Edit Class",
+    "cancel": "Cancel",
+    "train": "Train",
+    "from": "From",
+    "to": "To",
+    "departure": "Departure",
+    "arrival": "Arrival",
+    "distance": "Distance",
+    "selectedClass": "Selected Class"
   }
 }
