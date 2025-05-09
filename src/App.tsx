@@ -62,6 +62,7 @@ import { TrainsProvider } from "./context/TrainsContext";
 import TrainSearchResults from "./pages/trains/TrainSearchResults";
 import TrainTripDetailsPage from "./pages/trains/TrainTripDetailsPage";
 import TrainSearchResultsContainer from "./pages/trains/TrainSearchResultsContainer";
+import { HelmetProvider } from "react-helmet-async";
 
 const App: React.FC = () => {
   const currentLanguage = i18next.language;

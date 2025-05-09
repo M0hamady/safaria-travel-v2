@@ -84,7 +84,9 @@ const TripListItem: React.FC<Props> = ({ trip, onSelect, getMinPrice }) => {
               <Link
                 to={`/train-search/trip/${trip.id}`}
                 className="bg-primary h-fit my-auto text-white px-4 py-2 rounded shadow-md font-bold hover:bg-dark transition duration-300"
-                onClick={() => handleClassSelect(trainClass)}
+                onClick={() => {
+                  handleClassSelect(trainClass)
+                }}
               >
                 {t("busSearchTrips.select")}
               </Link>

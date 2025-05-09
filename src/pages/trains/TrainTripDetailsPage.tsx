@@ -1,87 +1,107 @@
-// pages/TrainTripDetailsPage.tsx
-import React, { useContext, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useContext, useEffect } from "react";
+import { useParams, useLocation } from "react-router-dom";
 import { TrainsContext } from "../../context/TrainsContext";
-import { Trip, TrainClass } from "../../types/trainTypes";
+import { TripDetailsSection } from "./TripDetailsSection";
+import { TrainInfoSection } from "./TrainInfoSection";
+import { TicketBookingForm } from "./TicketBookingForm";
+import { TripHeader } from "./TripHeader";
+import { Helmet } from "react-helmet-async";
 
 const TrainTripDetailsPage = () => {
   const { tripId } = useParams<{ tripId: string }>();
+  const location = useLocation();
   const { trips, bookTicket, loading, error } = useContext(TrainsContext);
 
-  // Convert tripId to number since Trip interface expects id to be number
   const trip = trips.find((t) => t.id === Number(tripId));
-  const [nationalId, setNationalId] = useState("");
-  const [seatsNo, setSeatsNo] = useState(1);
-  const [selectedClassId, setSelectedClassId] = useState("");
 
-  const handleBook = async () => {
-    if (!trip || !selectedClassId) return;
+  useEffect(() => {
+    const hash = location.hash.replace("#", "");
+    if (hash === "form-section-train-reserve") {
+      const target = document.getElementById(hash);
+      if (target) {
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: "smooth" });
+        }, 100); // slight delay ensures DOM is ready
+      }
+    }
+  }, [location]);
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[50vh] text-red-500 font-semibold text-lg">
+        {error}
+      </div>
+    );
+  }
+
+  if (!trip) {
+    return (
+      <div className="flex items-center justify-center h-[50vh] text-gray-600 font-medium text-lg">
+        Trip not found.
+      </div>
+    );
+  }
+
+  const handleBook = async (
+    nationalId: string,
+    seatsNo: number,
+    classId: string
+  ) => {
     await bookTicket(`${trip.id}`, {
       national_id: nationalId,
       seats_no: seatsNo,
-      coach_class_id: selectedClassId,
+      coach_class_id: classId,
     });
   };
 
-  if (!trip) return <p>Trip not found.</p>;
-  if (loading) return <p>Processing...</p>;
-  if (error) return <p>{error}</p>;
-
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Trip Details</h2>
-      <p><strong>From:</strong> {trip.station_from.name}</p>
-      <p><strong>To:</strong> {trip.station_to.name}</p>
-      
-      <p><strong>Departure:</strong> {trip.start_time}</p>
-      <p><strong>Arrival:</strong> {trip.finish_time}</p>
-      <p><strong>Duration:</strong> {trip.duration}</p>
-      <p><strong>Distance:</strong> {trip.distance} km</p>
-      <p><strong>Starting Price:</strong> {trip.starting_price} EGP</p>
-
-      <div className="mt-6">
-        <h3 className="font-semibold mb-2">Train Information</h3>
-        <p><strong>Train Name:</strong> {trip.train.name}</p>
-
-        <h3 className="font-semibold mb-2 mt-4">Book Ticket</h3>
-        <input
-          type="text"
-          placeholder="National ID"
-          value={nationalId}
-          onChange={(e) => setNationalId(e.target.value)}
-          className="border p-2 w-full mb-2"
+    <main className="grid grid-cols-1 gap-9 space-y-12 pb-6">
+      <Helmet>
+        <title>{`Train from ${trip.station_from.name} to ${trip.station_to.name}`}</title>
+        <meta
+          name="description"
+          content={`Book your train from ${trip.station_from.name} to ${trip.station_to.name}. Departure: ${trip.start_time}, Arrival: ${trip.finish_time}`}
         />
-        <input
-          type="number"
-          placeholder="Number of Seats"
-          value={seatsNo}
-          min="1"
-          max={trip.train.classes.find(c => c.id === selectedClassId)?.availableSeatsCount}
-          onChange={(e) => setSeatsNo(Number(e.target.value))}
-          className="border p-2 w-full mb-2"
+        <meta
+          name="keywords"
+          content="train booking, railway tickets, travel, transportation"
         />
-        <select
-          value={selectedClassId}
-          onChange={(e) => setSelectedClassId(e.target.value)}
-          className="border p-2 w-full mb-4"
-        >
-          <option value="">Select Class</option>
-          {trip.train.classes?.map((trainClass: TrainClass) => (
-            <option key={trainClass.id} value={trainClass.id}>
-              {trainClass.name} - {trainClass.cost} EGP 
-              (Available: {trainClass.availableSeatsCount})
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={handleBook}
-          disabled={!selectedClassId || loading}
-          className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-blue-300"
-        >
-          {loading ? "Processing..." : "Book Now"}
-        </button>
-      </div>
-    </div>
+        <meta
+          property="og:title"
+          content={`Train from ${trip.station_from.name} to ${trip.station_to.name}`}
+        />
+        <meta
+          property="og:description"
+          content={`Journey from ${trip.station_from.name} to ${trip.station_to.name}, departure at ${trip.start_time}. Book your seat now.`}
+        />
+        <meta property="og:image" content="URL_TO_TRAIN_IMAGE" />
+        <meta
+          name="twitter:title"
+          content={`Train from ${trip.station_from.name} to ${trip.station_to.name}`}
+        />
+        <meta
+          name="twitter:description"
+          content={`Start your journey from ${trip.station_from.name} to ${trip.station_to.name}, departure at ${trip.start_time}`}
+        />
+      </Helmet>
+
+      <TripHeader />
+
+      <section aria-labelledby="trip-details">
+        <TripDetailsSection trip={trip} />
+      </section>
+
+      {/* <section aria-labelledby="train-info">
+        <TrainInfoSection trip={trip} />
+      </section> */}
+
+      <section
+        aria-labelledby="ticket-booking-form"
+        id="form-section-train-reserve"
+      >
+        <TicketBookingForm onBook={handleBook} loading={loading} />
+      </section>
+    </main>
   );
 };
 
