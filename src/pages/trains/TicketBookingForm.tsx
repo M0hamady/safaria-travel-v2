@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TrainsContext } from "../../context/TrainsContext";
 import ConfirmAndAuthCheck from "../../components/utilies/ConfirmAndAuthCheck";
+import i18n from "../../i18n";
 
 interface Props {
   onBook: (nationalId: string, seatsNo: number, classId: string) => void;
@@ -13,6 +14,7 @@ export const TicketBookingForm = ({ onBook, loading }: Props) => {
   const [nationalId, setNationalId] = useState("");
   const [seatsNo, setSeatsNo] = useState(1);
   const [errors, setErrors] = useState<string[]>([]);
+  const isRTL = i18n.language === "ar"; // Check if the current language is Arabic
 
   const { selectedTrip, selectedClass } = useContext(TrainsContext);
   const maxSeats = 4;
@@ -88,7 +90,8 @@ export const TicketBookingForm = ({ onBook, loading }: Props) => {
 
         <div className="bg-gray-50 border rounded px-4 py-3">
           <p className="text-sm text-gray-700">
-            <span className="font-medium">{t("Class")}:</span> {selectedClass.name}
+            <span className="font-medium">{t("Class")}:</span>
+            {isRTL  ? selectedClass.arDesc :selectedClass.enDesc  }
           </p>
           <p className="text-sm text-gray-700">
             <span className="font-medium">{t("Cost")}:</span> {selectedClass.cost} EGP

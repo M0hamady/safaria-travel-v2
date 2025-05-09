@@ -1,26 +1,10 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  Chip,
-} from "@mui/material";
-import {
-  LocationOn,
-  AccessTime,
-  PriceChange,
-  Event,
-  Train as TrainIcon,
-} from "@mui/icons-material";
-import { Helmet } from "react-helmet-async";
+import React, { useContext, useEffect, useState } from "react";
 import { TrainsContext } from "../../context/TrainsContext";
 import { Trip, TrainClass } from "../../types/trainTypes";
 import TripNotFound from "./TripNotFound";
-import { useTranslation } from "react-i18next";  // Import useTranslation hook
+import { useTranslation } from "react-i18next"; // Import useTranslation hook
+import { Helmet } from "react-helmet-async";
+import i18n from "../../i18n";
 
 type Props = {
   trip: Trip | null;
@@ -35,37 +19,37 @@ const ClassSelector = ({
   selected: string;
   onSelect: (id: string) => void;
 }) => {
-  const options = useMemo(
-    () =>
-      trip.train.classes.map((cls) => (
-        <MenuItem key={cls.id} value={cls.id}>
-          {cls.name} — {cls.cost} EGP
-        </MenuItem>
-      )),
-    [trip.train.classes]
-  );
+
+  const { t } = useTranslation();  // Use the translation hook
+
+  const options = trip.train.classes.map((cls) => (
+    <option key={cls.id} value={cls.id}>
+      {cls.name} — {cls.cost} EGP
+    </option>
+  ));
 
   return (
-    <FormControl fullWidth sx={{ mt: 2 }}>
-      <InputLabel id="class-select-label">Select Class</InputLabel>
-      <Select
-        labelId="class-select-label"
+    <div style={{ marginTop: "16px" }}>
+      <label htmlFor="class-select">{t("tripDetails.selectClass")}</label>
+      <select
+        id="class-select"
         value={selected}
-        label="Select Class"
         onChange={(e) => onSelect(e.target.value)}
+        style={{ width: "100%", padding: "8px", marginTop: "8px" }}
       >
         {options}
-      </Select>
-    </FormControl>
+      </select>
+    </div>
   );
 };
 
 export const TripDetailsSection = ({ trip }: Props) => {
-  const { selectedClass, selectedTrip, setSelectedClass } =
+    const { selectedClass, selectedTrip, setSelectedClass } =
     useContext(TrainsContext);
   const [editing, setEditing] = useState(false);
   const [localClassId, setLocalClassId] = useState(selectedClass?.id || "");
   const { t } = useTranslation();  // Use the translation hook
+  const isRTL = i18n.language === "ar"; // Check if the current language is Arabic
 
   useEffect(() => {
     if (!editing && selectedClass) {
@@ -96,58 +80,50 @@ export const TripDetailsSection = ({ trip }: Props) => {
     <>
       <Helmet>
         <title>
-          {t('tripDetails.title')} from {trip.station_from.name} to {trip.station_to.name}
+          {t("tripDetails.title")} from {trip.station_from.name} to {trip.station_to.name}
         </title>
         <meta
           name="description"
-          content={`${t('tripDetails.train')}: ${trip.station_from.name} to ${trip.station_to.name}, departs at ${trip.start_time}, arrives at ${trip.finish_time}`}
+          content={`${t("tripDetails.train")}: ${trip.station_from.name} to ${trip.station_to.name}, departs at ${trip.start_time}, arrives at ${trip.finish_time}`}
         />
         <meta name="keywords" content="train, booking, trip details, travel" />
       </Helmet>
 
-      <Box
-        sx={{
-          maxWidth: 500,
-          mx: "auto",
-          p: 3,
-          bgcolor: "background.paper",
-          boxShadow: 3,
-          borderRadius: 2,
+      <div
+        style={{
+          maxWidth: "500px",
+          margin: "auto",
+          padding: "24px",
+          backgroundColor: "#fff",
+          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+          borderRadius: "8px",
         }}
       >
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h5" fontWeight="bold" gutterBottom>
-            {t('tripDetails.title')}
-          </Typography>
-          <Button size="small" onClick={handleEditToggle}>
-            {editing ? t('tripDetails.cancel') : t('tripDetails.editClass')}
-          </Button>
-        </Box>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h5 style={{ fontWeight: "bold" }}>{t("tripDetails.title")}</h5>
+          <button onClick={handleEditToggle} style={{ padding: "8px 16px", background: "#007bff", color: "#fff", border: "none", borderRadius: "4px" }}>
+            {editing ? t("tripDetails.cancel") : t("tripDetails.editClass")}
+          </button>
+        </div>
 
-        <Typography variant="body1" sx={{ my: 0.5 }}>
-          <TrainIcon color="primary" sx={{ mr: 1 }} /> <strong>{t('tripDetails.train')}:</strong>{" "}
-          {trip.train.name}
-        </Typography>
-        <Typography variant="body1" sx={{ my: 0.5 }}>
-          <LocationOn color="primary" sx={{ mr: 1 }} /> <strong>{t('tripDetails.from')}:</strong>{" "}
-          {trip.station_from.name}
-        </Typography>
-        <Typography variant="body1" sx={{ my: 0.5 }}>
-          <LocationOn color="error" sx={{ mr: 1 }} /> <strong>{t('tripDetails.to')}:</strong>{" "}
-          {trip.station_to.name}
-        </Typography>
-        <Typography variant="body1" sx={{ my: 0.5 }}>
-          <Event color="success" sx={{ mr: 1 }} /> <strong>{t('tripDetails.departure')}:</strong>{" "}
-          {trip.start_time}
-        </Typography>
-        <Typography variant="body1" sx={{ my: 0.5 }}>
-          <Event color="secondary" sx={{ mr: 1 }} /> <strong>{t('tripDetails.arrival')}:</strong>{" "}
-          {trip.finish_time}
-        </Typography>
-        <Typography variant="body1" sx={{ my: 0.5 }}>
-          <AccessTime color="warning" sx={{ mr: 1 }} /> <strong>{t('tripDetails.distance')}:</strong>{" "}
-          {selectedTrip?.distance} km
-        </Typography>
+        <p style={{ margin: "8px 0" }}>
+          <span style={{ marginRight: "8px" }}>🚆</span><strong>{t("tripDetails.train")}:</strong> {trip.train.name}
+        </p>
+        <p style={{ margin: "8px 0" }}>
+          <span style={{ marginRight: "8px" }}>📍</span><strong>{t("tripDetails.from")}:</strong> {trip.station_from.name}
+        </p>
+        <p style={{ margin: "8px 0" }}>
+          <span style={{ marginRight: "8px" }}>📍</span><strong>{t("tripDetails.to")}:</strong> {trip.station_to.name}
+        </p>
+        <p style={{ margin: "8px 0" }}>
+          <span style={{ marginRight: "8px" }}>⏳</span><strong>{t("tripDetails.departure")}:</strong> {trip.start_time}
+        </p>
+        <p style={{ margin: "8px 0" }}>
+          <span style={{ marginRight: "8px" }}>⏳</span><strong>{t("tripDetails.arrival")}:</strong> {trip.finish_time}
+        </p>
+        <p style={{ margin: "8px 0" }}>
+          <span style={{ marginRight: "8px" }}>⏰</span><strong>{t("tripDetails.distance")}:</strong> {selectedTrip?.distance} km
+        </p>
 
         {editing ? (
           <>
@@ -156,18 +132,17 @@ export const TripDetailsSection = ({ trip }: Props) => {
               selected={localClassId}
               onSelect={handleClassChange}
             />
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-              {t('tripDetails.selectedClass')}: {selectedClass?.name} — {selectedClass?.cost} EGP
-            </Typography>
+            <p style={{ fontSize: "12px", color: "#6c757d", marginTop: "8px" }}>
+              {t("tripDetails.selectedClass")}: {isRTL ? selectedClass?.arDesc : selectedClass?.enDesc }  — {selectedClass?.cost} EGP
+            </p>
           </>
         ) : (
-          <Typography variant="body1" sx={{ my: 0.5 }}>
-            <PriceChange color="disabled" sx={{ mr: 1 }} />{" "}
-            <strong>{t('tripDetails.selectedClass')}:</strong>{" "}
-            <Chip label={`${selectedClass?.name} (${selectedClass?.cost} EGP)`} />
-          </Typography>
+          <p style={{ margin: "8px 0" }}>
+            <span style={{ marginRight: "8px" }}>💲</span><strong>{t("tripDetails.selectedClass")}:</strong>{" "}
+            <span>{selectedClass?.name} ({selectedClass?.cost} EGP)</span>
+          </p>
         )}
-      </Box>
+      </div>
     </>
   );
 };
