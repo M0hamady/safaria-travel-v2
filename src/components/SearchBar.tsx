@@ -30,7 +30,7 @@ const SearchBar = () => {
     setTripType: setTripType_private,
     locations: locations_private,
   } = privateContext;
-    const { searchTrips } = useContext(TrainsContext);
+    const { searchTrips,      loading: loading_train, } = useContext(TrainsContext);
   
   // State for each context value
   const [currentSearchValues, setCurrentSearchValues] = useState<SearchValues>(
@@ -206,6 +206,7 @@ const SearchBar = () => {
       </div>
 
       <div className="md:hidden">
+        
         <TripTypeSelector
           tripType={currentTripType}
           setTripType={
@@ -229,7 +230,7 @@ const SearchBar = () => {
         handleSearch={
           searchType === "bus" ? busContext.handleSearch : searchType === "private"  ?  handleSearch_private  : searchTrips 
          }
-        loading={searchType === "bus" ? busContext.loading : loading_private}
+        loading={busContext.loading || loading_private || loading_train}
         errors={searchType === "bus" ? busContext.errors : errors_private}
         tripType={currentTripType}
         locations={currentLocations}
