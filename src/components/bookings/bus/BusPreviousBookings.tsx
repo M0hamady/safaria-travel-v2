@@ -1,7 +1,8 @@
 import { FC } from "react";
-import OrderCard from "./OrderCard";
-import { useOrder } from "../../context/OrderContext";
-import { Order } from "../../types/order";
+import { useOrder } from "../../../context/OrderContext";
+import { Order } from "../../../types/order";
+import OrderCard from "../componenns/OrderCard";
+
 
 const PreviousBookings: FC = () => {
   const { orders, loading } = useOrder();

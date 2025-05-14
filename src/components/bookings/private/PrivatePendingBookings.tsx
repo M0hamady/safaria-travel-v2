@@ -1,7 +1,8 @@
 import { FC } from "react";
-import OrderCard from "./OrderCard";
-import { useOrder } from "../../context/OrderContext";
-import { Order } from "../../types/order";
+import { useOrder } from "../../../context/OrderContext";
+import { Order } from "../../../types/order";
+import OrderCard from "../componenns/OrderCard";
+
 
 const PendingBookings: FC = () => {
   const { orders, loading } = useOrder();
@@ -14,7 +15,7 @@ const PendingBookings: FC = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold text-gray-800">Pending Bookings</h2>
+      <h2 className="text-2xl font-semibold text-gray-800">Pending Bookings private</h2>
 
       {loading ? (
         <p className="mt-4 text-gray-600">Loading...</p>

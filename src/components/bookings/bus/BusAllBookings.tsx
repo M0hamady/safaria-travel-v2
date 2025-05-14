@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
-import { useOrder } from "../../context/OrderContext";
-import OrderCard from "./OrderCard";
 import { useTranslation } from "react-i18next";
+import { useOrder } from "../../../context/OrderContext";
+import OrderCard from "../componenns/OrderCard";
 
-const AllBookings: React.FC = () => {
+const BusAllBookings : React.FC = () => {
   const { orders ,fetchOrders} = useOrder();
   const { t } = useTranslation();
 
@@ -30,4 +30,4 @@ const AllBookings: React.FC = () => {
   );
 };
 
-export default AllBookings;
+export default BusAllBookings ;

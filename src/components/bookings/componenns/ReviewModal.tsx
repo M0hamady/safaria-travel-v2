@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Star } from "@mui/icons-material";
 import { Button } from "@mui/material";
-import { useOrder } from "../../context/OrderContext";
-import { useToast } from "../../context/ToastContext";
+import { useOrder } from "../../../context/OrderContext";
+import { useToast } from "../../../context/ToastContext";
 
 type ReviewModalProps = {
   orderId: number;

@@ -63,6 +63,8 @@ import TrainSearchResults from "./pages/trains/TrainSearchResults";
 import TrainTripDetailsPage from "./pages/trains/TrainTripDetailsPage";
 import TrainSearchResultsContainer from "./pages/trains/TrainSearchResultsContainer";
 import { HelmetProvider } from "react-helmet-async";
+import { TrainOrderProvider } from "./context/TrainOrderContext";
+import { PrivateOrderProvider } from "./context/PrivateOrderContext";
 
 const App: React.FC = () => {
   const currentLanguage = i18next.language;
@@ -72,6 +74,7 @@ const App: React.FC = () => {
       dir={currentLanguage === "ar" ? "rtl" : "ltr"}
       className={currentLanguage === "ar" ? "font-ar" : "font-en"}
     >
+      
       <BrowserRouter>
         <ModalProvider>
           <ToastProvider>
@@ -81,6 +84,8 @@ const App: React.FC = () => {
                 <TrainsProvider>
                   <AuthProvider>
                     <OrderProvider>
+                    <TrainOrderProvider>
+                    <PrivateOrderProvider>
                       <Navbar />
                       <ToastContainer />
                       <ModalContainer />
@@ -157,6 +162,8 @@ const App: React.FC = () => {
                       </Routes>
 
                       <Footer />
+                    </PrivateOrderProvider>
+                    </TrainOrderProvider>
                     </OrderProvider>
                   </AuthProvider>
                 </TrainsProvider>

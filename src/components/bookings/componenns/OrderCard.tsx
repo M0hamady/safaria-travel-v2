@@ -1,11 +1,11 @@
 // src/components/OrderCard.tsx
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Order } from "../../types/order";
-import { formatTime } from "../utilies/functionalities";
-import { useOrder } from "../../context/OrderContext";
+import { Order } from "../../../types/order";
+import { formatTime } from "../../utilies/functionalities";
+import { useOrder } from "../../../context/OrderContext";
 import { useTranslation } from "react-i18next";
-import { useModal } from "../../context/ModalContext";
+import { useModal } from "../../../context/ModalContext";
 import { Star } from "@mui/icons-material";
 import ReviewModal from "./ReviewModal";
 
