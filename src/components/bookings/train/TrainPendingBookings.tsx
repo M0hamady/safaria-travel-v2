@@ -1,17 +1,19 @@
 import { FC } from "react";
 import { useOrder } from "../../../context/OrderContext";
-import { Order } from "../../../types/order";
+import { Order, TrainOrder } from "../../../types/order";
 import OrderCard from "../componenns/OrderCard";
+import { useTrainOrder } from "../../../context/TrainOrderContext";
+import TrainOrderCard from "../componenns/TrainOrderCard";
 
 
 const PendingBookings: FC = () => {
-  const { orders, loading } = useOrder();
+  const { trainOrders, loading } = useTrainOrder();
 
   // Helper function to check if an order is pending
-  const isOrderPending = (order: Order) => order.payment_data?.status_code === "pending";
+  const isOrderPending = (order: TrainOrder) => order.payment_data?.status_code === "pending";
 
   // Filter orders to show only pending ones
-  const pendingOrders = orders.filter(isOrderPending);
+  const pendingOrders = trainOrders.filter(isOrderPending);
 
   return (
     <div className="p-4">
@@ -22,7 +24,7 @@ const PendingBookings: FC = () => {
       ) : pendingOrders.length > 0 ? (
         <div className="mt-4 grid gap-4">
           {pendingOrders.map((order) => (
-            <OrderCard key={order.id} order={order} />
+            <TrainOrderCard key={order.id} order={order} />
           ))}
         </div>
       ) : (

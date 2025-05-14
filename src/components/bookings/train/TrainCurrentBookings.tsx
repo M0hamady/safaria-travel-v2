@@ -1,21 +1,23 @@
 import { FC } from "react";
 import { useTranslation } from "react-i18next";
 import { useOrder } from "../../../context/OrderContext";
-import { Order } from "../../../types/order";
+import { Order, TrainOrder } from "../../../types/order";
 import OrderCard from "../componenns/OrderCard";
+import { useTrainOrder } from "../../../context/TrainOrderContext";
+import TrainOrderCard from "../componenns/TrainOrderCard";
 
 const CurrentBookings: FC = () => {
-  const { orders, loading } = useOrder();
+  const { trainOrders, loading } = useTrainOrder();
   const { t } = useTranslation();
 
   // Helper functions to filter orders
-  const isOrderPaid = (order: Order) => order.payment_data?.status === "paid";
-  const isOrderRunning = (order: Order) =>
-    new Date(order.station_from.arrival_at) <= new Date() &&
-    new Date(order.station_to.arrival_at) > new Date();
+  const isOrderPaid = (order: TrainOrder) => order.payment_data?.status === "paid";
+  const isOrderRunning = (order: TrainOrder) =>
+    new Date(order.date_time) <= new Date() &&
+    new Date(order.date) > new Date();
 
   // Filter orders to show only running or paid ones
-  const filteredOrders = orders.filter(
+  const filteredOrders = trainOrders.filter(
     (order) => isOrderPaid(order) || isOrderRunning(order)
   );
 
@@ -28,7 +30,7 @@ const CurrentBookings: FC = () => {
       ) : filteredOrders.length > 0 ? (
         <div className="mt-4 grid gap-4">
           {filteredOrders.map((order) => (
-            <OrderCard key={order.id} order={order} />
+            <TrainOrderCard key={order.id} order={order} />
           ))}
         </div>
       ) : (
