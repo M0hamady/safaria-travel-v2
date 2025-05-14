@@ -1,38 +1,61 @@
 import { FC } from "react";
+import { useTrainOrder } from "../../../context/TrainOrderContext";
+import { TrainOrder } from "../../../types/order";
 import { useTranslation } from "react-i18next";
-import { useOrder } from "../../../context/OrderContext";
-import { Order } from "../../../types/order";
-import OrderCard from "../componenns/OrderCard";
+import TrainOrderCard from "../componenns/TrainOrderCard";
 
 const CurrentBookings: FC = () => {
-  const { orders, loading } = useOrder();
+  const { trainOrders, loading } = useTrainOrder();
   const { t } = useTranslation();
 
-  // Helper functions to filter orders
-  const isOrderPaid = (order: Order) => order.payment_data?.status === "paid";
-  const isOrderRunning = (order: Order) =>
-    new Date(order.station_from.arrival_at) <= new Date() &&
-    new Date(order.station_to.arrival_at) > new Date();
+  // Enhanced order filtering with only date_time available
+  const isOrderPending = (order: TrainOrder) => {
+    // Check payment status (multiple possible pending indicators)
+    const isPaymentPending = 
+      order.payment_data?.status === "success" || 
+      order.payment_data?.status_code === "success";
 
-  // Filter orders to show only running or paid ones
-  const filteredOrders = orders.filter(
-    (order) => isOrderPaid(order) || isOrderRunning(order)
-  );
+    // Check order status
+    const isOrderNotCanceled = order.status_code !== "paid";
+    const isOrderNotCompleted = order.status !== "success";
+    
+    // Additional check for train-specific status
+    const isTrainAvailable = order.is_confirmed;
+
+    return isPaymentPending && 
+           isOrderNotCanceled && 
+           isOrderNotCompleted &&
+           isTrainAvailable;
+  };
+
+  // Filter and sort orders by trip date_time (newest first)
+  const pendingOrders = trainOrders
+    .filter(isOrderPending)
+    .sort((a, b) => new Date(b.date_time).getTime() - new Date(a.date_time).getTime());
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold text-gray-800">{t("bookings.CurrentBookings")} private</h2>
+      <h2 className="text-2xl font-semibold text-gray-800">
+        {t("bookings.pending")} ({t("transport.train")})
+      </h2>
 
       {loading ? (
-        <p className="mt-4 text-gray-600">Loading...</p>
-      ) : filteredOrders.length > 0 ? (
-        <div className="mt-4 grid gap-4">
-          {filteredOrders.map((order) => (
-            <OrderCard key={order.id} order={order} />
+        <p className="mt-4 text-gray-600">{t("Loading")}...</p>
+      ) : pendingOrders.length > 0 ? (
+        <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          {pendingOrders.map((order) => (
+            <TrainOrderCard 
+              key={order.id} 
+              order={order}
+              onCancel={() => console.log("Cancel order:", order.id)}
+              onReview={() => console.log("Review order:", order.id)}
+            />
           ))}
         </div>
       ) : (
-        <p className="text-gray-500">{t("bookings.noBookings")}</p>
+        <p className="mt-4 text-gray-600">
+          {t("bookings.noBookings")}
+        </p>
       )}
     </div>
   );

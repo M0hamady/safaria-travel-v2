@@ -149,6 +149,7 @@
     "paymentUrlSuccess": "Payment URL retrieved successfully.",
     "paymentUrlMissing": "Payment URL not received.",
     "paymentFetchFailure": "Failed to retrieve payment URL."
+    
   },
   "validation": {
     "required": "Required field"
@@ -255,7 +256,10 @@
   "currency": "LE",
   "errors": {
     "paymentLinkFailed": "Failed to fetch payment link. Please retry.",
-    "paymentLinkNotFound": "Payment link not found"
+    "paymentLinkNotFound": "Payment link not found",
+      "requiredNationalId": "National ID is required.",
+    "noClass": "No class selected.",
+    "seatRange": "You can book between 1 to {{max}} seats."
   },
   "order": {
     "pay": "Pay",
@@ -318,6 +322,8 @@
     "distance": "Distance",
     "selectedClass": "Selected Class"
   },
+  "Cost per Seat": "Cost per Seat",
+  "Total Cost": "Total Cost",
   "button": {
     "getPaymentUrl": "Get Payment URL",
     "proceedToPayment": "Proceed to Payment"

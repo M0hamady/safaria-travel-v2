@@ -1,17 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { usePrivateSearchContext } from "../../context/PrivateSearchContext";
+import { useNavigate, useParams } from "react-router-dom";
+import { CreateTicketPayload, usePrivateSearchContext } from "../../context/PrivateSearchContext";
 import { PrivateTrip } from "../../types/types";
 import { Loader } from "../../components/utilies/Loader";
 import Header from "../../components/Header";
+import { useToast } from "../../context/ToastContext";
 
 const PrivateTripDetailsPage = () => {
   const { tripId } = useParams<{ tripId: string }>();
-  const { searchValues, fetchTripById } = usePrivateSearchContext();
-
+  const { 
+    searchValues, 
+    fetchTripById, 
+    createTicket,
+    tripType,
+    private_trip
+  } = usePrivateSearchContext();
   const [trip, setTrip] = useState<PrivateTrip | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [isCreatingTicket, setIsCreatingTicket] = useState<boolean>(false);
+  const navigate = useNavigate();
+
+  const { addToast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,6 +44,68 @@ const PrivateTripDetailsPage = () => {
 
     fetchData();
   }, [tripId, searchValues.departure]);
+const handleCreateTicket = async () => {
+  if (!tripId || !trip) {
+    addToast({
+      id: Date.now().toString(),
+      message: "Invalid trip data. Please refresh and try again.",
+      type: "error",
+    });
+    return;
+  }
+
+  if (!searchValues.departure || (tripType === "round" && !searchValues.return)) {
+    addToast({
+      id: Date.now().toString(),
+      message: "Please select both departure and return dates.",
+      type: "error",
+    });
+    return;
+  }
+
+  try {
+    setIsCreatingTicket(true);
+
+    const ticketPayload: CreateTicketPayload = {
+      round: tripType === "round" ? 2 : 1,
+      boarding: {
+        date: searchValues.departure,
+  address_id: Number(trip.from_location.id), // cast to number
+      }
+    };
+      ticketPayload.return = {
+        date: searchValues.return,
+  address_id: Number(trip.from_location.id), // cast to number
+      };
+
+    const response = await createTicket(parseInt(tripId), ticketPayload);
+
+    if (response) {
+      addToast({
+        id: Date.now().toString(),
+        message: "✅ Ticket created successfully!",
+        type: "success",
+      });
+      navigate(`/private-tickets/${response.ticket_id}`);
+    } else {
+      addToast({
+        id: Date.now().toString(),
+        message: "❌ Failed to create ticket. Try again.",
+        type: "error",
+      });
+    }
+  } catch (err) {
+    console.error("Ticket creation error:", err);
+    addToast({
+      id: Date.now().toString(),
+      message: "🚨 An unexpected error occurred.",
+      type: "error",
+    });
+  } finally {
+    setIsCreatingTicket(false);
+  }
+};
+
 
   if (loading) return <Loader />;
   if (error) {
@@ -207,9 +279,9 @@ const PrivateTripDetailsPage = () => {
             </div>
           </div>
 
-          <div className="w-[183px] inline-flex justify-end items-center">
+          <div className="w-[183px] inline-flex justify-end items-center" >
             <div className="flex-1 h-[54px] p-4 bg-[#0074c3] rounded-[9px] shadow-[0px_4px_4px_0px_rgba(217,217,217,0.25)] flex justify-center items-center gap-2 cursor-pointer">
-              <div className="justify-start text-white text-xl font-medium font-['Cairo'] leading-[30px]">
+              <div className="justify-start text-white text-xl font-medium font-['Cairo'] leading-[30px]" onClick={handleCreateTicket}>
                 Pay Now
               </div>
             </div>

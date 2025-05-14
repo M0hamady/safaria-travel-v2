@@ -1,15 +1,14 @@
-// File: src/pages/TrainSearchResultsContainer.tsx
+// File: src/pages/TrainSearchResultsContainerNoFilters.tsx
 import React, { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import TrainSearchResults from './TrainSearchResults';
-import TrainFilterComponent from './TrainFilterComponent';
 import Hero from '../../components/Hero';
 import { motion } from "framer-motion";
 import i18next from 'i18next';
 import { useTranslation } from 'react-i18next';
 import SearchBar from '../../components/SearchBar';
 
-const TrainSearchResultsContainer: React.FC = () => {
+const TrainSearchResultsContainerNoFilters: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentLanguage = i18next.language;
@@ -63,17 +62,12 @@ const TrainSearchResultsContainer: React.FC = () => {
         </motion.div>
       </section>
 
-      {/* Filter + Results Section */}
-      <section ref={searchResultsRef} className="flex flex-col md:flex-row gap-6 px-4 md:px-12">
-        <div className="md:w-3/12">
-          <TrainFilterComponent />
-        </div>
-        <div className="md:w-8/12">
-          <TrainSearchResults navigate={navigate} locationKey={location.key} />
-        </div>
+      {/* Results Section (no filters) */}
+      <section ref={searchResultsRef} className="px-4 md:px-12">
+        <TrainSearchResults navigate={navigate} locationKey={location.key} />
       </section>
     </div>
   );
 };
 
-export default TrainSearchResultsContainer;
+export default TrainSearchResultsContainerNoFilters;

@@ -1,46 +1,76 @@
 import React from 'react';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import i18next from 'i18next';
 
 interface DateTimeDisplayProps {
   value: string;
   type?: 'datetime' | 'date' | 'time';
-  locale?: 'en-US' | 'ar-EG';
+  locale?: 'en-US' | 'ar-EG'; // ممكن نحذفه نهائياً لو هنعتمد كلياً على i18next
 }
+
+const arabicMonths = [
+  'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+];
+
+const formatArabicDate = (date: Date, type: 'datetime' | 'date' | 'time') => {
+  const day = date.getDate();
+  const month = arabicMonths[date.getMonth()];
+  const year = date.getFullYear();
+  const hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+
+  let period = '';
+  let hourStr = hours;
+
+  if (type !== 'date') {
+    if (hours < 12) {
+      period = 'صباحًا';
+    } else {
+      period = 'مساءً';
+    }
+
+    hourStr = hours % 12 || 12; // تحويل لـ 12 ساعة
+  }
+
+  if (type === 'date') {
+    return `${day} ${month} ${year}`;
+  }
+
+  if (type === 'time') {
+    return `${hourStr}:${minutes} ${period}`;
+  }
+
+  return `${day} ${month} ${year} - ${hourStr}:${minutes} ${period}`;
+};
 
 const DateTimeDisplay: React.FC<DateTimeDisplayProps> = ({
   value,
   type = 'datetime',
-  locale = 'en-US',
+  locale, // قابل للإزالة لو مش هتستخدمه
 }) => {
   const date = new Date(value);
 
   if (isNaN(date.getTime())) {
-    return <span className="text-red-500 font-medium">⛔ Invalid date</span>;
+    return <span className="text-red-500 font-medium">⛔ تاريخ غير صالح</span>;
   }
 
-  const isArabic = locale.startsWith('ar');
+  const currentLang = locale || i18next.language || 'en-US';
+  const isArabic = currentLang.startsWith('ar');
 
-  let options: Intl.DateTimeFormatOptions;
-  switch (type) {
-    case 'date':
-      options = { year: 'numeric', month: 'long', day: 'numeric' };
-      break;
-    case 'time':
-      options = { hour: '2-digit', minute: '2-digit', hour12: true };
-      break;
-    default:
-      options = {
+  const formatted = isArabic
+    ? formatArabicDate(date, type)
+    : date.toLocaleString(currentLang, {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      };
-  }
-
-  const formatted = date.toLocaleString(locale, options);
+        ...(type !== 'date' && {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        }),
+      });
 
   return (
     <div

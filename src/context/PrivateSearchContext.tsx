@@ -219,7 +219,7 @@ export const PrivateSearchProvider = ({ children }: { children: ReactNode }) => 
   const createTicket = async (tripId: number, data: CreateTicketPayload): Promise<TicketResponse | null> => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
       const res = await axios.post(`${API_BASE}/api/transports/private/trips/${tripId}/create-ticket`, data, {
         headers: {
           Authorization: `Bearer ${token}`,

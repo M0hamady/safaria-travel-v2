@@ -16,6 +16,7 @@ import PrivatePreviousBookings from "../bookings/private/PrivatePreviousBookings
 import TrainCurrentBookings from "../bookings/train/TrainCurrentBookings";
 import TrainPendingBookings from "../bookings/train/TrainPendingBookings";
 import TrainPreviousBookings from "../bookings/train/TrainPreviousBookings";
+import PreviousBookings from "../bookings/train/TrainPreviousBookings";
 // …and likewise Current/Pending/Previous for each type
 
 type SearchType = "bus" | "private" | "train";
@@ -94,7 +95,7 @@ const BookingPage: React.FC = () => {
             <Route path="all"     element={<TrainAllBookings />} />
             <Route path="current" element={<TrainCurrentBookings />} />
             <Route path="pending" element={<TrainPendingBookings />} />
-            <Route path="previous"element={<TrainPreviousBookings />} />
+            <Route path="previous"element={<PreviousBookings />} />
           </Route>
 
           <Route path="*" element={<BusAllBookings />} />

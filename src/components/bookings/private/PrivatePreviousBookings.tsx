@@ -4,34 +4,32 @@ import { Order } from "../../../types/order";
 import OrderCard from "../componenns/OrderCard";
 
 
-const PreviousBookings: FC = () => {
+const PendingBookings: FC = () => {
   const { orders, loading } = useOrder();
 
-  // Helper function to check if an order is in the past and paid
-  const isOrderInPastAndPaid = (order: Order) => {
-    return order.payment_data?.status === "paid" && new Date(order.date_time) < new Date();
-  };
+  // Helper function to check if an order is pending
+  const isOrderPending = (order: Order) => order.payment_data?.status_code === "pending";
 
-  // Filter orders to show only previous ones
-  const previousOrders = orders.filter(isOrderInPastAndPaid);
+  // Filter orders to show only pending ones
+  const pendingOrders = orders.filter(isOrderPending);
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold text-gray-800">Previous Bookings private</h2>
+      <h2 className="text-2xl font-semibold text-gray-800">Pending Bookings private</h2>
 
       {loading ? (
         <p className="mt-4 text-gray-600">Loading...</p>
-      ) : previousOrders.length > 0 ? (
+      ) : pendingOrders.length > 0 ? (
         <div className="mt-4 grid gap-4">
-          {previousOrders.map((order) => (
+          {pendingOrders.map((order) => (
             <OrderCard key={order.id} order={order} />
           ))}
         </div>
       ) : (
-        <p className="mt-4 text-gray-600">No previous bookings found.</p>
+        <p className="mt-4 text-gray-600">No pending bookings found.</p>
       )}
     </div>
   );
 };
 
-export default PreviousBookings;
+export default PendingBookings;
