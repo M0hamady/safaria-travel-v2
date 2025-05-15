@@ -270,7 +270,8 @@
     "canceled": "Canceled",
     "addReview": "add review",
     "commentPlaceholder": "add your feedback",
-    "comment": "Your Feedback Matters"
+    "comment": "Your Feedback Matters",
+     "review": "Leave Review"
   },
   "bookings": {
     "allBookings": "All Bookings",

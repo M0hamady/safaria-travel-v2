@@ -19,7 +19,7 @@ export interface TripFilters {
 
 export interface BoardingInfo {
   date: string;        // "YYYY-MM-DD HH:mm"
-  address_id: number;
+  address_id: string;
 }
 
 export interface CreateTicketPayload {
@@ -28,12 +28,86 @@ export interface CreateTicketPayload {
   return?: BoardingInfo;
 }
 
-
-export interface TicketResponse {
-  ticket_id: number;
-  message: string;
+export interface Bus {
+  id: number;
+  name: string;
+  type: {
+    id: string;
+    name: string;
+    name_ar: string;
+    name_en: string;
+    seats_number: number;
+  };
+  seats_number: string;
+  license_plate: string;
+  vin: string;
+  mileage: string;
+  engine_hours: string;
+  model: string;
+  year: string;
+  color: string | null;
+  notes: string | null;
   status: string;
+  featured_image: string;
+  images: string[];
 }
+
+export interface Address {
+  id: number;
+  city: string | null;
+  name: string;
+  phone: string;
+  notes: string | null;
+  whatsapp_share_link: string;
+  map_location: {
+    lat: number;
+    lng: number;
+    address_name: string;
+  };
+}
+export interface TicketResponse {
+  data:{
+    
+  id: number;
+  date: string;
+  date_time: string;
+  status: string;
+  status_code: string;
+  payment_status: string;
+  payment_status_code: string;
+  rounded: boolean;
+  return_date: string | null;
+  payment_data: {
+    status: string;
+    status_code: string;
+    invoice_id: number;
+    data: any[]; // Adjust if structure of this array is known
+  };
+  from_location: Location;
+  to_location: Location;
+  bus: Bus;
+  address: Address;
+  from_address: Address | null;
+  to_address: Address | null;
+  can_pay: boolean;
+  can_be_cancel: boolean;
+  company: {
+    name: string;
+    logo: string;
+  };
+  trip_id: number;
+  trip_type: string;
+  payment_url: string;
+  cancel_url: string;
+  original_tickets_totals: string;
+  discount: string;
+  tickets_totals: string;
+  payment_fees_percentage: string;
+  payment_fees_value: string;
+  total: string;
+  }
+}
+
 interface PrivateSearchContextType {
   searchValues: SearchValues;
   setSearchValues: (values: SearchValues) => void;
