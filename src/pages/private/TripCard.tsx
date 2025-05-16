@@ -40,7 +40,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
             <img
               className="w-[139.82px] h-20 object-contain"
               src={trip.company_logo || trip.company_data.avatar || images.SafariaLogo}
-              alt={trip.company}
+              alt={trip.company_logo}
             />
           </div>
 

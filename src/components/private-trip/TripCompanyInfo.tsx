@@ -13,7 +13,7 @@ export const TripCompanyInfo: React.FC<TripCompanyInfoProps> = ({ trip }) => {
           <div className="inline-flex flex-col justify-center items-center gap-4">
             <img
               className="w-[139.82px] h-20 object-contain"
-              src={trip.company_logo}
+              src={trip.company_logo }
               alt={trip.company_name}
             />
           </div>
