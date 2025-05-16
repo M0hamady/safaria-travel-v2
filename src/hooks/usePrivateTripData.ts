@@ -135,8 +135,8 @@ export const usePrivateTripData = (tripId: string | undefined) => {
                 value: `${newAddress.name} - ${newAddress.map_location.address_name}`,
             };
 
-            setAddresses((prev) => [...prev, enriched]);
             fetchAddresses();
+            setAddresses((prev) => [...prev, enriched]);
 
             addToast({
                 id: "address-added",

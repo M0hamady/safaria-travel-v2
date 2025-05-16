@@ -7,6 +7,7 @@ import { AddLocation, Cancel } from "@mui/icons-material";
 import EgyptMapSelector from "../../pages/private/EgyptMapSelector";
 import { useToast } from "../../context/ToastContext";
 import dayjs from "dayjs";
+import { IconButton } from "@mui/material";
 
 type Props = {
   addresses: Address[];
@@ -26,6 +27,7 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
 
   const [mapDialogType, setMapDialogType] = useState<"boarding" | "return" | null>(null);
 
+  // Date-time state
   const [boardingDateTime, setBoardingDateTime] = useState<string>(() => {
     const stored = localStorage.getItem("boardingDateTime");
     return stored ? dayjs(stored).format("YYYY-MM-DDTHH:mm") : "";
@@ -35,7 +37,7 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
     return stored ? dayjs(stored).format("YYYY-MM-DDTHH:mm") : "";
   });
 
-  // persist date-times
+  // Persist date-times
   useEffect(() => {
     if (boardingDateTime) {
       localStorage.setItem("boardingDateTime", dayjs(boardingDateTime).toISOString());
@@ -48,16 +50,63 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
     }
   }, [returnDateTime]);
 
-  const boardingAddress = addresses.find((a) => `${a.id}` === boardingAddressId);
-  const returnAddress = addresses.find((a) => `${a.id}` === returnAddressId);
+  // Persist and listen for boarding/return IDs in localStorage
+  useEffect(() => {
+    // Write to localStorage whenever IDs change
+    if (boardingAddressId) {
+      localStorage.setItem("boardingAddressId", boardingAddressId);
+    } else {
+      localStorage.removeItem("boardingAddressId");
+    }
+    if (returnAddressId) {
+      localStorage.setItem("returnAddressId", returnAddressId);
+    } else {
+      localStorage.removeItem("returnAddressId");
+    }
+  }, [boardingAddressId, returnAddressId]);
 
-  // avoid same return
+  useEffect(() => {
+    // On mount, read from localStorage
+    const bd = localStorage.getItem("boardingAddressId");
+    if (bd) setBoardingAddressId(bd);
+    const rd = localStorage.getItem("returnAddressId");
+    if (rd) setReturnAddressId(rd);
+
+    // Listen to storage events (other tabs)
+    const handler = (e: StorageEvent) => {
+      if (e.key === "boardingAddressId") {
+        setBoardingAddressId(e.newValue);
+      }
+      if (e.key === "returnAddressId") {
+        setReturnAddressId(e.newValue);
+      }
+    };
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, [setBoardingAddressId, setReturnAddressId]);
+
+  // Avoid same return as boarding
   useEffect(() => {
     if (tripType === "round" && boardingAddressId && returnAddressId === boardingAddressId) {
       const alt = addresses.find((a) => `${a.id}` !== boardingAddressId);
       if (alt) setReturnAddressId(`${alt.id}`);
     }
   }, [boardingAddressId, returnAddressId, tripType, addresses]);
+
+  const boardingAddress = addresses.find((a) => `${a.id}` === boardingAddressId);
+  const returnAddress = addresses.find((a) => `${a.id}` === returnAddressId);
+
+  // Handlers for map pick
+  const handleMapSelect = (id: string) => {
+    if (!boardingAddressId) {
+      setBoardingAddressId(id);
+      addToast({ message: "تم تحديد عنوان الركوب.", type: "success",id:"" });
+    } else {
+      setReturnAddressId(id);
+      addToast({ message: "تم تحديد عنوان العودة.", type: "success",id:"" });
+    }
+    setMapDialogType(null);
+  };
 
   const renderDateTimeInput = (value: string, onChange: (v: string) => void, label: string) => (
     <div className="flex flex-col space-y-1">
@@ -87,14 +136,14 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
         {addresses
           .filter((addr) => `${addr.id}` !== excludeId)
           .map((addr) => (
-            <option key={addr.id} value={addr.id}>
-              {addr.value}
+            <option key={addr.id} value={`${addr.id}`}>
+              📍 {addr.value}
             </option>
           ))}
       </select>
       <button
         onClick={() => setMapDialogType(label === "عنوان الركوب" ? "boarding" : "return")}
-        className="flex items-center justify-center space-x-1 text-blue-600 hover:text-blue-800 text-xs sm:text-sm py-2"
+        className="flex items-center justify-center text-blue-600 hover:text-blue-800 text-xs sm:text-sm py-2"
       >
         <AddLocation className="text-lg sm:text-xl" />
         <span>إضافة عنوان جديد</span>
@@ -103,23 +152,22 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
   );
 
   return (
-    <div className="bg-white relative rounded-xl shadow-lg p-4 sm:p-6 space-y-6 max-w-md sm:max-w-2xl mx-auto w-full border border-gray-100 overflow-x-auto">
-      <h2 className="text-lg sm:text-xl font-bold text-gray-800">إعدادات العناوين</h2>
+    <div className="bg-white relative rounded-xl shadow-lg p-6 space-y-6 max-w-2xl mx-auto w-full border border-gray-100 overflow-auto">
+      <h2 className="text-xl font-bold text-gray-800">إعدادات العناوين</h2>
 
       {/* Boarding Section */}
-      <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-          <label className="text-sm sm:text-base text-gray-700">عنوان الركوب</label>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <label className="text-base text-gray-700">عنوان الركوب</label>
           {boardingAddressId && (
             <button
               onClick={() => setBoardingAddressId(null)}
-              className="self-start sm:self-auto text-xs sm:text-sm text-blue-600 hover:text-blue-800 underline"
+              className="text-sm text-blue-600 hover:text-blue-800 underline"
             >
               تغيير
             </button>
           )}
         </div>
-
         {!boardingAddressId
           ? renderAddressSelect("عنوان الركوب", boardingAddressId, setBoardingAddressId)
           : boardingAddress && (
@@ -129,26 +177,24 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
                 variant="primary"
               />
             )}
-
         {boardingAddressId &&
           renderDateTimeInput(boardingDateTime, setBoardingDateTime, "موعد الركوب")}
       </div>
 
       {/* Return Section */}
       {(tripType === "round" || boardingAddressId) && (
-        <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-            <label className="text-sm sm:text-base text-gray-700">عنوان العودة</label>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <label className="text-base text-gray-700">عنوان العودة</label>
             {returnAddressId && (
               <button
                 onClick={() => setReturnAddressId(null)}
-                className="self-start sm:self-auto text-xs sm:text-sm text-green-600 hover:text-green-800 underline"
+                className="text-sm text-green-600 hover:text-green-800 underline"
               >
                 تغيير
               </button>
             )}
           </div>
-
           {!returnAddressId
             ? renderAddressSelect(
                 "عنوان العودة",
@@ -163,36 +209,26 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
                   variant="secondary"
                 />
               )}
-
-          {tripType === "round" &&
-            returnAddressId &&
+          {tripType === "round" && returnAddressId &&
             renderDateTimeInput(returnDateTime, setReturnDateTime, "موعد العودة")}
         </div>
       )}
 
-      {/* Custom Modal */}
+      {/* Map Modal */}
       {mapDialogType && (
-        <div className="  inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50  top-0">
-          <div className="bg-white rounded-lg shadow-lg w-11/12 sm:w-3/4 lg:w-1/2 max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2 border-b">
-              <h3 className="text-lg font-medium">
-                <AddLocation className="inline text-blue-500 mr-2" />
+        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg w-11/12 sm:w-3/4 lg:w-1/2 max-h-[80vh] flex flex-col">
+            <div className="flex justify-between items-center px-4 py-2 border-b">
+              <h3 className="text-lg font-medium flex items-center gap-2">
+                <AddLocation className="text-blue-500" />
                 {mapDialogType === "boarding" ? "اختيار عنوان الركوب" : "اختيار عنوان العودة"}
               </h3>
-              <button onClick={() => setMapDialogType(null)} className="text-gray-500 hover:text-gray-700">
+              <IconButton onClick={() => setMapDialogType(null)}>
                 <Cancel />
-              </button>
+              </IconButton>
             </div>
-            <div className="p-0 h-[60vh] sm:h-96">
-              <EgyptMapSelector />
-            </div>
-            <div className="px-4 py-2 border-t text-right">
-              <button
-                onClick={() => setMapDialogType(null)}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                إلغاء
-              </button>
+            <div className="flex-1 h-0">
+              <EgyptMapSelector locations={addresses} tripId={tripId} onSelect={handleMapSelect} />
             </div>
           </div>
         </div>
