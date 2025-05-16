@@ -29,7 +29,8 @@ export default function PrivateTripSearchResults() {
     [trips]
   );
   const { t } = useTranslation();
-
+console.log('-------------------------');
+console.log(busTypes);
   const [selectedCompany, setSelectedCompany] = useState<string[]>(
     tripFilters.company
   );
@@ -134,6 +135,7 @@ export default function PrivateTripSearchResults() {
             selectedBusType={selectedBusType}
             setSelectedBusType={setSelectedBusType}
             resetFilters={resetFilters}
+            isOpen={showFilters}
           />
         </div>
         <MobileFilterDrawer

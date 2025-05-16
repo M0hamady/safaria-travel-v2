@@ -179,7 +179,21 @@
     "pricePerPerson": "Price per person",
     "select": "Select"
   },
-  "filters": "Filters",
+    "filters": {
+    "title": "Filters",
+    "company": "Company",
+    "priceRange": "Price Range",
+    "busType": "Bus Type",
+    "currency": "LE"
+  },
+    "categories": {
+    "unknown": "Unknown",
+    "limousine": "Limousine",
+    "Bus": "Bus",
+    "Hi-ACE": "Hi-ACE",
+    "Costar": "Costar"
+  },
+  
   "open_filters": "open filters",
   "companies": "Companies",
   "departureStations": "Departure Stations",
@@ -297,6 +311,7 @@
     "defaultName": "User",
     "back": "back"
   },
+  
   "I agree to the Terms and Conditions": "I agree to the Terms and Conditions",
   "Processing...": "Processing...",
   "Book Your Ticket": "Book Your Ticket",
@@ -328,5 +343,12 @@
   "button": {
     "getPaymentUrl": "Get Payment URL",
     "proceedToPayment": "Proceed to Payment"
-  }
+  },
+    "offers": "offers",
+  "tripWith": "trip with",
+  "seatsAvailable": "seats available",
+  "seats": "seats",
+  "luggageInfo": "Luggage: 1 large + 1 small",
+  "roundTripPrice": "Round Trip Price",
+  "select": "Select"
 }

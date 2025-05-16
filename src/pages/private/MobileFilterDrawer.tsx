@@ -1,6 +1,7 @@
-import { FC, useCallback } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { useTranslation } from "react-i18next";
 
 export const MobileFilterDrawer: FC<{
   visible: boolean;
@@ -32,7 +33,9 @@ export const MobileFilterDrawer: FC<{
     const newMin = Math.min(value, max);
     setSelectedPriceRange([newMin, max]);
   };
+    const { t } = useTranslation();
 
+const [open, setopen] = useState(visible)
   const handleMaxChange = (value: number) => {
     const [min, max] = selectedPriceRange;
     const newMax = Math.max(value, min);
@@ -53,11 +56,25 @@ export const MobileFilterDrawer: FC<{
     []
   );
   const [min, max] = selectedPriceRange;
+    useEffect(() => {
+      setopen(!open)
+    if (visible) {
+      const el = document.getElementById("company-filter");
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 300); // wait for slide-down animation
+      }
+    }
+  }, [visible]);
+
   if (!visible) return null;
 
+
+
   return (
-    <div className="fixed inset-0 bg-black/50 z-30 flex justify-center items-start pt-20 px-4">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 relative">
+    <div className="fixed inset-0 bg-black/50 z-30 flex justify-center items-start pt-20 px-4"  id="company-filter">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 relative space-y-9 ">
         <button
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition"
           onClick={onClose}
@@ -65,8 +82,8 @@ export const MobileFilterDrawer: FC<{
           <CloseIcon fontSize="large"   />
         </button>
 
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-800">Filters</h2>
+        <div className="flex justify-between items-center mb-6 ">
+          <h2 className="text-xl font-bold text-gray-800">{t("filters.title")}</h2>
           <button
             onClick={resetFilters}
             className="text-gray-500 hover:text-blue-600 transition absolute right-14 top-4 "
@@ -77,7 +94,7 @@ export const MobileFilterDrawer: FC<{
 
         {/* Company Filter */}
         <div className="pb-4 mb-4  mt-2 border-b-2 ">
-          <h3 className="text-lg font-medium mb-3">Company</h3>
+          <h3 className="text-lg font-medium mb-3">{t("filters.company")}</h3>
           <div className="flex flex-col gap-2">
             {companies.map((company) => (
               <div
@@ -100,11 +117,11 @@ export const MobileFilterDrawer: FC<{
         </div>
 
         <div>
-          <h3 className="text-lg font-medium mb-3">Price Range</h3>
+          <h3 className="text-lg font-medium mb-3">{t("filters.priceRange")}</h3>
           {/* Labels */}
           <div className="w-full px-4 flex justify-between text-xs text-[#1e1e1e] font-normal leading-[18px]">
-            <span>{min.toLocaleString()} LE</span>
-            <span>{max.toLocaleString()} LE</span>
+            <span>{max.toLocaleString()} {t("filters.currency")}</span>
+            <span>{min.toLocaleString()} {t("filters.currency")}</span>
           </div>
           {/* Slider */}
           <div className="relative w-full h-[100px] mb-4 mt-2 border-b-2 ">
@@ -155,7 +172,7 @@ export const MobileFilterDrawer: FC<{
 
         {/* Bus Type Filter */}
         <div className="mb-4 border-b-2 ">
-          <h3 className="text-lg font-medium mb-3">Bus Type</h3>
+          <h3 className="text-lg font-medium mb-3">{t("filters.busType")}</h3>
           <div className="flex flex-wrap gap-3">
             {busTypes.map((type) => (
               <div

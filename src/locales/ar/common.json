@@ -184,7 +184,20 @@
     "pricePerPerson": "السعر للفرد",
     "select": "اختيار"
   },
-  "filters": "الفلاتر",
+  "filters": {
+    "title": "الفلاتر",
+    "company": "الشركة",
+    "priceRange": "نطاق السعر",
+    "busType": "نوع الحافلة",
+    "currency": "ج.م"
+  },
+   "categories": {
+    "unknown": "غير معروف",
+    "limousine": "ليموزين",
+    "Bus": "حافلة",
+    "Hi-ACE": "هاي إيس",
+    "Costar": "كوستار"
+  },
   "open_filters": "فتح الفلاتر",
   "companies": "الشركات",
   "departureStations": "محطات المغادرة",
@@ -346,5 +359,12 @@
    "button": {
     "getPaymentUrl": "الحصول على رابط الدفع",
     "proceedToPayment": "المتابعة إلى الدفع"
-  }
+  },
+    "offers": "يقدم",
+  "tripWith": "رحلة مع",
+  "seatsAvailable": "مقاعد متاحة",
+  "seats": "مقعد",
+  "luggageInfo": "الحقائب: حقيبة كبيرة + حقيبة صغيرة",
+  "roundTripPrice": "سعر الرحلة ذهابًا وإيابًا",
+  "select": "اختر"
 }

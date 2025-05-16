@@ -3,10 +3,18 @@ import { Trip } from "../../types/types";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import images from "../../assets";
-
+import { useTranslation } from "react-i18next";
+const categoryBadgeClasses: Record<string, string> = {
+  unknown: "bg-gray-200 text-gray-800",
+  limousine: "bg-purple-200 text-purple-800",
+  Bus: "bg-blue-200 text-blue-800",
+  "Hi-ACE": "bg-green-200 text-green-800",
+  Costar: "bg-yellow-200 text-yellow-800",
+};
 export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
   const navigate = useNavigate();
   const handleSelect = () => navigate(`/private-trips-search/trip/${trip.id}`);
+  const { t } = useTranslation();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -23,6 +31,11 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
     "availability": trip.available_seats > 0 ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
     "url": `https://yourdomain.com/private-trips-search/trip/${trip.id}`
   };
+    const category = trip.bus.category;
+
+  const badgeClass =
+    categoryBadgeClasses[category] || "bg-gray-100 text-gray-700"; // fallback
+const label = t(`categories.${category}`, category);
 
   return (
     <article
@@ -39,7 +52,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
           <div className="inline-flex flex-col  justify-center items-center gap-4">
             <img
               className="w-[139.82px] h-20 object-contain"
-              src={trip.company_logo || trip.company_data.avatar || images.SafariaLogo}
+              src={ trip.company_data.avatar || trip.company_logo  }
               alt={trip.company_logo}
             />
           </div>
@@ -64,7 +77,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
               <div className="inline-flex flex-col justify-start items-start gap-4">
                 <div className="inline-flex justify-start items-start gap-2">
                   <div className="text-[#68696a] text-base font-normal leading-normal font-cairo">
-                    {trip.available_seats} seats
+                    {trip.available_seats}  {t("seats")}
                   </div>
                 </div>
               </div>
@@ -72,7 +85,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
               <div className="inline-flex flex-col justify-start items-start gap-4">
                 <div className="inline-flex justify-start items-start gap-2">
                   <div className="text-[#68696a] text-base font-normal leading-normal font-cairo">
-                    Luggage: 1 large + 1 small
+                    {t("luggageInfo")}
                   </div>
                 </div>
               </div>
@@ -83,14 +96,19 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
         </div>
 
         <div className="w-full pt-4 border-t border-[#b9c4d5] inline-flex justify-end items-center gap-4">
-          <div className="flex-1 flex justify-end items-center gap-4">
-            <div className="inline-flex flex-col justify-start items-start gap-1">
-              <div className="text-[#1e1e1e] text-xl font-medium leading-[30px] font-cairo">
-                LE {trip.price_start_with}
+          <div className="flex-1 flex justify-between items-center gap-4 ">
+            <div className="inline-flex flex-col  justify-start items-start gap-1">
+              <div className="text-primary font-bold text-xl  leading-[30px] font-cairo">
+                 {trip.price_start_with}   {t("busSearchTrips.LE")} 
               </div>
               <div className="text-[#68696a] text-xs font-normal leading-[18px] font-cairo">
-                Round Trip Price
+                {t("roundTripPrice")}
               </div>
+               <div
+              className={`px-3 py-1 rounded-full text-sm font-semibold ${badgeClass}`}
+            >
+              {label}
+            </div>
             </div>
 
             <div className="w-[110px] flex justify-start items-start">
@@ -99,7 +117,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
                 className="flex-1 h-[54px] p-4 bg-[#0074c3] rounded-[9px] shadow-[0px_4px_4px_rgba(217,217,217,0.25)] flex justify-center items-center gap-2 cursor-pointer hover:brightness-90 transition"
               >
                 <div className="text-white text-xl font-medium leading-[30px] font-cairo">
-                  Select
+                  {t("select")}
                 </div>
               </div>
             </div>

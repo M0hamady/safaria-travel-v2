@@ -1,5 +1,6 @@
-import { FC, useCallback } from "react";
+import { FC, useCallback, useEffect } from "react";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { useTranslation } from "react-i18next";
 
 interface FilterSidebarProps {
   companies: string[];
@@ -11,6 +12,8 @@ interface FilterSidebarProps {
   selectedBusType: string[];
   setSelectedBusType: (val: string[]) => void;
   resetFilters: () => void;
+    isOpen: boolean;
+
 }
 
 export const FilterSidebar: FC<FilterSidebarProps> = ({
@@ -23,6 +26,8 @@ export const FilterSidebar: FC<FilterSidebarProps> = ({
   selectedBusType,
   setSelectedBusType,
   resetFilters,
+    isOpen,
+
 }) => {
   const toggleItem = useCallback(
     (list: string[], item: string, setter: (val: string[]) => void) => {
@@ -41,6 +46,7 @@ export const FilterSidebar: FC<FilterSidebarProps> = ({
     const newMin = Math.min(value, max);
     setSelectedPriceRange([newMin, max]);
   };
+const { t } = useTranslation();
 
   const handleMaxChange = (value: number) => {
     const [min, max] = selectedPriceRange;
@@ -49,20 +55,21 @@ export const FilterSidebar: FC<FilterSidebarProps> = ({
   };
 
   const [min, max] = selectedPriceRange;
+  // scroll into view on open (mobile only)
 
   return (
     <aside className="hidden md:block sticky top-4 bg-white p-6 rounded-2xl shadow-md space-y-6 w-[285px] font-cairo">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Filters</h2>
+        <h2 className="text-2xl font-semibold">{t("filters.title")}</h2>
         <button onClick={resetFilters} className="text-gray-500 hover:text-gray-800">
           <RefreshIcon />
         </button>
       </div>
 
       {/* Company Filter */}
-      <div>
-        <h3 className="text-lg font-medium mb-3">Company</h3>
-        <div className="flex flex-col gap-2">
+      <div  >
+        <h3 className="text-lg font-medium mb-3">{t("filters.company")}</h3>
+        <div className="flex flex-col gap-2" >
           {companies.map((company) => (
             <div
               key={company}
@@ -82,12 +89,12 @@ export const FilterSidebar: FC<FilterSidebarProps> = ({
       </div>
 
       {/* Price Range Filter */}
-      <div>
-        <h3 className="text-lg font-medium mb-3">Price Range</h3>
+      <div className="rtl:hidden">
+        <h3 className="text-lg font-medium mb-3">{t("filters.priceRange")}</h3>
         {/* Labels */}
         <div className="w-full px-4 flex justify-between text-xs text-[#1e1e1e] font-normal leading-[18px]">
-          <span>{min.toLocaleString()} LE</span>
-          <span>{max.toLocaleString()} LE</span>
+          <span>{min.toLocaleString()}  {t("filters.currency")}</span>
+          <span>{max.toLocaleString()}  {t("filters.currency")}</span>
         </div>
 
         {/* Slider */}
@@ -139,7 +146,7 @@ export const FilterSidebar: FC<FilterSidebarProps> = ({
 
       {/* Bus Type Filter */}
       <div>
-        <h3 className="text-lg font-medium mb-3">Bus Type</h3>
+        <h3 className="text-lg font-medium mb-3">{t("filters.busType")}</h3>
         <div className="flex flex-wrap gap-3">
           {busTypes.map((type) => (
             <div
