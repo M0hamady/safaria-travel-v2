@@ -135,9 +135,14 @@ export const usePrivateTripData = (tripId: string | undefined) => {
                 value: `${newAddress.name} - ${newAddress.map_location.address_name}`,
             };
 
-            fetchAddresses();
+            if (!boardingAddressId && newAddress) {
+              setBoardingAddressId(`${newAddress.id}`)
+            }
+            if (boardingAddressId && !returnAddressId && newAddress) {
+              setReturnAddressId(`${newAddress.id}`)
+            }
             setAddresses((prev) => [...prev, enriched]);
-
+            window.location.reload()
             addToast({
                 id: "address-added",
                 message: "📍 Address added successfully.",

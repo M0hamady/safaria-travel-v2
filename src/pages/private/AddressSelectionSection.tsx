@@ -55,16 +55,32 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
     // Write to localStorage whenever IDs change
     if (boardingAddressId) {
       localStorage.setItem("boardingAddressId", boardingAddressId);
-    } else {
-      localStorage.removeItem("boardingAddressId");
-    }
+    } 
     if (returnAddressId) {
       localStorage.setItem("returnAddressId", returnAddressId);
-    } else {
-      localStorage.removeItem("returnAddressId");
-    }
+    } 
+    
   }, [boardingAddressId, returnAddressId]);
 
+  useEffect(() => {
+    // On mount, read from localStorage
+    const bd = localStorage.getItem("boardingAddressId");
+    if (bd) setBoardingAddressId(bd);
+    const rd = localStorage.getItem("returnAddressId");
+    if (rd) setReturnAddressId(rd);
+
+    // Listen to storage events (other tabs)
+    const handler = (e: StorageEvent) => {
+      if (e.key === "boardingAddressId") {
+        setBoardingAddressId(e.newValue);
+      }
+      if (e.key === "returnAddressId") {
+        setReturnAddressId(e.newValue);
+      }
+    };
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, []);
   useEffect(() => {
     // On mount, read from localStorage
     const bd = localStorage.getItem("boardingAddressId");
@@ -95,7 +111,7 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
 
   const boardingAddress = addresses.find((a) => `${a.id}` === boardingAddressId);
   const returnAddress = addresses.find((a) => `${a.id}` === returnAddressId);
-
+  
   // Handlers for map pick
   const handleMapSelect = (id: string) => {
     if (!boardingAddressId) {
@@ -216,8 +232,8 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
 
       {/* Map Modal */}
       {mapDialogType && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg w-11/12 sm:w-3/4 lg:w-1/2 max-h-[80vh] flex flex-col">
+        <div className="fixed w-screen top-10 h-screen left-0 right-20  z-20 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg w-11/12 sm:w-3/4 lg:w-1/2 max-h-fit gap-3 flex flex-col">
             <div className="flex justify-between items-center px-4 py-2 border-b">
               <h3 className="text-lg font-medium flex items-center gap-2">
                 <AddLocation className="text-blue-500" />
@@ -227,7 +243,7 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
                 <Cancel />
               </IconButton>
             </div>
-            <div className="flex-1 h-0">
+            <div className="flex-1 h-fit">
               <EgyptMapSelector locations={addresses} tripId={tripId} onSelect={handleMapSelect} />
             </div>
           </div>

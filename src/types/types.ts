@@ -151,6 +151,7 @@ export interface FormatDateTimeOptions {
 export interface Trip {
   id: number;
   gateway_id: string;
+  company_logo?:string;
   company: string;
   company_data: {
     name: string;

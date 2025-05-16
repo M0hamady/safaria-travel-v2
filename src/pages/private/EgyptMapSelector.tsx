@@ -163,7 +163,7 @@ export default function EgyptMapSelector({ locations = [], tripId, onSelect }: P
   };
 
   return (
-    <div className="relative w-full h-[60vh]">
+    <div className="relative w-full h-[85vh]">
       {/* Locate button */}
       <Fab
         onClick={locateMe}
@@ -174,36 +174,9 @@ export default function EgyptMapSelector({ locations = [], tripId, onSelect }: P
         <GpsFixed />
       </Fab>
 
-      {/* Search input */}
-      <div className="absolute top-4 right-4 z-10 w-80">
-        <div className="relative">
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="ابحث..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            InputProps={{
-              endAdornment: <AddLocation className="text-gray-400" />,
-            }}
-          />
-        </div>
-        {suggestions.length > 0 && (
-          <div className="bg-white shadow rounded mt-1 max-h-60 overflow-auto">
-            {suggestions.map((s, i) => (
-              <div
-                key={i}
-                onClick={() => handleSuggestion(s)}
-                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-              >
-                <Place className="inline mr-2 text-gray-500" /> {s.display_name}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+   
 
-      <MapContainer center={[26.8, 30.8]} zoom={6} className="h-full w-full" doubleClickZoom={false}>
+      <MapContainer center={[26.8, 30.8]} zoom={6} className="h-full w-full z-20" doubleClickZoom={false}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <DoubleClickHandler onDouble={handleDouble} />
 
@@ -239,7 +212,34 @@ export default function EgyptMapSelector({ locations = [], tripId, onSelect }: P
           );
         })}
       </MapContainer>
-
+   {/* Search input */}
+      <div className="absolute top-4 right-4 z-50 w-80">
+        <div className="relative">
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="ابحث..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            InputProps={{
+              endAdornment: <AddLocation className="text-gray-400" />,
+            }}
+          />
+        </div>
+        {suggestions.length > 0 && (
+          <div className="bg-white shadow rounded mt-1 max-h-60 overflow-auto">
+            {suggestions.map((s, i) => (
+              <div
+                key={i}
+                onClick={() => handleSuggestion(s)}
+                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+              >
+                <Place className="inline mr-2 text-gray-500" /> {s.display_name}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       {/* Add address dialog */}
       <Dialog open={openAdd} onClose={() => setOpenAdd(false)} maxWidth="xs" fullWidth>
         <DialogTitle>إضافة عنوان جديد</DialogTitle>
