@@ -8,6 +8,7 @@ import EgyptMapSelector from "../../pages/private/EgyptMapSelector";
 import { useToast } from "../../context/ToastContext";
 import dayjs from "dayjs";
 import { IconButton } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   addresses: Address[];
@@ -26,6 +27,7 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
   const { addToast } = useToast();
 
   const [mapDialogType, setMapDialogType] = useState<"boarding" | "return" | null>(null);
+  const { t } = useTranslation();
 
   // Date-time state
   const [boardingDateTime, setBoardingDateTime] = useState<string>(() => {
@@ -148,7 +150,7 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value)}
       >
-        <option value="">اختر {label}</option>
+        <option value="">{t("اختر")} {t(label)}</option>
         {addresses
           .filter((addr) => `${addr.id}` !== excludeId)
           .map((addr) => (
@@ -162,25 +164,25 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
         className="flex items-center justify-center text-blue-600 hover:text-blue-800 text-xs sm:text-sm py-2"
       >
         <AddLocation className="text-lg sm:text-xl" />
-        <span>إضافة عنوان جديد</span>
+        <span>{t("addNew")}</span>
       </button>
     </div>
   );
 
   return (
     <div className="bg-white relative rounded-xl shadow-lg p-6 space-y-6 max-w-2xl mx-auto w-full border border-gray-100 overflow-auto">
-      <h2 className="text-xl font-bold text-gray-800">إعدادات العناوين</h2>
+      <h2 className="text-xl font-bold text-gray-800">{t("address.sectionTitle")}</h2>
 
       {/* Boarding Section */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <label className="text-base text-gray-700">عنوان الركوب</label>
+          <label className="text-base text-gray-700">{t("address.boardingLabel")}</label>
           {boardingAddressId && (
             <button
               onClick={() => setBoardingAddressId(null)}
               className="text-sm text-blue-600 hover:text-blue-800 underline"
             >
-              تغيير
+               {t("common.change")}
             </button>
           )}
         </div>
@@ -194,27 +196,27 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
               />
             )}
         {boardingAddressId &&
-          renderDateTimeInput(boardingDateTime, setBoardingDateTime, "موعد الركوب")}
+          renderDateTimeInput(boardingDateTime, setBoardingDateTime, `${t('address.boardingDate')}`)}
       </div>
 
       {/* Return Section */}
       {(tripType === "round" || boardingAddressId) && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <label className="text-base text-gray-700">عنوان العودة</label>
+            <label className="text-base text-gray-700">{t("address.returnLabel")}</label>
             {returnAddressId && (
               <button
                 onClick={() => setReturnAddressId(null)}
                 className="text-sm text-green-600 hover:text-green-800 underline"
               >
-                تغيير
+                                {t("common.change")}
+
               </button>
             )}
           </div>
           {!returnAddressId
             ? renderAddressSelect(
-                "عنوان العودة",
-                returnAddressId,
+`${t("address.return")}`,                 returnAddressId,
                 setReturnAddressId,
                 boardingAddressId ?? undefined
               )
@@ -226,7 +228,7 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
                 />
               )}
           {tripType === "round" && returnAddressId &&
-            renderDateTimeInput(returnDateTime, setReturnDateTime, "موعد العودة")}
+            renderDateTimeInput(returnDateTime, setReturnDateTime, `${t("address.return")}`)}
         </div>
       )}
 
@@ -237,7 +239,9 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses, tripId }) => {
             <div className="flex justify-between items-center px-4 py-2 border-b">
               <h3 className="text-lg font-medium flex items-center gap-2">
                 <AddLocation className="text-blue-500" />
-                {mapDialogType === "boarding" ? "اختيار عنوان الركوب" : "اختيار عنوان العودة"}
+                {mapDialogType === "boarding"
+                  ? t("address.pickBoarding")
+                  : t("address.pickReturn")}
               </h3>
               <IconButton onClick={() => setMapDialogType(null)}>
                 <Cancel />

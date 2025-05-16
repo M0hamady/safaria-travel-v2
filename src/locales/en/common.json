@@ -229,7 +229,9 @@
   "common": {
     "edit": "Edit",
     "changeLocation": "change location",
-    "searchStations": "search station"
+    "searchStations": "search station",
+    "change": "Change"
+
   },
   "reservation": {
     "confirming": "Confirming your reservation...",
@@ -311,7 +313,20 @@
     "defaultName": "User",
     "back": "back"
   },
-  
+  "address": {
+    "sectionTitle": "Address Settings",
+    "boardingLabel": "Boarding Address",
+    "boardingPlaceholder": "Select boarding address",
+    "boardingDate": "Boarding Date & Time",
+    "returnLabel": "Return Address",
+    "returnPlaceholder": "Select return address",
+    "returnDate": "Return Date & Time",
+    "addNew": "Add New Address",
+    "pickBoarding": "Pick Boarding Address",
+    "pickReturn": "Pick Return Address",
+    "selectedBoarding": "Boarding address selected.",
+    "selectedReturn": "Return address selected."
+  },
   "I agree to the Terms and Conditions": "I agree to the Terms and Conditions",
   "Processing...": "Processing...",
   "Book Your Ticket": "Book Your Ticket",
@@ -350,5 +365,12 @@
   "seats": "seats",
   "luggageInfo": "Luggage: 1 large + 1 small",
   "roundTripPrice": "Round Trip Price",
-  "select": "Select"
+  "select": "Select",
+  "priceSummary": {
+    "discount": "Discount",
+    "taxIncluded": "Tax Included",
+    "total": "Total",
+    "payNow": "Pay Now",
+    "processing": "Processing..."
+  }
 }

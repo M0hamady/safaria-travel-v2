@@ -65,6 +65,7 @@ import TrainSearchResultsContainer from "./pages/trains/TrainSearchResultsContai
 import { HelmetProvider } from "react-helmet-async";
 import { TrainOrderProvider } from "./context/TrainOrderContext";
 import { PrivateOrderProvider } from "./context/PrivateOrderContext";
+import PrivateTripDetailsPageData from "./pages/private/PrivateTripDetailsPageData";
 
 const App: React.FC = () => {
   const currentLanguage = i18next.language;
@@ -107,6 +108,7 @@ const App: React.FC = () => {
                         {/* ------------------- Private Trip Routes ------------------- */}
                         <Route path="/private-trips-search" element={<PrivateTripSearchResults />} />
                         <Route path="/private-trips-search/trip/:tripId" element={<PrivateTripDetailsPage />} />
+                        <Route path="/private-trips-search/trip/shared/:tripId" element={<PrivateTripDetailsPageData />} />
                         <Route path="/private-search/trip/:tripId" element={<TripDetailsPage />} />
 
                         {/* ------------------- Train Routes (Planned) ------------------- */}

@@ -68,6 +68,7 @@
   "starting_price": "يبدأ من",
   "price_unit": "جنيه مصري",
   "class_options": "خيارات الدرجة",
+  "Ticket Price": "سعر التذكرة",
   "view_trip": "عرض الرحلة",
   "railway_track": "مسار السكك الحديدية",
   "available_seats": "المقاعد المتاحة",
@@ -197,6 +198,19 @@
     "Bus": "حافلة",
     "Hi-ACE": "هاي إيس",
     "Costar": "كوستار"
+  },  "address": {
+    "sectionTitle": "إعدادات العناوين",
+    "boardingLabel": "عنوان الركوب",
+    "boardingPlaceholder": "اختر عنوان الركوب",
+    "boardingDate": "موعد الركوب",
+    "returnLabel": "عنوان العودة",
+    "returnPlaceholder": "اختر عنوان العودة",
+    "returnDate": "موعد العودة",
+    "addNew": "إضافة عنوان جديد",
+    "pickBoarding": "اختيار عنوان الركوب",
+    "pickReturn": "اختيار عنوان العودة",
+    "selectedBoarding": "تم تحديد عنوان الركوب.",
+    "selectedReturn": "تم تحديد عنوان العودة."
   },
   "open_filters": "فتح الفلاتر",
   "companies": "الشركات",
@@ -243,7 +257,9 @@
   "common": {
     "edit": "تعديل",
     "changeLocation": "تعديل المحافظة",
-    "searchStations": "البحث  عن محطة"
+    "searchStations": "البحث  عن محطة",
+        "change": "تغيير"
+
   },
   "reservation": {
     "confirming": "جاري تأكيد الحجز...",
@@ -366,5 +382,12 @@
   "seats": "مقعد",
   "luggageInfo": "الحقائب: حقيبة كبيرة + حقيبة صغيرة",
   "roundTripPrice": "سعر الرحلة ذهابًا وإيابًا",
-  "select": "اختر"
+  "select": "اختر",
+    "priceSummary": {
+    "discount": "الخصم",
+    "taxIncluded": "شامل الضريبة",
+    "total": "الإجمالي",
+    "payNow": "ادفع الآن",
+    "processing": "جاري المعالجة..."
+  }
 }

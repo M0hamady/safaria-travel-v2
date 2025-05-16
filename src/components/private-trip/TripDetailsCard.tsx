@@ -1,5 +1,6 @@
 import React from "react";
 import { PrivateTrip } from "../../types/types";
+import { useTranslation } from "react-i18next";
 
 // In TripDetailsCard.tsx
 interface TripDetailsCardProps {
@@ -15,6 +16,8 @@ export const TripDetailsCard: React.FC<TripDetailsCardProps> = ({
   toLocation,
   price,
 }) => {
+    const { t } = useTranslation();
+
   return (
     <div className="self-stretch px-5 pb-4 border-b border-[#e8ecf2] inline-flex justify-start items-start gap-[87px]">
       <div className="flex-1 inline-flex flex-col justify-start items-start gap-2">
@@ -27,10 +30,10 @@ export const TripDetailsCard: React.FC<TripDetailsCardProps> = ({
       </div>
       <div className="inline-flex flex-col justify-start items-start gap-2">
         <div className="justify-start text-[#1e1e1e] text-base font-normal font-['Cairo'] leading-normal">
-          Ticket Price
+          {t("Ticket Price")}
         </div>
         <div className="justify-start text-[#0074c3] text-base font-medium font-['Cairo']">
-          {price} EGP
+          {price} {t("price_unit")}
         </div>
       </div>
     </div>

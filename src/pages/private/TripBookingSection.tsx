@@ -37,7 +37,7 @@ const TripBookingSection: React.FC<TripBookingSectionProps> = ({
 
       <TripPriceSummary
         discount={trip.discount || 0}
-        tax={trip.go_price || 0}
+        tax={0 || 0}
         total={totalPrice}
         onPayNow={onCreateTicket}
         isCreatingTicket={isCreatingTicket}

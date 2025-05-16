@@ -17,9 +17,7 @@ export const TripHeader: React.FC<TripHeaderProps> = ({ companyName }) => {
           {companyName}
         </div>
       </div>
-      <div className="justify-start text-[#0074c3] text-base font-normal font-['Cairo'] leading-normal cursor-pointer">
-        Edit
-      </div>
+     
     </div>
   );
 };
