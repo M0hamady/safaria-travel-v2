@@ -46,7 +46,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
   const [toLocation, setToLocation] = useState<Location>();
   const lang = i18n.language;
   const { trainLocations, setSearchBody, searchBody, setSelectedDepartureLocation, setSelectedArrivalLocation, setArrivalStation, setDepartureStation, selectedArrivalLocation, selectedDepartureLocation, selectedArrivalStation, selectedDepartureStation } = useContext(TrainsContext);
-  const { searchType, isPrivateSearch,isTrainSearch } = useSearchType();
+  const { searchType, isPrivateSearch , isTrainSearch, setSearchType } = useSearchType();
 
   const handleInputTrain = (field: string | keyof SearchValues, value: string) => {
     const foundLocation = trainLocations.find((loc) => loc.id === Number(value));
@@ -67,6 +67,8 @@ export const SearchForm: React.FC<SearchFormProps> = ({
   };
 
   useEffect(() => {
+
+
     if (searchValues.from) {
       setFromLocation(
         locations.find((location) => location.id === searchValues.from)
@@ -130,7 +132,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
             error={errors.departure}
 maxDate={isPrivateSearch ?
               new Date(
-                new Date().setDate(new Date().getDate() + 2)
+                new Date().setDate(new Date().getDate() + 3)
               ).toISOString().split("T")[0] // Two days from today
               : new Date(
                 new Date().setDate(new Date().getDate())
@@ -215,7 +217,7 @@ maxDate={isPrivateSearch ?
 
 
       {tripType !== "round" && <div className="col-span-4 "></div>}
-      {tripType === "round" && (
+      {tripType === "round" && !isTrainSearch && (
         <DatePicker
           label={t("searchForm.return")}
           value={searchValues.return}
@@ -223,7 +225,12 @@ maxDate={isPrivateSearch ?
           error={errors.return}
           helperText={errors.return ? t("validation.required") : ""}
           className="col-span-4 max-sm:col-span-12"
-          beforeVal={searchValues.departure}
+          beforeVal={searchValues.departure || isPrivateSearch ?
+              new Date(
+                new Date().setDate(new Date().getDate() + 3)
+              ).toISOString().split("T")[0] // Two days from today
+              : new Date(
+                new Date().setDate(new Date().getDate() )).toISOString()}
         />
       )}
       <button

@@ -76,7 +76,9 @@ const SearchBar = () => {
     setCurrentLocations(
       searchType === "bus" ? busContext.locations : locations_private
     );
-
+    if (searchType === "train" && currentTripType === "round") {
+      setCurrentTripType("one-way")
+    }
     // Add transport selection guide
     addToast({
       id: "transport-selection",
