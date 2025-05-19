@@ -1,10 +1,10 @@
 // SearchTypeContext.tsx
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
 
-// Define the search types as a union type directly in this file
 export type SearchType = 'bus' | 'private' | 'train';
 
-// Define the context shape with TypeScript
+const SEARCH_TYPE_KEY = 'searchType';
+
 interface SearchTypeContextProps {
   searchType: SearchType;
   setSearchType: (type: SearchType) => void;
@@ -13,22 +13,45 @@ interface SearchTypeContextProps {
   isPrivateSearch: boolean;
 }
 
-// Create context with explicit type and undefined for default value
 const SearchTypeContext = createContext<SearchTypeContextProps | undefined>(undefined);
 
-// Create provider component
+// Helper function to safely get from localStorage
+const getSavedSearchType = (): SearchType | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const saved = localStorage.getItem(SEARCH_TYPE_KEY);
+    return saved as SearchType;
+  } catch (error) {
+    console.error('Error reading from localStorage:', error);
+    return null;
+  }
+};
+
 export const SearchTypeProvider: React.FC<{ 
   children: React.ReactNode;
-  defaultType?: SearchType; // Optional default type
+  defaultType?: SearchType;
 }> = ({ children, defaultType = 'bus' }) => {
-  const [searchType, setSearchType] = useState<SearchType>(defaultType);
+  // Initialize state with function to read from localStorage only once
+  const [searchType, setSearchType] = useState<SearchType>(() => {
+    const savedType = getSavedSearchType();
+    return savedType || defaultType;
+  });
 
-  // Derived state for convenience
+  // Save to localStorage whenever searchType changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(SEARCH_TYPE_KEY, searchType);
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+  }, [searchType]);
+
+  // Derived state
   const isTrainSearch = searchType === 'train';
   const isBusSearch = searchType === 'bus';
   const isPrivateSearch = searchType === 'private';
 
-  // Memoize the context value to prevent unnecessary re-renders
+  // Memoize context value
   const contextValue = useMemo(() => ({
     searchType,
     setSearchType,
@@ -44,7 +67,6 @@ export const SearchTypeProvider: React.FC<{
   );
 };
 
-// Custom hook for consuming the context
 export const useSearchType = (): SearchTypeContextProps => {
   const context = useContext(SearchTypeContext);
   if (!context) {
@@ -53,7 +75,6 @@ export const useSearchType = (): SearchTypeContextProps => {
   return context;
 };
 
-// Optional: Helper hook for train-specific logic
 export const useTrainSearch = () => {
   const { isTrainSearch } = useSearchType();
   return { isTrainSearch };

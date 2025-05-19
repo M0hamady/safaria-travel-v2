@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Location, PrivateTrip, SearchValues, Trip,  } from "../types/types";
+import { Location, PrivateTrip, SearchValues, Trip, } from "../types/types";
 
 const API_BASE = "https://app.telefreik.com";
 export interface TripFilters {
@@ -16,7 +16,12 @@ export interface TripFilters {
   busType?: string[];           // e.g., ["VIP", "Mini"]
 }
 
-
+const STORAGE_KEYS = {
+  SEARCH_VALUES: "privateSearchValues",
+  TRIP_TYPE: "privateTripType",
+  LOCATIONS: "privateLocations",
+  TRIP_FILTERS: "privateTripFilters"
+};
 export interface BoardingInfo {
   date: string;        // "YYYY-MM-DD HH:mm"
   address_id: string;
@@ -66,45 +71,45 @@ export interface Address {
   };
 }
 export interface TicketResponse {
-  data:{
-    
-  id: number;
-  date: string;
-  date_time: string;
-  status: string;
-  status_code: string;
-  payment_status: string;
-  payment_status_code: string;
-  rounded: boolean;
-  return_date: string | null;
-  payment_data: {
+  data: {
+
+    id: number;
+    date: string;
+    date_time: string;
     status: string;
     status_code: string;
-    invoice_id: number;
-    data: any[]; // Adjust if structure of this array is known
-  };
-  from_location: Location;
-  to_location: Location;
-  bus: Bus;
-  address: Address;
-  from_address: Address | null;
-  to_address: Address | null;
-  can_pay: boolean;
-  can_be_cancel: boolean;
-  company: {
-    name: string;
-    logo: string;
-  };
-  trip_id: number;
-  trip_type: string;
-  payment_url: string;
-  cancel_url: string;
-  original_tickets_totals: string;
-  discount: string;
-  tickets_totals: string;
-  payment_fees_percentage: string;
-  payment_fees_value: string;
-  total: string;
+    payment_status: string;
+    payment_status_code: string;
+    rounded: boolean;
+    return_date: string | null;
+    payment_data: {
+      status: string;
+      status_code: string;
+      invoice_id: number;
+      data: any[]; // Adjust if structure of this array is known
+    };
+    from_location: Location;
+    to_location: Location;
+    bus: Bus;
+    address: Address;
+    from_address: Address | null;
+    to_address: Address | null;
+    can_pay: boolean;
+    can_be_cancel: boolean;
+    company: {
+      name: string;
+      logo: string;
+    };
+    trip_id: number;
+    trip_type: string;
+    payment_url: string;
+    cancel_url: string;
+    original_tickets_totals: string;
+    discount: string;
+    tickets_totals: string;
+    payment_fees_percentage: string;
+    payment_fees_value: string;
+    total: string;
   }
 }
 
@@ -135,29 +140,61 @@ const PrivateSearchContext = createContext<PrivateSearchContextType | null>(null
 
 // Provider
 export const PrivateSearchProvider = ({ children }: { children: ReactNode }) => {
-  const [searchValues, setSearchValues] = useState<SearchValues>({
-    from: "",
-    to: "",
-    departure: "",
-    return: "",
+  const [searchValues, setSearchValues] = useState<SearchValues>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(STORAGE_KEYS.SEARCH_VALUES);
+      return saved ? JSON.parse(saved) : {
+        from: "",
+        to: "",
+        departure: "",
+        return: "",
+      };
+    }
+    return {
+      from: "",
+      to: "",
+      departure: "",
+      return: "",
+    };
   });
-
-  const [locations, setLocations] = useState<Location[]>([]);
+  const [locations, setLocations] = useState<Location[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(STORAGE_KEYS.LOCATIONS);
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
   const [trips, setTrips] = useState<Trip[]>([]);
   const [private_trip, setPrivate_trip] = useState<PrivateTrip | undefined>();
   const [loading, setLoading] = useState<boolean>(false);
-
-  const [tripFilters, setTripFilters] = useState<TripFilters>({
-    company: [],
-    priceRange: [0, 10000],
-    busType: [],
+  const [tripFilters, setTripFilters] = useState<TripFilters>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(STORAGE_KEYS.TRIP_FILTERS);
+      return saved ? JSON.parse(saved) : {
+        company: [],
+        priceRange: [0, 10000],
+        busType: [],
+      };
+    }
+    return {
+      company: [],
+      priceRange: [0, 10000],
+      busType: [],
+    };
   });
   const [errors, setErrors] = useState<Record<string, boolean>>({
     from: false,
     to: false,
     departure: false,
     return: false,
-  });  const [tripType, setTripType] = useState<"one-way" | "round">('one-way');
+  });
+  const [tripType, setTripType] = useState<"one-way" | "round">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(STORAGE_KEYS.TRIP_TYPE);
+      return saved ? saved as "one-way" | "round" : "one-way";
+    }
+    return "one-way";
+  });
   const navigate = useNavigate();
 
   const fetchLocations = async () => {
@@ -171,9 +208,28 @@ export const PrivateSearchProvider = ({ children }: { children: ReactNode }) => 
       setLoading(false);
     }
   };
+  const handleSetTripType = (type: "one-way" | "round") => {
+    setTripType(type);
+    setErrors(prev => ({
+      ...prev,
+      return: type === "round" && !searchValues.return,
+    }));
+  };
 
   const handleInputChange = (field: string | keyof SearchValues, value: string) => {
-    setSearchValues((prev) => ({ ...prev, [field]: value }));
+    setSearchValues(prev => {
+      const newValues = { ...prev, [field]: value };
+
+      // Validate required fields
+      setErrors({
+        from: !newValues.from,
+        to: !newValues.to,
+        departure: !newValues.departure,
+        return: tripType === "round" && !newValues.return,
+      });
+
+      return newValues;
+    });
   };
 
   const swapLocations = () => {
@@ -183,7 +239,22 @@ export const PrivateSearchProvider = ({ children }: { children: ReactNode }) => 
       to: prev.from,
     }));
   };
+  // Save to localStorage whenever relevant state changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.SEARCH_VALUES, JSON.stringify(searchValues));
+  }, [searchValues]);
 
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.TRIP_TYPE, tripType);
+  }, [tripType]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.LOCATIONS, JSON.stringify(locations));
+  }, [locations]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.TRIP_FILTERS, JSON.stringify(tripFilters));
+  }, [tripFilters]);
   const handleSearch = async () => {
     const { from, to, departure } = searchValues;
     if (!from || !to || !departure) return;
@@ -257,18 +328,18 @@ export const PrivateSearchProvider = ({ children }: { children: ReactNode }) => 
     return trips.filter((trip) => {
       const companyMatch =
         tripFilters.company.length === 0 || tripFilters.company.includes(trip.company);
-  
+
       const priceMatch =
         trip.price_start_with >= tripFilters.priceRange[0] &&
         trip.price_start_with <= tripFilters.priceRange[1];
-  
+
       const busTypeMatch =
         !tripFilters.busType?.length || tripFilters.busType.includes(trip.category);
-  
+
       return companyMatch && priceMatch && busTypeMatch;
     });
   };
-  
+
   const fetchTripById = async (id: string,): Promise<PrivateTrip | null> => {
     try {
       setLoading(true);
@@ -289,7 +360,7 @@ export const PrivateSearchProvider = ({ children }: { children: ReactNode }) => 
       setLoading(false);
     }
   };
-  
+
   const createTicket = async (tripId: number, data: CreateTicketPayload): Promise<TicketResponse | null> => {
     try {
       setLoading(true);
@@ -307,33 +378,33 @@ export const PrivateSearchProvider = ({ children }: { children: ReactNode }) => 
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchLocations();
   }, []);
 
   return (
     <PrivateSearchContext.Provider
-    value={{
-      searchValues,
-      setSearchValues,
-      handleInputChange,
-      swapLocations,
-      fetchLocations,
-      handleSearch,
-      locations,
-      trips,
-      loading,
-      tripFilters,
-      setTripFilters,
-      getFilteredTrips,
-      errors,
-      tripType,
-      private_trip,
-      setTripType,
-      fetchTripById,
-      createTicket,
-    }}
+      value={{
+        searchValues,
+        setSearchValues,
+        handleInputChange,
+        swapLocations,
+        fetchLocations,
+        handleSearch,
+        locations,
+        trips,
+        loading,
+        tripFilters,
+        setTripFilters,
+        getFilteredTrips,
+        errors,
+        tripType,
+        private_trip,
+        setTripType: handleSetTripType,
+        fetchTripById,
+        createTicket,
+      }}
     >
       {children}
     </PrivateSearchContext.Provider>

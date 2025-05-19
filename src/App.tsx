@@ -66,6 +66,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { TrainOrderProvider } from "./context/TrainOrderContext";
 import { PrivateOrderProvider } from "./context/PrivateOrderContext";
 import PrivateTripDetailsPageData from "./pages/private/PrivateTripDetailsPageData";
+import { PrivateTripDataProvider } from "./context/PrivateTripDataContext";
 
 const App: React.FC = () => {
   const currentLanguage = i18next.language;
@@ -87,6 +88,7 @@ const App: React.FC = () => {
                     <OrderProvider>
                     <TrainOrderProvider>
                     <PrivateOrderProvider>
+                    <PrivateTripDataProvider>
                       <Navbar />
                       <ToastContainer />
                       <ModalContainer />
@@ -164,6 +166,7 @@ const App: React.FC = () => {
                       </Routes>
 
                       <Footer />
+                    </PrivateTripDataProvider>
                     </PrivateOrderProvider>
                     </TrainOrderProvider>
                     </OrderProvider>

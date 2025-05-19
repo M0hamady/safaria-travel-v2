@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Address } from "../../types/privateTypes";
 import LocationMap from "./LocationMap";
 import {
@@ -8,37 +8,98 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
-import { ArrowCircleDown, ArrowCircleUp, AddLocation } from "@mui/icons-material";
+import {
+  ArrowCircleDown,
+  ArrowCircleUp,
+  AddLocation,
+} from "@mui/icons-material";
 import EgyptMapSelector from "../../pages/private/EgyptMapSelector";
+import { usePrivateTripData } from "../../hooks/usePrivateTripData";
+import { useToast } from "../../context/ToastContext";
 
 type Props = {
-  address: Address;
+  address?: Address;
   onEdit?: () => void;
   variant?: "primary" | "secondary";
+  tripId?: string;
 };
 
-const AddressCard: React.FC<Props> = ({ address, onEdit, variant = "primary" }) => {
+const AddressCard: React.FC<Props> = ({
+  address,
+  onEdit,
+  variant = "primary",
+  tripId,
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [mapDialogOpen, setMapDialogOpen] = useState(false);
+
+  const {
+    boardingAddressId,
+    setBoardingAddressId,
+    returnAddressId,
+    setReturnAddressId,
+    addresses,
+  } = usePrivateTripData(tripId);
+
+  const { addToast } = useToast();
+
+  // Resolve full address if only id is provided
+  const resolvedAddress = useMemo(() => {
+    if (address) return address;
+    const fallbackId = variant === "primary" ? boardingAddressId : returnAddressId;
+    return addresses.find((a) => String(a.id) === String(fallbackId));
+  }, [address, addresses, boardingAddressId, returnAddressId, variant]);
+
+  const isSelected = useMemo(() => {
+    if (!resolvedAddress) return false;
+    return variant === "primary"
+      ? String(resolvedAddress.id) === String(boardingAddressId)
+      : String(resolvedAddress.id) === String(returnAddressId);
+  }, [resolvedAddress, boardingAddressId, returnAddressId, variant]);
+
+  const toggleExpand = () => setIsExpanded((prev) => !prev);
+  const handleAddNewLocation = () => setMapDialogOpen(true);
+
+  const handleMapSelect = (id: string) => {
+    if (variant === "primary") {
+      setBoardingAddressId(id);
+      addToast({
+        message: "تم تحديد عنوان الركوب",
+        type: "success",
+        id: "boarding-set",
+      });
+    } else {
+      setReturnAddressId(id);
+      addToast({
+        message: "تم تحديد عنوان العودة",
+        type: "success",
+        id: "return-set",
+      });
+    }
+    setMapDialogOpen(false);
+  };
+
+  if (!resolvedAddress) return null;
 
   const variantStyles = {
     primary: "border-blue-500 hover:shadow-lg",
     secondary: "border-green-500 hover:shadow-lg",
   };
 
-  const toggleExpand = () => setIsExpanded(!isExpanded);
-useEffect(() => {
-if (variant ==="primary" ) {
-  // setb
-}
-}, [])
+  const ringStyles =
+    isSelected && variant === "primary"
+      ? "ring-2 ring-offset-2 ring-blue-500"
+      : isSelected && variant === "secondary"
+      ? "ring-2 ring-offset-2 ring-green-500"
+      : "";
 
   return (
     <>
       <div
-        className={`bg-white rounded-lg shadow-md p-4 max-w-md w-full mx-auto flex flex-col border-l-4 duration-700 ${variantStyles[variant]}`}
+        className={`bg-white rounded-lg shadow-md p-4 max-w-md w-full mx-auto flex flex-col border-l-4 duration-700 ${
+          variantStyles[variant]
+        } ${ringStyles}`}
       >
-        {/* Collapsed View */}
         {!isExpanded && (
           <div
             className="flex items-center justify-between cursor-pointer duration-700"
@@ -46,51 +107,63 @@ if (variant ==="primary" ) {
           >
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-gray-800">
-                {address.map_location.address_name}
+                {resolvedAddress.map_location.address_name}
               </h3>
-              <p className="text-gray-600 text-sm">{address.name}</p>
+              <p className="text-gray-600 text-sm">{resolvedAddress.name}</p>
+              {isSelected && (
+                <span className="text-xs mt-1 inline-block px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                  {variant === "primary" ? "نقطة الركوب" : "نقطة العودة"}
+                </span>
+              )}
             </div>
             <div className="flex items-center space-x-2">
-              <AddLocation className="text-gray-500 cursor-pointer hover:text-gray-700" onClick={() => setMapDialogOpen(true)} />
+              <AddLocation
+                className="text-gray-500 cursor-pointer hover:text-gray-700"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddNewLocation();
+                }}
+              />
               <ArrowCircleDown className="text-gray-500" />
               <span className="text-sm text-gray-500">عرض</span>
             </div>
           </div>
         )}
 
-        {/* Expanded View */}
         {isExpanded && (
           <>
             <div className="mb-4 duration-700">
               <LocationMap
-                latitude={address.map_location.lat}
-                longitude={address.map_location.lng}
+                latitude={resolvedAddress.map_location.lat}
+                longitude={resolvedAddress.map_location.lng}
                 markerColor={variant === "primary" ? "#3b82f6" : "#10b981"}
               />
             </div>
 
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              {address.map_location.address_name}
+              {resolvedAddress.map_location.address_name}
             </h3>
-            <p className="text-gray-700 font-medium mb-4">{address.name}</p>
+            <p className="text-gray-700 font-medium mb-4">
+              {resolvedAddress.name}
+            </p>
 
             <div className="mt-3 text-gray-600 text-sm space-y-1">
-              {address.city && (
+              {resolvedAddress.city && (
                 <p className="flex items-start">
                   <strong className="w-20 inline-block">المدينة:</strong>
-                  <span className="flex-1">{address.city}</span>
+                  <span className="flex-1">{resolvedAddress.city}</span>
                 </p>
               )}
-              {address.phone && (
+              {resolvedAddress.phone && (
                 <p className="flex items-start">
                   <strong className="w-20 inline-block">الهاتف:</strong>
-                  <span className="flex-1">{address.phone}</span>
+                  <span className="flex-1">{resolvedAddress.phone}</span>
                 </p>
               )}
-              {address.notes && (
+              {resolvedAddress.notes && (
                 <p className="flex items-start">
                   <strong className="w-20 inline-block">ملاحظات:</strong>
-                  <span className="flex-1">{address.notes}</span>
+                  <span className="flex-1">{resolvedAddress.notes}</span>
                 </p>
               )}
             </div>
@@ -112,7 +185,10 @@ if (variant ==="primary" ) {
 
               <div className="flex items-center space-x-4">
                 <button
-                  onClick={() => setMapDialogOpen(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddNewLocation();
+                  }}
                   className="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
                   type="button"
                 >
@@ -141,9 +217,11 @@ if (variant ==="primary" ) {
         fullWidth
         maxWidth="md"
       >
-        <DialogTitle>إضافة عنوان جديد</DialogTitle>
-        <DialogContent className="h-96 p-0">
-          <EgyptMapSelector locations={[address]} />
+        <DialogTitle>
+          {variant === "primary" ? "اختر عنوان الركوب" : "اختر عنوان العودة"}
+        </DialogTitle>
+        <DialogContent className="h-[70vh] p-0">
+          <EgyptMapSelector locations={addresses} onSelect={handleMapSelect} mapDialogType=   {variant === "primary" ? "boarding" : "return"} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setMapDialogOpen(false)}>إغلاق</Button>
