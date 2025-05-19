@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import images from "../../assets";
 import { useTranslation } from "react-i18next";
-import { ShareOutlined } from "@mui/icons-material";
+import { BusinessCenter, EventSeat, ShareOutlined } from "@mui/icons-material";
 const categoryBadgeClasses: Record<string, string> = {
   unknown: "bg-gray-200 text-gray-800",
   limousine: "bg-purple-200 text-purple-800",
@@ -113,7 +113,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
               <div className="inline-flex flex-col justify-start items-start gap-4">
                 <div className="inline-flex justify-start items-start gap-2">
                   <div className="text-[#68696a] text-base font-normal leading-normal font-cairo">
-                    {trip.available_seats}  {t("seats")}
+                    {trip.available_seats}  {t("seats")} <EventSeat />
                   </div>
                 </div>
               </div>
@@ -121,7 +121,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
               <div className="inline-flex flex-col justify-start items-start gap-4">
                 <div className="inline-flex justify-start items-start gap-2">
                   <div className="text-[#68696a] text-base font-normal leading-normal font-cairo">
-                    {t("luggageInfo")}
+                    {t("luggageInfo")} <BusinessCenter />
                   </div>
                 </div>
               </div>
