@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -72,7 +72,7 @@ export default function EgyptMapSelector({
   selectedId,
 }: Props) {
   // Using global context instead of prop-driven hook
-  const { addNewAddress ,addresses} = usePrivateTripDataContext();
+  const { addNewAddress, addresses } = usePrivateTripDataContext();
   const { addToast } = useToast();
 
   const [query, setQuery] = useState("");
@@ -96,7 +96,7 @@ export default function EgyptMapSelector({
         );
         const data = await res.json();
         setSuggestions(data);
-      } catch {}
+      } catch { }
     }, 300);
 
     return () => {
@@ -143,10 +143,10 @@ export default function EgyptMapSelector({
       });
       const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-          await sleep(1500); // waits 1.5 seconds before reloading
+      await sleep(1500); // waits 1.5 seconds before reloading
       setOpenAdd(false);
 
-    
+
 
       setNewLabel("");
       setCandidate(null);
@@ -160,10 +160,10 @@ export default function EgyptMapSelector({
     console.log(addresses, 'from selection');
     console.log(id, 'from selection');
     if (mapDialogType === 'boarding') {
-      
+
       localStorage.removeItem('boardingAddressId')
-    }else if (mapDialogType === 'return') {
-      
+    } else if (mapDialogType === 'return') {
+
       localStorage.removeItem('returnAddressId')
     }
     if (onSelect) {
@@ -176,55 +176,61 @@ export default function EgyptMapSelector({
     }
   };
 
+  useEffect(() => {
+      document.getElementById("mapRef")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
   return (
-    <div className="relative w-full h-[85vh]">
+    <div className="relative w-full md:h-[55vh] max-sm:h-[75vh] ">
       <Fab onClick={locateMe} size="small" className="absolute top-4 left-4 z-10 bg-white" aria-label="locate me">
         <GpsFixed />
       </Fab>
+      <div id={'mapRef'} className="w-full h-full">
 
-      <MapContainer center={[26.8, 30.8]} zoom={6} className="h-full w-full z-20" doubleClickZoom={false}>
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <DoubleClickHandler onDouble={handleDouble} />
+        <MapContainer center={[28.8, 30.8]} zoom={7} className="h-[45vh] max-sm:h-full w-full z-20" doubleClickZoom={false}>
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <DoubleClickHandler onDouble={handleDouble} />
 
-        {current && <FlyTo coords={current.coords} />}
+          {current && <FlyTo coords={current.coords} />}
 
-        {current && (
-          <Marker position={current.coords} icon={currentIcon}>
-            <Popup>{current.name}</Popup>
-          </Marker>
-        )}
-
-        {effectiveLocations.map((loc) => {
-          const bid = String(loc.id);
-          const isSelected = bid === selectedId;
-
-          return (
-            <Marker key={bid} position={[+loc.map_location.lat, +loc.map_location.lng]} icon={isSelected ? currentIcon : propIcon}>
-              <Popup>
-                <div className="flex flex-col space-y-2">
-                  <div className="font-semibold">📍 {loc.name}</div>
-                  <div className="text-sm">{loc.map_location.address_name}</div>
-                  {!isSelected && (
-                    <Button size="small" onClick={() => handleAddressSelect(bid)}>
-                      {mapDialogType === "boarding" ? "تحديد كنقطة ركوب" : "تحديد كنقطة عودة"}
-                    </Button>
-                  )}
-                  {isSelected && (
-                    <div className="text-green-600">
-                      {mapDialogType === "boarding" ? "✔️ نقطة الركوب المختارة" : "✔️ نقطة العودة المختارة"}
-                    </div>
-                  )}
-                </div>
-              </Popup>
+          {current && (
+            <Marker position={current.coords} icon={currentIcon}>
+              <Popup>{current.name}</Popup>
             </Marker>
-          );
-        })}
-      </MapContainer>
+          )}
+
+          {effectiveLocations.map((loc) => {
+            const bid = String(loc.id);
+            const isSelected = bid === selectedId;
+
+            return (
+              <Marker key={bid} position={[+loc.map_location.lat, +loc.map_location.lng]} icon={isSelected ? currentIcon : propIcon}>
+                <Popup>
+                  <div className="flex flex-col space-y-2">
+                    <div className="font-semibold">📍 {loc.name}</div>
+                    <div className="text-sm">{loc.map_location.address_name}</div>
+                    {!isSelected && (
+                      <Button size="small" onClick={() => handleAddressSelect(bid)}>
+                        {mapDialogType === "boarding" ? "تحديد كنقطة ركوب" : "تحديد كنقطة عودة"}
+                      </Button>
+                    )}
+                    {isSelected && (
+                      <div className="text-green-600">
+                        {mapDialogType === "boarding" ? "✔️ نقطة الركوب المختارة" : "✔️ نقطة العودة المختارة"}
+                      </div>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+        </MapContainer>
+      </div>
 
       <div className="absolute top-4 right-4 z-50 w-80">
         <TextField
           fullWidth
           size="small"
+          className="bg-white  px-2 py-1"
           placeholder="ابحث..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
