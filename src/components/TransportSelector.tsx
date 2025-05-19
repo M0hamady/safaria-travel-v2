@@ -19,7 +19,7 @@ export const TransportSelector = ({
           onClick={() => setSelectedTransport(option.value as SearchType)} // Cast to SearchType
           className={`flex items-center gap-2 px-4 py-3 transition-all ${
             selectedTransport === option.value
-              ? "bg-border text-black shadow-inner"
+              ? "bg-border text-black shadow-inner bg-primary bg-opacity-10"
               : "text-gray-500 hover:bg-gray-50"
           } rounded-3xl`}
           aria-label={t(option.label)} // Add an aria-label for better accessibility
