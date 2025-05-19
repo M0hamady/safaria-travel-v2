@@ -100,14 +100,12 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
               <div className="text-[#1e1e1e] text-xl font-medium leading-[30px] font-cairo">
                 {trip.company}
               </div>
-              <div className="text-[#68696a] text-base font-normal leading-normal font-cairo ml-2">
-                {trip.category}
-              </div>
+              
             </div>
 
             <div className="self-stretch inline-flex justify-start items-center gap-5">
-              <div className="w-[139.82px] px-2.5 py-2 rounded-3xl flex justify-center items-start gap-2.5 border border-[#ddd]">
-                <div className="text-[#68696a] text-base font-normal leading-normal font-cairo">
+              <div className={`w-[139.82px] px-2.5 py-2 rounded-3xl flex justify-center items-start gap-2.5 border border-[#ddd] ${badgeClass}`}>
+                <div className={`text-[#68696a] text-base font-normal leading-normal font-cairo }`}>
                   {trip.category}
                 </div>
               </div>
@@ -142,11 +140,11 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
               <div className="text-[#68696a] text-xs font-normal leading-[18px] font-cairo">
                 {t("roundTripPrice")}
               </div>
-              <div
+              {/* <div
                 className={`px-3 py-1 rounded-full text-sm font-semibold ${badgeClass}`}
               >
                 {label}
-              </div>
+              </div> */}
             </div>
 
             <div className="w-[110px] flex justify-start items-start">
