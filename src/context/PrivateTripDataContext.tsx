@@ -86,6 +86,7 @@ export const PrivateTripDataProvider: React.FC<{ children: React.ReactNode }> = 
     const saved = localStorage.getItem(STORAGE.ADDRESSES);
     return saved ? JSON.parse(saved) : [];
   });
+    const token = localStorage.getItem("authToken");
 
   const [addressesBoarding, setAddressesBoarding] = useState<Address | undefined>(() => {
     const saved = localStorage.getItem(STORAGE.BOARDING_ADDRESS);
@@ -162,11 +163,7 @@ const fetchAddresses = useCallback(async () => {
   setAddressesLoading(true);
 
   try {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      navigate("/login", { replace: true });
-      return;
-    }
+   
 
     const res = await fetch("https://app.telefreik.com/api/transports/profile/address-book", {
       headers: { Authorization: `Bearer ${token}` },
@@ -202,7 +199,7 @@ const fetchAddresses = useCallback(async () => {
 
 useEffect(() => {
   fetchAddresses();
-}, [fetchAddresses]);
+}, [token]);
 
 useEffect(() => {
  if (boardingAddressId){

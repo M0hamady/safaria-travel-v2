@@ -7,6 +7,7 @@ import EgyptMapSelector from "../../pages/private/EgyptMapSelector";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import { usePrivateTripDataContext } from "../../context/PrivateTripDataContext";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   addresses: Address[];
@@ -26,6 +27,7 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
     returnDateTime,
     setReturnDateTime,
   } = usePrivateTripDataContext();
+  const navigate = useNavigate();
 
   const [mapDialogType, setMapDialogType] = useState<"boarding" | "return" | null>(null);
 
@@ -57,6 +59,10 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
       console.log('done','return');
 
     }  
+     if (!addresses) {
+      navigate("/login", { replace: true });
+      return;
+    }
   }, []);
   useEffect(() => {
     if (boardingAddressId) {
