@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../context/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
 
 interface ConfirmAndAuthCheckProps {
   onConfirm: () => void;
@@ -34,15 +34,21 @@ const ConfirmAndAuthCheck: React.FC<ConfirmAndAuthCheckProps> = ({
 
   return (
     <div className="space-y-4">
-      <label className="flex items-center text-sm text-gray-700 space-x-2">
-        <input
-          type="checkbox"
-          checked={agreed}
-          onChange={(e) => setAgreed(e.target.checked)}
-          className="accent-yellow-600"
-        />
-        <span>{t("I agree to the Terms and Conditions")}</span>
-      </label>
+<label className="flex items-center text-sm text-gray-700 space-x-5">
+  <input
+    type="checkbox"
+    checked={agreed}
+    onChange={(e) => setAgreed(e.target.checked)}
+    className="accent-yellow-600 mx-2"
+  />
+  <Link
+    to="/terms"
+    className="text-blue-600 hover:underline"
+  >
+    {t("I agree to the Terms and Conditions")}
+  </Link>
+</label>
+
 
       <button
         onClick={onConfirm}

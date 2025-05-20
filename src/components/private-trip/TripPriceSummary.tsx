@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import ConfirmAndAuthCheck from "../utilies/ConfirmAndAuthCheck";
 
 interface TripPriceSummaryProps {
   discount: number | string;
@@ -20,6 +21,7 @@ export const TripPriceSummary: React.FC<TripPriceSummaryProps> = ({
 
   return (
     <div className="self-stretch px-5 pb-5 flex flex-col justify-start items-start gap-4">
+
       {/* Discount */}
       <div className="flex justify-between w-full overflow-hidden">
         <span className="text-[#1e1e1e] text-base font-normal font-cairo">
@@ -50,19 +52,15 @@ export const TripPriceSummary: React.FC<TripPriceSummaryProps> = ({
         </span>
       </div>
 
-      {/* Pay Button */}
-      <div className="w-[183px] flex justify-end">
-        <button
-          className="flex-1 h-[54px] p-4 bg-[#0074c3] rounded-[9px] shadow flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50"
-          onClick={onPayNow}
-          disabled={isCreatingTicket}
-        >
-          <span className="text-white text-xl font-medium font-cairo">
-            {isCreatingTicket
-              ? t("priceSummary.processing")
-              : t("priceSummary.payNow")}
-          </span>
-        </button>
+      {/* Confirm Button with Auth & Agreement Check */}
+      <div className="w-full ">
+        <div className="">
+          <ConfirmAndAuthCheck
+            onConfirm={onPayNow}
+            loading={isCreatingTicket}
+            label={t("priceSummary.payNow")}
+          />
+        </div>
       </div>
     </div>
   );

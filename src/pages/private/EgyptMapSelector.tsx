@@ -6,6 +6,7 @@ import {
   Popup,
   useMap,
   useMapEvents,
+  Tooltip,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -193,8 +194,8 @@ export default function EgyptMapSelector({
           {current && <FlyTo coords={current.coords} />}
 
           {current && (
-            <Marker position={current.coords} icon={currentIcon}>
-              <Popup>{current.name}</Popup>
+            <Marker position={current.coords} icon={defaultIcon}>
+              <Popup>{current.name} </Popup>
             </Marker>
           )}
 
@@ -204,18 +205,30 @@ export default function EgyptMapSelector({
 
             return (
               <Marker key={bid} position={[+loc.map_location.lat, +loc.map_location.lng]} icon={isSelected ? currentIcon : propIcon}>
+               {/* Popup as fallback / extra */}
+               <Tooltip direction="top" offset={[10, 0]} permanent>
+                  {loc.name}
+                </Tooltip>
+                               <Tooltip>{loc.name}</Tooltip>
+
                 <Popup>
                   <div className="flex flex-col space-y-2">
                     <div className="font-semibold">📍 {loc.name}</div>
                     <div className="text-sm">{loc.map_location.address_name}</div>
-                    {!isSelected && (
-                      <Button size="small" onClick={() => handleAddressSelect(bid)}>
-                        {mapDialogType === "boarding" ? "تحديد كنقطة ركوب" : "تحديد كنقطة عودة"}
+                    {!isSelected ? (
+                      <Button
+                        size="small"
+                        onClick={() => handleAddressSelect(bid)}
+                      >
+                        {mapDialogType === "boarding"
+                          ? "تحديد كنقطة ركوب"
+                          : "تحديد كنقطة عودة"}
                       </Button>
-                    )}
-                    {isSelected && (
+                    ) : (
                       <div className="text-green-600">
-                        {mapDialogType === "boarding" ? "✔️ نقطة الركوب المختارة" : "✔️ نقطة العودة المختارة"}
+                        {mapDialogType === "boarding"
+                          ? "✔️ نقطة الركوب المختارة"
+                          : "✔️ نقطة العودة المختارة"}
                       </div>
                     )}
                   </div>
@@ -242,7 +255,12 @@ export default function EgyptMapSelector({
           <div className="bg-white shadow rounded mt-1 max-h-60 overflow-auto">
             {suggestions.map((s, i) => (
               <div key={i} onClick={() => handleSuggestion(s)} className="px-3 py-2 hover:bg-gray-100 cursor-pointer">
-                <Place className="inline mr-2 text-gray-500" /> {s.display_name}
+                <Place className="inline mr-2 text-gray-500" /> 
+                
+                <span>
+
+                {s.display_name}
+                </span>
               </div>
             ))}
           </div>

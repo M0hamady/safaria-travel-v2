@@ -108,21 +108,7 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
       <label className="sr-only" htmlFor={`select-${label.toLowerCase()}`}>
         {t("select")} {label}
       </label>
-      <select
-        id={`select-${label.toLowerCase()}`}
-        className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg"
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <option value="">{`${t("select")} ${label}`}</option>
-        {addresses
-          .filter(addr => !excludeId || `${addr.id}` !== excludeId)
-          .map(addr => (
-            <option key={addr.id} value={`${addr.id}`}>
-              📍 {addr.value}
-            </option>
-          ))}
-      </select>
+
       <button
         type="button"
         onClick={() =>
@@ -146,7 +132,9 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
           <label className="text-base text-gray-700">{t("address.boardingLabel")}</label>
           {boardingAddressId && (
             <button
-              onClick={() => setBoardingAddressId(null)}
+        onClick={() =>
+          setMapDialogType("boarding")
+        }
               className="text-sm text-blue-600 hover:text-blue-800 underline"
             >
               {t("common.change")}
@@ -159,7 +147,9 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
           : boardingAddress && (
               <AddressCard
                 address={boardingAddress}
-                onEdit={() => setBoardingAddressId(null)}
+                onEdit={() =>   {
+                   setBoardingAddressId(null)
+                  setMapDialogType("boarding")}}
                 variant="primary"
               />
             )}
@@ -180,7 +170,10 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
             <label className="text-base text-gray-700">{t("address.returnLabel")}</label>
             {returnAddressId && (
               <button
-                onClick={() => setReturnAddressId(null)}
+                onClick={() =>   {
+                   setReturnAddressId(null)
+                  
+                  setMapDialogType("return")}}
                 className="text-sm text-green-600 hover:text-green-800 underline"
               >
                 {t("common.change")}
@@ -198,7 +191,12 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
             : returnAddress && (
                 <AddressCard
                   address={returnAddress}
-                  onEdit={() => setReturnAddressId(null)}
+                  onEdit={() =>{
+                     setReturnAddressId(null)
+                    setMapDialogType("return")
+                    }
+                    
+                    }
                   variant="secondary"
                 />
               )}

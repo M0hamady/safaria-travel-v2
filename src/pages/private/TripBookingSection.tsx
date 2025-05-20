@@ -22,7 +22,7 @@ const TripBookingSection: React.FC<TripBookingSectionProps> = ({
   } = usePrivateSearchContext();
   return (
     <div className="px-4 py-5 bg-white rounded-2xl shadow-[0px_4px_4px_0px_rgba(217,217,217,0.25)] inline-flex flex-col justify-start items-end gap-5">
-      <TripHeader companyName={trip.company_name} />
+      <TripHeader companyName={trip.company_name} companyImage={trip.company_logo} />
 {
   tripType=== 'one-way' ?   
   <TripDetailsCard

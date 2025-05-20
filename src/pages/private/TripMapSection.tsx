@@ -21,7 +21,7 @@ const TripMapSection: React.FC<TripMapSectionProps> = ({
 }) => {
   return (
     <div className="px-4 py-5 bg-white rounded-2xl shadow-[0px_4px_4px_0px_rgba(217,217,217,0.25)] inline-flex flex-col justify-start items-end gap-5">
-      <TripHeader companyName={trip.company_name} />
+      <TripHeader companyName={trip.company_name} companyImage={trip.company_logo} />
       
       <div className={`bg-purple-400 w-full relative ${isMapExpanded ? "h-[100px] max-sm:h-[60vh]" : "h-[300px] max-sm:h-[60vh]"} duration-700 ease-in-out`}>
         <EgyptMapSelector  locations={addresses} />
