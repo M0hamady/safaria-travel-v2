@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import images from "../../assets";
 import { useTranslation } from "react-i18next";
 import { BusinessCenter, EventSeat, ShareOutlined } from "@mui/icons-material";
+import { usePrivateSearchContext } from "../../context/PrivateSearchContext";
 const categoryBadgeClasses: Record<string, string> = {
   unknown: "bg-gray-200 text-gray-800",
   limousine: "bg-purple-200 text-purple-800",
@@ -16,7 +17,8 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
   const navigate = useNavigate();
   const handleSelect = () => navigate(`/private-trips-search/trip/${trip.id}`);
   const { t } = useTranslation();
-
+  const { tripType } =
+    usePrivateSearchContext();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Offer",
@@ -135,10 +137,12 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
           <div className="flex-1 flex justify-between items-center gap-4 ">
             <div className="inline-flex flex-col  justify-start items-start gap-1">
               <div className="text-primary font-bold text-xl  leading-[30px] font-cairo">
-                {trip.price_start_with}   {t("busSearchTrips.LE")}
+                
+                  { tripType === 'round'   ? trip.round_price :trip.go_price} 
+                   {' '} {t("busSearchTrips.LE")}
               </div>
               <div className="text-[#68696a] text-xs font-normal leading-[18px] font-cairo">
-                {t("roundTripPrice")}
+                { tripType === 'one-way'   ? t("goingTripPrice") : t("roundTripPrice")}
               </div>
               {/* <div
                 className={`px-3 py-1 rounded-full text-sm font-semibold ${badgeClass}`}

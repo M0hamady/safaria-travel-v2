@@ -382,6 +382,7 @@
   "seats": "مقعد",
   "luggageInfo": "الحقائب: حقيبة كبيرة + حقيبة صغيرة",
   "roundTripPrice": "سعر الرحلة ذهابًا وإيابًا",
+  "goingTripPrice": "سعر الرحلة ذهابًا ",
   "select": "اختر",
     "priceSummary": {
     "discount": "الخصم",

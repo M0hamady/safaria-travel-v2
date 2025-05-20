@@ -307,6 +307,8 @@ export const PrivateSearchProvider = ({ children }: { children: ReactNode }) => 
         stations_from: [],
         stations_to: [],
         pricing: [],
+        round_price: trip.round_price,
+        price: trip.price,
         price_start_with: Number(trip.price) || 0,
         prices_start_with: {
           original_price: Number(trip.original_price) || 0,

@@ -365,6 +365,7 @@
   "seats": "seats",
   "luggageInfo": "Luggage: 1 large + 1 small",
   "roundTripPrice": "Round Trip Price",
+  "goingTripPrice": "going Trip Price",
   "select": "Select",
   "priceSummary": {
     "discount": "Discount",

@@ -152,6 +152,8 @@ export interface Trip {
   id: number;
   gateway_id: string;
   company_logo?:string;
+  go_price?:string;
+  round_price?:string;
   company: string;
   company_data: {
     name: string;
