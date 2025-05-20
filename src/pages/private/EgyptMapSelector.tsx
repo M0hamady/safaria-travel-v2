@@ -145,9 +145,9 @@ export default function EgyptMapSelector({
 
       await sleep(1500); // waits 1.5 seconds before reloading
       setOpenAdd(false);
-
-
-
+      
+      
+      
       setNewLabel("");
       setCandidate(null);
       addToast({ message: "تم إضافة العنوان بنجاح", type: "success", id: "address-added" });
@@ -181,12 +181,12 @@ export default function EgyptMapSelector({
   }, []);
   return (
     <div className="relative w-full md:h-[55vh] max-sm:h-[75vh] ">
-      <Fab onClick={locateMe} size="small" className="absolute top-4 left-4 z-10 bg-white" aria-label="locate me">
+      <Fab onClick={locateMe} size="small" className="absolute top-4 md:h-[55vh] max-sm:h-[110vh]  left-4 z-10 bg-white" aria-label="locate me">
         <GpsFixed />
       </Fab>
-      <div id={'mapRef'} className="w-full h-full">
+      <div id={'mapRef'} className="md:h-[45vh] max-sm:h-[70vh] w-full z-20">
 
-        <MapContainer center={[28.8, 30.8]} zoom={7} className="h-[45vh] max-sm:h-full w-full z-20" doubleClickZoom={false}>
+        <MapContainer center={[28.8, 30.8]} zoom={7} className="h-[45vh] max-sm:h-w-[70vh] z-20" doubleClickZoom={false}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <DoubleClickHandler onDouble={handleDouble} />
 

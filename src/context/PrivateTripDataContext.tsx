@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import { CreateTicketPayload, usePrivateSearchContext } from "./PrivateSearchContext";
 import { useToast } from "./ToastContext";
 import { PrivateTrip } from "../types/types";
@@ -157,42 +157,63 @@ useEffect(() => {
     }
   }, [fetchTripById, addToast]);
 
-  const fetchAddresses = useCallback(async () => {
-    setAddressesLoading(true);
-    try {
-      const token = localStorage.getItem("authToken");
-      const res = await fetch("https://app.telefreik.com/api/transports/profile/address-book", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
 
-      if (!res.ok) throw new Error("Failed to fetch addresses");
+const fetchAddresses = useCallback(async () => {
+  setAddressesLoading(true);
 
-      const json = await res.json();
-      const enriched = json.data.map((addr: Address) => ({
-        ...addr,
-          id: String(addr.id),  // force id to be string
-        value: `${addr.name} - ${addr.map_location?.address_name ?? ""}`,
-      }));
-
-      setAddresses(enriched);
-      localStorage.setItem(`${STORAGE.ADDRESSES}_time`, Date.now().toString());
-    } catch (err) {
-      console.error(err);
-      addToast({ id: "address-fetch", message: "❌ Failed to fetch addresses.", type: "error" });
-    } finally {
-      setAddressesLoading(false);
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
     }
-  }, [addToast]);
+
+    const res = await fetch("https://app.telefreik.com/api/transports/profile/address-book", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        navigate("/login", { replace: true });
+      }
+      throw new Error("Failed to fetch addresses");
+    }
+
+    const json = await res.json();
+    const enriched = json.data.map((addr: Address) => ({
+      ...addr,
+      id: String(addr.id), // force id to be string
+      value: `${addr.name} - ${addr.map_location?.address_name ?? ""}`,
+    }));
+
+    setAddresses(enriched);
+    localStorage.setItem(`${STORAGE.ADDRESSES}_time`, Date.now().toString());
+  } catch (err) {
+    console.error(err);
+    addToast({
+      id: "address-fetch",
+      message: "❌ Failed to fetch addresses.",
+      type: "error",
+    });
+  } finally {
+    setAddressesLoading(false);
+  }
+}, [addToast, navigate]);
+
 useEffect(() => {
-  fetchAddresses()
-}, [])
+  fetchAddresses();
+}, [fetchAddresses]);
 
 useEffect(() => {
  if (boardingAddressId){
      const found = addresses.find((addr)=> `${addr.id}` === boardingAddressId)
      setAddressesBoarding(found)
-     console.log(found);
-     console.log('found');
+     setBoardingAddressId(`${found?.id}`)
+     if (addressesBoarding?.id !==  `${found?.id}`) {
+      
+       window.location.reload()
+     }
+
     }
 
    
@@ -204,6 +225,10 @@ useEffect(() => {
      console.log(found);
      console.log('found','returm');
     setAddressesReturn(found)
+    if (addressesReturn?.id !==  `${found?.id}`) {
+      
+       window.location.reload()
+     }
  }
 }, [ returnAddressId])
 

@@ -167,7 +167,7 @@ const renderAddressSelect = (
         {!boardingAddressId ? (
           renderAddressSelect(t("address.boarding"), boardingAddressId, setBoardingAddressId)
         ) : (
-          boardingAddress && (
+           (
             <AddressCard
               address={boardingAddress}
               onEdit={() => setBoardingAddressId(null)}

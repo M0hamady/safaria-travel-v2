@@ -116,14 +116,8 @@ const AddressCard: React.FC<Props> = ({
                 </span>
               )}
             </div>
-            <div className="flex items-center space-x-2">
-              <AddLocation
-                className="text-gray-500 cursor-pointer hover:text-gray-700"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddNewLocation();
-                }}
-              />
+            <div className="flex items-center space-x-2 ">
+             
               <ArrowCircleDown className="text-gray-500" />
               <span className="text-sm text-gray-500">عرض</span>
             </div>
@@ -184,25 +178,18 @@ const AddressCard: React.FC<Props> = ({
               )}
 
               <div className="flex items-center space-x-4">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddNewLocation();
-                  }}
-                  className="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
-                  type="button"
-                >
-                  <AddLocation className="ml-1" />
-                  إضافة مكان جديد
-                </button>
+
 
                 <button
                   onClick={toggleExpand}
-                  className="text-gray-500 hover:text-gray-700 flex items-center text-sm duration-700"
+                  className="text-gray-500 hover:text-gray-700 flex items-center text-sm duration-700 space-x-4"
                   type="button"
                 >
                   <ArrowCircleUp className="ml-1" />
+                  <span >
+
                   إغلاق
+                  </span>
                 </button>
               </div>
             </div>
