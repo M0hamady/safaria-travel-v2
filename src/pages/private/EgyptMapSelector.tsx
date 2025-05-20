@@ -186,7 +186,7 @@ export default function EgyptMapSelector({
       </Fab>
       <div id={'mapRef'} className="md:h-[45vh] max-sm:h-[70vh] w-full z-20">
 
-        <MapContainer center={[28.8, 30.8]} zoom={7} className="h-[45vh] max-sm:h-w-[70vh] z-20" doubleClickZoom={false}>
+        <MapContainer center={[28.8, 30.8]} zoom={7} className="h-[45vh] max-sm:h-[65vh] z-20" doubleClickZoom={false}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <DoubleClickHandler onDouble={handleDouble} />
 
