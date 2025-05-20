@@ -14,7 +14,13 @@ interface CompanyData {
       notes: string;
     };
   }
-  
+  interface location {
+    id:string;
+    name:string;
+    name_en:string;
+    name_ar:string;
+
+  }
   interface Station {
     id: number;
     city_id: number;
@@ -154,8 +160,8 @@ export interface PrivateOrder {
   rounded: boolean;
   return_date: string | null;
   payment_data: PaymentData;
-  from_location: string | null;
-  to_location: string | null;
+  from_location: location | null;
+  to_location: location | null;
   bus: BusData;
   address: string | null;
   from_address: string | null;

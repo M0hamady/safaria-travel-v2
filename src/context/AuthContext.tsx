@@ -283,10 +283,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const forgotPasswordResting = async (mobile: string,code:string,password:string, passwordConfirmation:string) => {
     try {
       await apiFetch<any>(
-        `${BASE_URL}/api/v1/mobile/customer/forget-password`,
+        `${BASE_URL}/api/v1/mobile/customer/reset-password`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" ,Accept : "application/json"},
           body: JSON.stringify({ mobile, phonecode: 20,code,password,passwordConfirmation }),
         }
       );

@@ -31,6 +31,12 @@ const TripBookingSection: React.FC<TripBookingSectionProps> = ({
   />
   :
   <>
+    <TripDetailsCard
+    date={trip.date}
+    fromLocation={trip.from_location?.name || ''}
+    toLocation={trip.to_location?.name || ''}
+    price={trip.price}
+  />
   <TripDetailsCard
     date={trip.date}
     fromLocation={trip.from_location?.name || ''}

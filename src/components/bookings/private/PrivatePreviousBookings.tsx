@@ -1,17 +1,29 @@
-import { FC } from "react";
-import { useOrder } from "../../../context/OrderContext";
-import { Order } from "../../../types/order";
-import OrderCard from "../componenns/OrderCard";
+import { FC, useEffect } from "react";
+import { usePrivateOrder } from "../../../context/PrivateOrderContext";
+import PrivateOrderCard from "../componenns/PrivateOrderCard";
 
+const PreviousBooking: FC = () => {
+  const { privateOrders: orders, loading, fetchPrivateOrders } = usePrivateOrder();
 
-const PendingBookings: FC = () => {
-  const { orders, loading } = useOrder();
+  // Define what counts as a "pending" order correctly
+  // Assuming pending means payment status is not "paid" or "success" but rather still pending?
+  // But from your code, you probably want only orders with status "paid" or "success"
+  
+  const now = new Date();
+  
+  const isOrderPending = (order: any) => {
+    const status = order.payment_data?.status_code;
+    return status === "paid" || status === "success" && new Date(order.date_time) > now;
+  };
 
-  // Helper function to check if an order is pending
-  const isOrderPending = (order: Order) => order.payment_data?.status_code === "pending";
-
-  // Filter orders to show only pending ones
   const pendingOrders = orders.filter(isOrderPending);
+
+  // Optional: auto-fetch orders on mount
+  useEffect(() => {
+    if (!orders.length) {
+      fetchPrivateOrders();
+    }
+  }, [fetchPrivateOrders, orders.length]);
 
   return (
     <div className="p-4">
@@ -22,7 +34,7 @@ const PendingBookings: FC = () => {
       ) : pendingOrders.length > 0 ? (
         <div className="mt-4 grid gap-4">
           {pendingOrders.map((order) => (
-            <OrderCard key={order.id} order={order} />
+            <PrivateOrderCard key={order.id} order={order} />
           ))}
         </div>
       ) : (
@@ -32,4 +44,4 @@ const PendingBookings: FC = () => {
   );
 };
 
-export default PendingBookings;
+export default PreviousBooking;

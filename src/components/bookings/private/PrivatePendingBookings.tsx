@@ -1,14 +1,17 @@
 import { FC } from "react";
 import { useOrder } from "../../../context/OrderContext";
-import { Order } from "../../../types/order";
+import { Order, PrivateOrder } from "../../../types/order";
 import OrderCard from "../componenns/OrderCard";
+import { usePrivateOrder } from "../../../context/PrivateOrderContext";
+import PrivateOrderCard from "../componenns/PrivateOrderCard";
 
 
 const PendingBookings: FC = () => {
-  const { orders, loading } = useOrder();
+  const { privateOrders: orders ,loading,fetchPrivateOrders} = usePrivateOrder();
+  const now = new Date();
 
   // Helper function to check if an order is pending
-  const isOrderPending = (order: Order) => order.payment_data?.status_code === "pending";
+  const isOrderPending = (order: PrivateOrder) => order.payment_data?.status_code === "pending" && order.can_pay && new Date(order.date_time) > now;
 
   // Filter orders to show only pending ones
   const pendingOrders = orders.filter(isOrderPending);
@@ -22,7 +25,7 @@ const PendingBookings: FC = () => {
       ) : pendingOrders.length > 0 ? (
         <div className="mt-4 grid gap-4">
           {pendingOrders.map((order) => (
-            <OrderCard key={order.id} order={order} />
+            <PrivateOrderCard key={order.id} order={order} />
           ))}
         </div>
       ) : (

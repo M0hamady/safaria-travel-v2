@@ -1,15 +1,17 @@
 import { FC } from "react";
 import { useTrainOrder } from "../../../context/TrainOrderContext";
-import { TrainOrder } from "../../../types/order";
+import { PrivateOrder, TrainOrder } from "../../../types/order";
 import { useTranslation } from "react-i18next";
 import TrainOrderCard from "../componenns/TrainOrderCard";
+import PrivateOrderCard from "../componenns/PrivateOrderCard";
+import { usePrivateOrder } from "../../../context/PrivateOrderContext";
 
 const CurrentBookings: FC = () => {
-  const { trainOrders, loading } = useTrainOrder();
+  const { privateOrders: trainOrders ,loading,fetchPrivateOrders} = usePrivateOrder();
   const { t } = useTranslation();
 
   // Enhanced order filtering with only date_time available
-  const isOrderPending = (order: TrainOrder) => {
+  const isOrderPending = (order: PrivateOrder) => {
     // Check payment status (multiple possible pending indicators)
     const isPaymentPending = 
       order.payment_data?.status === "success" || 
@@ -20,12 +22,10 @@ const CurrentBookings: FC = () => {
     const isOrderNotCompleted = order.status !== "success";
     
     // Additional check for train-specific status
-    const isTrainAvailable = order.is_confirmed;
 
     return isPaymentPending && 
            isOrderNotCanceled && 
-           isOrderNotCompleted &&
-           isTrainAvailable;
+           isOrderNotCompleted 
   };
 
   // Filter and sort orders by trip date_time (newest first)
@@ -36,7 +36,7 @@ const CurrentBookings: FC = () => {
   return (
     <div className="p-4">
       <h2 className="text-2xl font-semibold text-gray-800">
-        {t("bookings.pending")} ({t("transport.train")})
+        {t("bookings.pending")} ({t("transport.private")})
       </h2>
 
       {loading ? (
@@ -44,11 +44,9 @@ const CurrentBookings: FC = () => {
       ) : pendingOrders.length > 0 ? (
         <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           {pendingOrders.map((order) => (
-            <TrainOrderCard 
+            <PrivateOrderCard 
               key={order.id} 
               order={order}
-              onCancel={() => console.log("Cancel order:", order.id)}
-              onReview={() => console.log("Review order:", order.id)}
             />
           ))}
         </div>
