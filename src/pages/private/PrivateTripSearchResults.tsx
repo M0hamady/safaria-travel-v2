@@ -70,9 +70,9 @@ console.log(busTypes);
   }, [trips]);
   
   return (
-    <div className="  bg-gray-100 min-h-screen">
+    <div className="  bg-gray-100 md:min-h-screen ">
       <section
-        className="w-full h-fit md:max-h-[600px] mb-6 2xl:mb-20  max-sm:mb-32"
+        className="w-full h-fit md:max-h-[600px] mb-6 2xl:mb-20  max-sm:mb-0"
         id="hero"
       >
         <Hero />
