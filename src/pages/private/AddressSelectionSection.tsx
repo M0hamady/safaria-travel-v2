@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import { usePrivateTripDataContext } from "../../context/PrivateTripDataContext";
 import { useNavigate } from "react-router-dom";
+import { usePrivateSearchContext } from "../../context/PrivateSearchContext";
 
 type Props = {
   addresses: Address[];
@@ -16,6 +17,7 @@ type Props = {
 const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
   const { t } = useTranslation();
   const { addToast } = useToast();
+  const navigate = useNavigate();
 
   const {
     boardingAddressId,
@@ -27,64 +29,45 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
     returnDateTime,
     setReturnDateTime,
   } = usePrivateTripDataContext();
-  const navigate = useNavigate();
+
+  const {
+    searchValues,
+    tripType,
+  } = usePrivateSearchContext();
 
   const [mapDialogType, setMapDialogType] = useState<"boarding" | "return" | null>(null);
+  const [boardingAddress, setBoardingAddress] = useState<Address | undefined>();
+  const [returnAddress, setReturnAddress] = useState<Address | undefined>();
 
-  // Local state for full boarding and return address objects
-  const [boardingAddress, setBoardingAddress] = useState<Address | undefined>(
-    addresses.find((a) => `${a.id}` === boardingAddressId)
-  );
-  const [returnAddress, setReturnAddress] = useState<Address | undefined>(
-    addresses.find((a) => `${a.id}` === returnAddressId)
-  );
-
-  const tripType = localStorage.getItem("privateTripType") ?? "oneway";
-
-  // Update boardingAddress state when boardingAddressId or addresses change
+  // Initial datetime setup
   useEffect(() => {
-    console.log(boardingAddressId);
-    if (boardingAddressId) {
-      const found = addresses.find((a) => `${a.id}` === boardingAddressId);
-      console.log(found);
-      setBoardingAddress(found);
-      console.log('done');
+    if (searchValues?.departure) {
+      const formatted = dayjs(searchValues.departure).format("YYYY-MM-DDTHH:mm");
+      const formatted2 = dayjs(searchValues.return).format("YYYY-MM-DDTHH:mm");
+      setBoardingDateTime(formatted);
+      if (tripType === "round") {
+        setReturnDateTime(formatted2);
+      }
     }
-    console.log(returnAddressId,);
-    if (returnAddressId) {
-            const found = addresses.find((a) => `${a.id}` === returnAddressId);
-      console.log(found,'return');
+  }, []);
 
-      setReturnAddress(found)
-      console.log('done','return');
-
-    }  
-     if (!addresses) {
+  // Set full address objects
+  useEffect(() => {
+    if (!addresses) {
       navigate("/login", { replace: true });
       return;
     }
-  }, []);
-  useEffect(() => {
+
     if (boardingAddressId) {
-      const found = addresses.find((a) => `${a.id}` === boardingAddressId);
+      const found = addresses.find(a => `${a.id}` === boardingAddressId);
       setBoardingAddress(found);
     }
-    if (returnAddressId) {
-            const found = addresses.find((a) => `${a.id}` === returnAddressId);
 
-      setReturnAddress(found)
-    }  
-  }, [boardingAddressId, addresses]);
-
-  // Update returnAddress state when returnAddressId or addresses change
-  useEffect(() => {
     if (returnAddressId) {
-      const found = addresses.find((a) => `${a.id}` === returnAddressId);
+      const found = addresses.find(a => `${a.id}` === returnAddressId);
       setReturnAddress(found);
-    } else {
-      setReturnAddress(undefined);
     }
-  }, [returnAddressId, addresses]);
+  }, [boardingAddressId, returnAddressId, addresses]);
 
   const handleMapSelect = (id: string) => {
     if (mapDialogType === "boarding") {
@@ -115,45 +98,46 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
     </div>
   );
 
-const renderAddressSelect = (
-  label: string,
-  value: string | null,
-  onChange: (id: string) => void,
-  excludeId?: string
-) => (
-  <div className="flex flex-col space-y-2">
-    <label className="sr-only" htmlFor={`select-${label.toLowerCase().replace(/\s+/g, "-")}`}>
-      {t("select")} {label}
-    </label>
-    <select
-      id={`select-${label.toLowerCase().replace(/\s+/g, "-")}`}
-      className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg overflow-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
-      value={value ?? ""}
-      onChange={(e) => onChange(e.target.value)}
-      aria-label={`${t("select")} ${label}`}
-    >
-      <option value="">{`${t("select")} ${label}`}</option>
-      {addresses
-        .filter(addr => !excludeId || `${addr.id}` !== excludeId)
-        .map(addr => (
-          <option key={addr.id} value={`${addr.id}`}>
-            📍 {addr.value}
-          </option>
-        ))}
-    </select>
-    <button
-      type="button"
-      onClick={() => setMapDialogType(label.toLowerCase().includes("boarding") ? "boarding" : "return")}
-      className="flex items-center justify-center text-blue-600 hover:text-blue-800 text-xs sm:text-sm py-2 space-x-1"
-    >
-      <AddLocation className="text-lg sm:text-xl" />
-      <span>{t("address.addNew")}</span>
-    </button>
-  </div>
-);
+  const renderAddressSelect = (
+    label: string,
+    value: string | null,
+    onChange: (id: string) => void,
+    excludeId?: string
+  ) => (
+    <div className="flex flex-col space-y-2">
+      <label className="sr-only" htmlFor={`select-${label.toLowerCase()}`}>
+        {t("select")} {label}
+      </label>
+      <select
+        id={`select-${label.toLowerCase()}`}
+        className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg"
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <option value="">{`${t("select")} ${label}`}</option>
+        {addresses
+          .filter(addr => !excludeId || `${addr.id}` !== excludeId)
+          .map(addr => (
+            <option key={addr.id} value={`${addr.id}`}>
+              📍 {addr.value}
+            </option>
+          ))}
+      </select>
+      <button
+        type="button"
+        onClick={() =>
+          setMapDialogType(label.toLowerCase().includes("boarding") ? "boarding" : "return")
+        }
+        className="flex items-center text-blue-600 hover:text-blue-800 text-xs py-1"
+      >
+        <AddLocation className="mr-1 text-base" />
+        {t("address.addNew")}
+      </button>
+    </div>
+  );
 
   return (
-    <div className="bg-white relative rounded-xl shadow-lg p-6 space-y-6 max-w-2xl mx-auto w-full">
+    <div className="bg-white rounded-xl shadow-lg p-6 space-y-6 max-w-2xl mx-auto w-full">
       <h2 className="text-xl font-bold text-gray-800">{t("address.sectionTitle")}</h2>
 
       {/* Boarding Section */}
@@ -170,24 +154,23 @@ const renderAddressSelect = (
           )}
         </div>
 
-        {!boardingAddressId ? (
-          renderAddressSelect(t("address.boarding"), boardingAddressId, setBoardingAddressId)
-        ) : (
-           (
-            <AddressCard
-              address={boardingAddress}
-              onEdit={() => setBoardingAddressId(null)}
-              variant="primary"
-            />
-          )
-        )}
+        {!boardingAddressId
+          ? renderAddressSelect(t("address.boarding"), boardingAddressId, setBoardingAddressId)
+          : boardingAddress && (
+              <AddressCard
+                address={boardingAddress}
+                onEdit={() => setBoardingAddressId(null)}
+                variant="primary"
+              />
+            )}
 
-        {boardingAddressId && renderDateTimeInput(
-          boardingDateTime,
-          setBoardingDateTime,
-          t("address.boardingDate"),
-          dayjs().format("YYYY-MM-DDTHH:mm")
-        )}
+        {boardingAddressId &&
+          renderDateTimeInput(
+            boardingDateTime,
+            setBoardingDateTime,
+            t("address.boardingDate"),
+            dayjs().format("YYYY-MM-DDTHH:mm")
+          )}
       </div>
 
       {/* Return Section */}
@@ -205,33 +188,32 @@ const renderAddressSelect = (
             )}
           </div>
 
-          {!returnAddressId ? (
-            renderAddressSelect(
-              t("address.return"),
-              returnAddressId,
-              setReturnAddressId,
-              boardingAddressId ?? undefined
-            )
-          ) : (
-            returnAddress && (
-              <AddressCard
-                address={returnAddress}
-                onEdit={() => setReturnAddressId(null)}
-                variant="secondary"
-              />
-            )
-          )}
+          {!returnAddressId
+            ? renderAddressSelect(
+                t("address.return"),
+                returnAddressId,
+                setReturnAddressId,
+                boardingAddressId ?? undefined
+              )
+            : returnAddress && (
+                <AddressCard
+                  address={returnAddress}
+                  onEdit={() => setReturnAddressId(null)}
+                  variant="secondary"
+                />
+              )}
 
-          {tripType === "round" && returnAddressId && renderDateTimeInput(
-            returnDateTime,
-            setReturnDateTime,
-            t("address.returnDate"),
-            boardingDateTime
-          )}
+          {tripType === "round" && returnAddressId &&
+            renderDateTimeInput(
+              returnDateTime,
+              setReturnDateTime,
+              t("address.returnDate"),
+              boardingDateTime
+            )}
         </div>
       )}
 
-      {/* Map Modal */}
+      {/* Map Dialog */}
       {mapDialogType && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg w-11/12 sm:w-3/4 lg:w-1/2 max-h-[90vh] flex flex-col">
@@ -246,9 +228,7 @@ const renderAddressSelect = (
                 <Cancel />
               </button>
             </div>
-            <EgyptMapSelector onSelect={handleMapSelect} mapDialogType= {mapDialogType === "boarding"
-                  ? 'boarding'
-                  : 'return'} />
+            <EgyptMapSelector onSelect={handleMapSelect} mapDialogType={mapDialogType} />
           </div>
         </div>
       )}

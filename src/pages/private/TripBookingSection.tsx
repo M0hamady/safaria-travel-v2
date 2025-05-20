@@ -3,6 +3,7 @@ import { PrivateTrip } from "../../types/types";
 import { TripHeader } from "../../components/private-trip/TripHeader";
 import { TripDetailsCard } from "../../components/private-trip/TripDetailsCard";
 import { TripPriceSummary } from "../../components/private-trip/TripPriceSummary";
+import { usePrivateSearchContext } from "../../context/PrivateSearchContext";
 
 interface TripBookingSectionProps {
   trip: PrivateTrip;
@@ -15,16 +16,17 @@ const TripBookingSection: React.FC<TripBookingSectionProps> = ({
   isCreatingTicket, 
   onCreateTicket 
 }) => {
-  const totalPrice = (Number(trip.price) + Number(trip.go_price || 0)).toFixed(2);
-  const tripType = localStorage.getItem("privateTripType") ?? "one-way";
-
+  const {
+    searchValues,
+    tripType,
+  } = usePrivateSearchContext();
   return (
     <div className="px-4 py-5 bg-white rounded-2xl shadow-[0px_4px_4px_0px_rgba(217,217,217,0.25)] inline-flex flex-col justify-start items-end gap-5">
       <TripHeader companyName={trip.company_name} />
 {
   tripType=== 'one-way' ?   
   <TripDetailsCard
-    date={trip.date}
+    date={searchValues.departure}
     fromLocation={trip.from_location?.name || ''}
     toLocation={trip.to_location?.name || ''}
     price={trip.price}
@@ -32,15 +34,15 @@ const TripBookingSection: React.FC<TripBookingSectionProps> = ({
   :
   <>
     <TripDetailsCard
-    date={trip.date}
+    date={searchValues.departure}
     fromLocation={trip.from_location?.name || ''}
     toLocation={trip.to_location?.name || ''}
     price={trip.price}
   />
   <TripDetailsCard
-    date={trip.date}
-    fromLocation={trip.from_location?.name || ''}
-    toLocation={trip.to_location?.name || ''}
+    date={searchValues.return}
+    fromLocation={trip.to_location?.name || ''}
+    toLocation={trip.from_location?.name || ''}
     price={trip.round_price}
   />
 

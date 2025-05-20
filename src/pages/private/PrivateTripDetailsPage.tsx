@@ -8,6 +8,7 @@ import TripMapSection from "./TripMapSection";
 import TripInfoSection from "./TripInfoSection";
 import TripBookingSection from "./TripBookingSection";
 import AddressSelectionSection from "./AddressSelectionSection";
+import { usePrivateSearchContext } from "../../context/PrivateSearchContext";
 
 const PrivateTripDetailsPage = () => {
   const { tripId } = useParams<{ tripId: string }>();
