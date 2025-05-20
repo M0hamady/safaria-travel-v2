@@ -226,7 +226,7 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
                 <Cancel />
               </button>
             </div>
-            <EgyptMapSelector onSelect={handleMapSelect} mapDialogType={mapDialogType} />
+            <EgyptMapSelector onSelect={handleMapSelect} mapDialogType={mapDialogType}   />
           </div>
         </div>
       )}

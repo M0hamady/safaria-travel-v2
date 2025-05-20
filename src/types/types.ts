@@ -150,6 +150,7 @@ export interface FormatDateTimeOptions {
 // Trip-related details for bus, private transport, etc.
 export interface Trip {
   id: number;
+  images?: string[];
   gateway_id: string;
   company_logo?:string;
   go_price?:string;

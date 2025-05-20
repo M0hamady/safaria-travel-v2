@@ -6,6 +6,7 @@ import images from "../../assets";
 import { useTranslation } from "react-i18next";
 import { BusinessCenter, EventSeat, ShareOutlined } from "@mui/icons-material";
 import { usePrivateSearchContext } from "../../context/PrivateSearchContext";
+import ImageSlider from "../../components/utilies/ImageSlider";
 const categoryBadgeClasses: Record<string, string> = {
   unknown: "bg-gray-200 text-gray-800",
   limousine: "bg-purple-200 text-purple-800",
@@ -38,45 +39,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
 
   const badgeClass =
     categoryBadgeClasses[category] || "bg-gray-100 text-gray-700"; // fallback
-  const label = t(`categories.${category}`, category);
-  const handleShare = useCallback(() => {
-    const params = new URLSearchParams({
-      id: trip.id.toString(),
-      company: trip.company,
-      category: trip.category,
-      date: trip.date,
-      time: trip.time,
-      availableSeats: trip.available_seats.toString(),
-      price: trip.price_start_with.toString(),
-      busCategory: trip.bus.category,
-      // Add departure and arrival cities
-      fromCity: trip.cities_from[0]?.name || '',
-      toCity: trip.cities_to[0]?.name || '',
-      // Add departure and arrival stations if available
-      fromStation: trip.stations_from[0]?.name || '',
-      toStation: trip.stations_to[0]?.name || '',
-      // Add bus type and features
-      busType: trip.bus.type,
-      busSalon: trip.bus.salon,
-      // Add pricing information
-      originalPrice: trip.prices_start_with?.original_price?.toString() || '0',
-      finalPrice: trip.prices_start_with?.final_price?.toString() || '0',
-      offer: trip.prices_start_with?.offer || '',
-      // Add company details
-      companyName: trip.company_data.name,
-      companyAvatar: trip.company_data.avatar,
-      companyBusImage: trip.company_data.bus_image,
-      // Add gateway/reference if available
-      gatewayId: trip.gateway_id || ''
-    }).toString();
-    const url = `${window.location.origin}/private-trips-search/trip/shared/${trip.id}?${params}`;
-    if (navigator.share) {
-      navigator.share({ title: trip.company, url });
-    } else {
-      navigator.clipboard.writeText(url);
-      alert(t('shareLinkCopied'));
-    }
-  }, [trip.id, trip.company, t]);
+
   return (
     <article
       className="bg-white rounded-lg shadow p-4 flex flex-col md:flex-row items-start md:items-center gap-4"
@@ -90,12 +53,12 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
       <div className="px-[18px] py-[17px] bg-white rounded-lg shadow-[0px_4px_4px_rgba(217,217,217,0.25)] inline-flex flex-col justify-start items-start gap-4 w-full w-full">
         <div className="w-full inline-flex justify-start items-center gap-[60px] max-sm:flex-wrap">
           <div className="inline-flex flex-col  justify-center items-center gap-4">
-            <img
-              className="w-[139.82px] h-20 object-contain"
-              src={trip.company_data.avatar || trip.company_logo}
-              alt={trip.company_logo}
-            />
+            { trip.images && trip.images?.length > 0 &&  
+            
+            <ImageSlider images={trip.images} />
+            }
           </div>
+      
 
           <div className="flex-1 inline-flex flex-col justify-center items-start gap-6 max-sm:flex-wrap">
             <div className="inline-flex justify-start items-center gap-1">
@@ -129,7 +92,13 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
               </div>
             </div>
           </div>
-
+    <div className="inline-flex flex-col  justify-center items-center gap-4">
+            <img
+              className="w-[139.82px] h-20 object-contain"
+              src={trip.company_data.avatar || trip.company_logo}
+              alt={trip.company_logo}
+            />
+          </div>
 
         </div>
 
@@ -138,7 +107,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
             <div className="inline-flex flex-col  justify-start items-start gap-1">
               <div className="text-primary font-bold text-xl  leading-[30px] font-cairo">
                 
-                  { tripType === 'round'   ? trip.round_price :trip.go_price} 
+                  { tripType === 'round'   ? trip.round_price :trip.go_price ? trip.go_price : trip.price_start_with } 
                    {' '} {t("busSearchTrips.LE")}
               </div>
               <div className="text-[#68696a] text-xs font-normal leading-[18px] font-cairo">
@@ -159,13 +128,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
                 <div className="text-white text-xl font-medium leading-[30px] font-cairo">
                   {t("select")}
                 </div>
-                {/* <button
-                  onClick={handleShare}
-                  className="p-2 rounded-full "
-                  aria-label={t('share')}
-                >
-                  <ShareOutlined className="text-white" />
-                </button> */}
+               
               </div>
             </div>
           </div>

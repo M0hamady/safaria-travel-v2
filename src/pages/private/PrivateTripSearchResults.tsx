@@ -29,8 +29,7 @@ export default function PrivateTripSearchResults() {
     [trips]
   );
   const { t } = useTranslation();
-console.log('-------------------------');
-console.log(busTypes);
+
   const [selectedCompany, setSelectedCompany] = useState<string[]>(
     tripFilters.company
   );
@@ -72,7 +71,7 @@ console.log(busTypes);
   return (
     <div className="  bg-gray-100 md:min-h-screen ">
       <section
-        className="w-full h-fit md:max-h-[600px] mb-6 2xl:mb-20  max-sm:mb-0"
+        className="w-full h-fit md:max-h-[600px] mb-6 2xl:mb-20  max-sm:mb-8"
         id="hero"
       >
         <Hero />

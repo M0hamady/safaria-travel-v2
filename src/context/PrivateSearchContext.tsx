@@ -270,6 +270,7 @@ export const PrivateSearchProvider = ({ children }: { children: ReactNode }) => 
       });
       const tripsData: Trip[] = res.data.data.map((trip: any) => ({
         id: trip.id,
+        images:trip.bus.images,
         gateway_id: `${trip.id}`,
         company: trip.company_name,
         company_data: {
