@@ -2,11 +2,13 @@ import React from "react";
 import { useSearchContext } from "../context/SearchContext";
 import { useNavigate } from "react-router-dom";
 import { usePrivateSearchContext } from "../context/PrivateSearchContext";
+import { useTranslation } from "react-i18next";
 
 const Header: React.FC = () => {
   const { selectedTrip } = useSearchContext();
   const { private_trip } = usePrivateSearchContext();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const city_from = selectedTrip?.cities_from[0] || private_trip?.from_location;
   const city_to = selectedTrip?.cities_to[0] || private_trip?.to_location;
@@ -26,6 +28,7 @@ const Header: React.FC = () => {
             viewBox="0 0 24 25"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            className="rtl:rotate-180"
           >
             <path
               d="M15.75 20.1538L8.25 12.6538L15.75 5.15381"
@@ -35,7 +38,7 @@ const Header: React.FC = () => {
               stroke-linejoin="round"
             />
           </svg>
-          Back
+          {t("dashboard.back")}
         </button>
       </div>
 

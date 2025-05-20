@@ -67,7 +67,7 @@ console.log(busTypes);
     if (filteredTrips.length > 0) {
       document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [filteredTrips]);
+  }, [trips]);
   
   return (
     <div className="  bg-gray-100 min-h-screen">

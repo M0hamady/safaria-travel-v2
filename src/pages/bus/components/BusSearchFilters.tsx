@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSearchContext } from "../../../context/SearchContext";
 import { useTranslation } from "react-i18next";
+import { FilterCheckbox } from "../../../components/utilies/FilterCheckbox";
 
 // Helper functions
 const convertTimeToMinutes = (timeStr: string): number => {
@@ -277,20 +278,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({ title, children, alwaysOp
 };
 
 // Reusable checkbox component
-const FilterCheckbox: React.FC<{
-  label: string;
-  checked: boolean;
-  onChange: () => void;
-}> = ({ label, checked, onChange }) => (
-  <label className="inline-flex items-center gap-2 text-gray-700 transition duration-300 ease-out">
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={onChange}
-      className="w-4 h-4 text-primary"
-    />
-    {label}
-  </label>
-);
+
 
 export default BusSearchFilters;

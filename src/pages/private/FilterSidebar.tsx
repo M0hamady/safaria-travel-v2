@@ -1,6 +1,7 @@
 import { FC, useCallback, useEffect } from "react";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useTranslation } from "react-i18next";
+import { FilterCheckbox } from "../../components/utilies/FilterCheckbox";
 
 interface FilterSidebarProps {
   companies: string[];
@@ -71,25 +72,20 @@ const { t } = useTranslation();
         <h3 className="text-lg font-medium mb-3">{t("filters.company")}</h3>
         <div className="flex flex-col gap-2" >
           {companies.map((company) => (
-            <div
-              key={company}
-              onClick={() => toggleItem(selectedCompany, company, setSelectedCompany)}
-              className={`px-4 py-2 rounded-lg border-b border-[#e8ecf2] bg-white cursor-pointer transition
-                ${
-                  isSelected(selectedCompany, company)
-                    ? "outline outline-primary text-primary"
-                    : "text-[#1e1e1e]"
-                }
-              `}
-            >
-              {company}
-            </div>
+             <FilterCheckbox
+        key={company}
+        label={company}
+        checked={selectedCompany.includes(company)}
+        onChange={() =>
+          toggleItem(selectedCompany, company, setSelectedCompany)
+        }
+      />
           ))}
         </div>
       </div>
 
       {/* Price Range Filter */}
-      <div className="rtl:hidden">
+      <div className="" dir="ltr" >
         <h3 className="text-lg font-medium mb-3">{t("filters.priceRange")}</h3>
         {/* Labels */}
         <div className="w-full px-4 flex justify-between text-xs text-[#1e1e1e] font-normal leading-[18px]">
@@ -110,7 +106,7 @@ const { t } = useTranslation();
             step={100}
             value={min}
             onChange={(e) => handleMinChange(Number(e.target.value))}
-            className="absolute appearance-none  bg-primary_dark rounded-full opacity-10 w-full h-[22px] top-0 left-0 bg-transparent pointer-events-auto"
+            className="absolute appearance-none  bg-primary rounded-full opacity-10 w-full h-[12px]  top-[5px] left-0 pointer-events-auto"
             style={{ zIndex: 8 }}
           />
 
@@ -122,7 +118,7 @@ const { t } = useTranslation();
             step={100}
             value={max}
             onChange={(e) => handleMaxChange(Number(e.target.value))}
-            className="absolute appearance-none w-full h-[22px] bottom-4 bg-primary_dark rounded-full opacity-10  left-0 bg-transparent pointer-events-auto"
+            className="absolute appearance-none w-full h-[12px]  bottom-[20px] bg-primary rounded-full opacity-10  left-0  pointer-events-auto"
             style={{ zIndex: 9 }}
           />
 
@@ -149,24 +145,14 @@ const { t } = useTranslation();
         <h3 className="text-lg font-medium mb-3">{t("filters.busType")}</h3>
         <div className="flex flex-wrap gap-3">
           {busTypes.map((type) => (
-            <div
-              key={type}
-              onClick={() => toggleItem(selectedBusType, type, setSelectedBusType)}
-              className={`px-4 py-2 rounded-lg bg-white cursor-pointer flex items-center gap-2 transition duration-300
-                ${
-                  isSelected(selectedBusType, type)
-                    ? "outline outline-primary text-primary"
-                    : "text-[#68696a]"
-                }
-              `}
-            >
-              <div className={`w-6 h-6  rounded-t-md rounded-r-md duration-300  ${
-                  isSelected(selectedBusType, type)
-                    ? " bg-primary text-primary"
-                    : "bg-primary_dark text-primary_dark"
-                }`} />
-              <span>{type}</span>
-            </div>
+ <FilterCheckbox
+        key={type}
+        label={type}
+        checked={selectedBusType.includes(type)}
+        onChange={() =>
+          toggleItem(selectedBusType, type, setSelectedBusType)
+        }
+      />
           ))}
         </div>
       </div>
