@@ -52,20 +52,30 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
 
       <div className="px-[18px] py-[17px] bg-white rounded-lg shadow-[0px_4px_4px_rgba(217,217,217,0.25)] inline-flex flex-col justify-start items-start gap-4 w-full w-full">
         <div className="w-full inline-flex justify-start items-center gap-[60px] max-sm:flex-wrap">
-          <div className="inline-flex flex-col  justify-center items-center gap-4">
-            { trip.images && trip.images?.length > 0 &&  
-            
-            <ImageSlider images={trip.images} />
-            }
+          <div className="flex flex-row justify-between max-sm:w-full ">
+            <div className="inline-flex flex-col  justify-center items-center gap-4 ">
+              {trip.images && trip.images?.length > 0 &&
+
+                <ImageSlider images={trip.images} />
+              }
+
+            </div>
+            <div className="inline-flex flex-col  justify-center items-center gap-4 md:hidden sm:hidden">
+              <img
+                className="w-[139.82px] h-20 object-contain"
+                src={trip.company_data.avatar || trip.company_logo}
+                alt={trip.company_logo}
+              />
+            </div>
           </div>
-      
+
 
           <div className="flex-1 inline-flex flex-col justify-center items-start gap-6 max-sm:flex-wrap">
             <div className="inline-flex justify-start items-center gap-1">
               <div className="text-[#1e1e1e] text-xl font-medium leading-[30px] font-cairo">
                 {trip.company}
               </div>
-              
+
             </div>
 
             <div className="self-stretch inline-flex justify-start items-center gap-5">
@@ -92,7 +102,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
               </div>
             </div>
           </div>
-    <div className="inline-flex flex-col  justify-center items-center gap-4">
+          <div className="inline-flex flex-col  justify-center items-center gap-4 max-sm:hidden">
             <img
               className="w-[139.82px] h-20 object-contain"
               src={trip.company_data.avatar || trip.company_logo}
@@ -106,12 +116,12 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
           <div className="flex-1 flex justify-between items-center gap-4 ">
             <div className="inline-flex flex-col  justify-start items-start gap-1">
               <div className="text-primary font-bold text-xl  leading-[30px] font-cairo">
-                
-                  { tripType === 'round'   ? trip.round_price :trip.go_price ? trip.go_price : trip.price_start_with } 
-                   {' '} {t("busSearchTrips.LE")}
+
+                {tripType === 'round' ? trip.round_price : trip.go_price ? trip.go_price : trip.price_start_with}
+                {' '} {t("busSearchTrips.LE")}
               </div>
               <div className="text-[#68696a] text-xs font-normal leading-[18px] font-cairo">
-                { tripType === 'one-way'   ? t("goingTripPrice") : t("roundTripPrice")}
+                {tripType === 'one-way' ? t("goingTripPrice") : t("roundTripPrice")}
               </div>
               {/* <div
                 className={`px-3 py-1 rounded-full text-sm font-semibold ${badgeClass}`}
@@ -128,7 +138,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
                 <div className="text-white text-xl font-medium leading-[30px] font-cairo">
                   {t("select")}
                 </div>
-               
+
               </div>
             </div>
           </div>

@@ -29,7 +29,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ images }) => {
         <img
           src={images[currentIndex]}
           alt={`Slide ${currentIndex + 1}`}
-          className="w-[139.82px] h-20 object-contain mx-auto"
+          className="w-[139.82px] h-32 object-cover mx-auto"
         />
         {/* Navigation Arrows */}
         <button

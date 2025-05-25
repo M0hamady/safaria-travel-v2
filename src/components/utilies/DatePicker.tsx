@@ -130,19 +130,19 @@ const DatePicker: React.FC<DatePickerProps> = ({
           aria-describedby={error ? `${id}-error` : undefined}
         />
 
-        {/* Clear Button */}
+        
+      </div>
+
+    {/* Clear Button */}
         {value && !disabled && (
           <button
             onClick={handleClearDate}
-            className="text-red-500 ltr:ml-2 rtl:mr-2"
+            className="text-red-500 ltr:ml-2 rtl:mr-2 absolute rtl:left-3 top-0 ltr:right-3 max-sm:top-2 max-sm:bottom-2"
             aria-label="Clear date"
           >
             {clearButtonIcon}
           </button>
         )}
-      </div>
-
-    
       
     </div>
   );
