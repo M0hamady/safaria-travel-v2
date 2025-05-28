@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
-import { CalendarToday, Clear } from "@mui/icons-material";
+import React, { useEffect, useState } from "react";
+import { CalendarToday, Clear } from "@mui/icons-material"; // Import icons
 import { useToast } from "../../context/ToastContext";
-import i18next from "i18next";
 
 interface DatePickerProps {
   label: string;
@@ -17,9 +16,9 @@ interface DatePickerProps {
   disabled?: boolean;
   id?: string;
   name?: string;
-  beforeVal?: string;
-  clearButtonIcon?: React.ReactNode;
-  calendarIcon?: React.ReactNode;
+  beforeVal?: string; // New prop added
+  clearButtonIcon?: React.ReactNode; // Customizable clear button icon
+  calendarIcon?: React.ReactNode; // Customizable calendar icon
 }
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -36,78 +35,48 @@ const DatePicker: React.FC<DatePickerProps> = ({
   disabled = false,
   id,
   name,
-  beforeVal,
-  clearButtonIcon = <Clear />,
-  calendarIcon = <CalendarToday />,
+  beforeVal, // Destructure the new prop
+  clearButtonIcon = <Clear />, // Default clear icon
+  calendarIcon = <CalendarToday />, // Default calendar icon
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const displayInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
 
-  const { addToast } = useToast();
-  const currentLanguage = i18next.language;
-  const isRTL = currentLanguage === "ar";
-
-  // Open the native date picker
+  // Open the date picker when clicking anywhere on the input container
+   const { addToast } = useToast();
   const handleClick = () => {
     if (inputRef.current && !disabled) {
+      // Try to open the native date picker
       if (typeof inputRef.current.showPicker === "function") {
         inputRef.current.showPicker();
       } else {
+        // Fallback: Focus the input field (works on most devices)
         inputRef.current.focus();
       }
-      setFocused(true);
     }
   };
 
   // Clear the selected date
   const handleClearDate = () => {
-    if (inputRef.current && displayInputRef.current) {
-      inputRef.current.value = "";
-      displayInputRef.current.value = "";
-      onChange({ target: { value: "" } } as React.ChangeEvent<HTMLInputElement>);
+    if (inputRef.current) {
+      inputRef.current.value = ""; // Clear the input value
+      onChange({ target: { value: "" } } as React.ChangeEvent<HTMLInputElement>); // Trigger onChange
     }
-  };
-
-  // Format date based on language
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const year = date.getFullYear();
-
-    if (currentLanguage === "ar") {
-      const arabicMonthNames = [
-        "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-        "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
-      ];
-      const month = arabicMonthNames[date.getMonth()];
-      const arabicNumerals = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
-      const formatArabicNumber = (num: number) =>
-        String(num).replace(/\d/g, (d) => arabicNumerals[parseInt(d)]);
-      return `${formatArabicNumber(day)} ${month} ${formatArabicNumber(year)}`;
-    } else {
-      const englishMonthNames = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-      ];
-      const month = englishMonthNames[date.getMonth()];
-      return `${day} ${month} ${year}`;
-    }
-  };
-
-  // Handle date selection from native picker
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (displayInputRef.current) {
-      displayInputRef.current.value = formatDate(e.target.value);
-    }
-    onChange(e);
   };
 
   // Set proper max and min dates
   const calculatedMaxDate = maxDate || beforeVal || undefined;
 
-  // Toast for errors
+  // Format the selected date for display
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
   useEffect(() => {
     if (error) {
       addToast({
@@ -116,19 +85,18 @@ const DatePicker: React.FC<DatePickerProps> = ({
         type: "error",
       });
     }
-  }, [error, helperText, label, addToast]);
+  }, [error, helperText])
+  
 
   return (
     <div
-      className={`relative ${fullWidth ? "w-full" : "max-w-sm"} ${className} text-black font-sans`}
+      className={`relative ${fullWidth ? "w-full" : ""} ${className} text-black`}
       onClick={handleClick}
     >
       {/* Label */}
       <label
-        className={`absolute left-3 top-0 text-gray-600  transition-all duration-300 ease-in-out rtl:right-14 ${
-          value || focused
-            ? "text-xs rtl:right-8    text-primary font-medium"
-            : "text-base top-3 "
+        className={`absolute left-3 top-0 text-gray-500 transition-all duration-300 rtl:right-4  ${
+          value || focused ? "text-xs top-1 text-primary" : "text-base top-1"
         }`}
       >
         {label}
@@ -136,46 +104,24 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
       {/* Input Container */}
       <div
-        className={`flex items-center border min-h-[50px] ${
-          error ? "border-red-500 ring-1 ring-red-200" : "border-gray-300"
-        } rounded-lg px-4 py-3 ${disabled ? "bg-gray-100 right-6" : "bg-white"} 
-        cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200 
-        max-sm:rounded-full max-sm:w-full focus-within:ring-2 focus-within:ring-primary focus-within:border-primary`}
+        className={`flex items-center border h-[55px] ${
+          error ? "border-red-500" : "border-gray-300"
+        } rounded-md px-3 py-2 ${disabled ? "bg-gray-100" : "bg-white"} 
+        cursor-pointer max-sm:rounded-full max-sm:w-full `}
       >
         {/* Calendar Icon */}
-        <span
-          className={`text-gray-500 mr-3 rtl:ml-3 transition-colors duration-200 ${
-            focused ? "text-primary" : ""
-          }`}
-        >
-          {calendarIcon}
-        </span>
 
-        {/* Display Input (Formatted Day Mon Year or Helper Text as Placeholder) */}
-        <input
-          type="text"
-          value={value ? formatDate(value) : ""}
-          placeholder={value ? "" : helperText ||  isRTL ? "اختر تايخ" :   "Select a date"}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          className={`appearance-none w-full  focus:outline-none bg-transparent cursor-pointer text-gray-800 font-medium placeholder-gray-400 ${
-            isRTL ? `text-right  ${!value && "absolute rtl:right-24 mr-2"}  ` : `text-left ${!value && "absolute rtl:right-24 mr-2"} `
-          }`}
-          readOnly
-          ref={displayInputRef}
-          aria-label={label}
-        />
-
-        {/* Hidden Native Date Input */}
+        {/* Input Field */}
         <input
           type="date"
           id={id}
           name={name}
           value={value}
-          onChange={handleDateChange}
-          className="absolute opacity-0 w-0 h-0"
+          onChange={onChange}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          className="appearance-none w-full focus:outline-none bg-transparent cursor-pointer min-h-[50px] pt-4 text-gray-700"
           min={calculatedMaxDate}
-          max={minDate}
           required={required}
           disabled={disabled}
           ref={inputRef}
@@ -183,30 +129,21 @@ const DatePicker: React.FC<DatePickerProps> = ({
           aria-invalid={error}
           aria-describedby={error ? `${id}-error` : undefined}
         />
+
+        
       </div>
 
-      {/* Clear Button */}
-      {value && !disabled && (
-        <button
-          onClick={handleClearDate}
-          className="text-red-500 hover:text-red-600 ltr:ml-2 rtl:mr-2 absolute rtl:left-3 top-3 ltr:right-3 max-sm:top-3 transition-colors duration-200"
-          aria-label="Clear date"
-        >
-          {clearButtonIcon}
-        </button>
-      )}
-
-      {/* Helper Text for Errors */}
-      {helperText && error && (
-        <p
-          id={`${id}-error`}
-          className={`text-red-500 text-xs mt-2  ${
-            isRTL ? "text-right" : "text-left"
-          }`}
-        >
-          {helperText}
-        </p>
-      )}
+    {/* Clear Button */}
+        {value && !disabled && (
+          <button
+            onClick={handleClearDate}
+            className="text-red-500 ltr:ml-2 rtl:mr-2 absolute rtl:left-3 top-0 ltr:right-3 max-sm:top-2 max-sm:bottom-2"
+            aria-label="Clear date"
+          >
+            {clearButtonIcon}
+          </button>
+        )}
+      
     </div>
   );
 };
