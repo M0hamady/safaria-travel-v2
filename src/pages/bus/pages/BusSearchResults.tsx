@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 
 const BusSearchResults: React.FC = () => {
-  const { searchValues, setSearchValues, handleSearch } = useSearchContext();
+  const { searchValues, setSearchValues, handleSearch,trips } = useSearchContext();
   const location = useLocation();
   const { t } = useTranslation();
 
@@ -28,20 +28,21 @@ const BusSearchResults: React.FC = () => {
         block: "start",
       });
     }, 800);
-  }, [location.search]);
+  }, [location.search,trips]);
   
   const currentLanguage = i18next.language;
   const isRTL = currentLanguage === "ar"; // RTL for Arabic
 
   return (
-    <div className="bg-boarder relative">
-      <section className="w-full h-fit md:max-h-[600px] mb-6 2xl:mb-20  max-sm:mb-32" id="hero">
+    <div className="bg-boarder relative min-h-screen grid grid-cols-1 lg:grid-cols-4 gap-1 ">
+      {/* Hero Section */}
+      <section className="col-span-1 lg:col-span-4 h-fit  max-sm:mb-32 relative" id="hero">
         <Hero />
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="flex items-center justify-center flex-col w-full px-24 max-sm:px-0"
+          className="flex items-center justify-center flex-col w-full px-24 max-sm:px-0  md:-mb-[12rem] "
         >
           <div
             className={`${
@@ -71,20 +72,28 @@ const BusSearchResults: React.FC = () => {
         </motion.div>
       </section>
 
-
-
-      <section id="bus-search-trips" className="grid grid-cols-4 max-sm:grid-cols-1 z-50 max-md:-translate-y-40 max-sm:min-h-screen">
-        <div className="col-span-1 px-2">
+      {/* Filters and Trips Section */}
+      <section
+        id="bus-search-trips"
+        className="col-span-1 lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-4 max-sm:min-h-screen max-md:-translate-y-40 md:mx-4"
+      >
+        <div className="lg:col-span-1  rounded-lg shadow-md p-4">
           <BusSearchFilters />
         </div>
-        <div className="col-span-3 px-4 max-sm:min-h-screen">
+        <div className="lg:col-span-3   rounded-lg shadow-md p-4">
           <BusSearchTrips />
         </div>
       </section>
 
-      <Link to={"/bus-search-return"} className="text-black z-50">
-        {t("searchResults.returnTrips")}
-      </Link>
+      {/* Return Link Section */}
+      <div className="col-span-1 lg:col-span-4 flex justify-center py-6">
+        <Link
+          to={"/bus-search-return"}
+          className="text-black z-50 text-base font-medium hover:underline"
+        >
+          {t("searchResults.returnTrips")}
+        </Link>
+      </div>
     </div>
   );
 };

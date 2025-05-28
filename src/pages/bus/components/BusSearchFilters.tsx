@@ -161,7 +161,7 @@ const BusSearchFilters: React.FC = () => {
                 strokeLinejoin="round"
               />
             </svg>
-            {t("filters")}
+            {t("filters.title")}
 
           </h2>
           <h2
