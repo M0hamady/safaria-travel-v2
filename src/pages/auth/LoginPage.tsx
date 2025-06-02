@@ -33,7 +33,6 @@ const LoginPage: React.FC = () => {
       const result = await login(mobile, password);
       if (result.requiresOTP) {
         addToast({
-          id: Date.now().toString(),
           message: "This is a otp sended to you!",
           type: "info",
         });

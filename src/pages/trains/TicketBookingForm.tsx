@@ -43,7 +43,7 @@ useEffect(() => {
       try {
         const decrypted = await decryptString(savedId);
         setNationalId(decrypted);
-        addToast({ id: 'loaded-id', message: t("Your National ID is loaded securely."), type: 'info' });
+        addToast({  message: t("Your National ID is loaded securely."), type: 'info' });
       } catch (err) {
         console.error("Decryption failed", err);
         localStorage.removeItem("nationalId");
@@ -59,10 +59,10 @@ useEffect(() => {
       try {
         const encrypted = await encryptString(nationalId.trim());
         localStorage.setItem("nationalId", encrypted);
-        addToast({ id: 'save-id', message: t("Saved securely ✅"), type: "success" });
+        addToast({  message: t("Saved securely ✅"), type: "success" });
       } catch (err) {
         console.error("Encryption failed", err);
-        addToast({ id: 'enc-error', message: t("Encryption error occurred."), type: "error" });
+        addToast({ message: t("Encryption error occurred."), type: "error" });
       }
     })();
   }
@@ -72,13 +72,13 @@ useEffect(() => {
   const increment = () => {
     if (seatsNo < maxSeats) {
       setSeatsNo(prev => prev + 1);
-      addToast({ id: 'seat-up', message: t("Increased seat count."), type: "info" });
+      addToast({  message: t("Increased seat count."), type: "info" });
     }
   };
   const decrement = () => {
     if (seatsNo > 1) {
       setSeatsNo(prev => prev - 1);
-      addToast({ id: 'seat-down', message: t("Decreased seat count."), type: "info" });
+      addToast({ message: t("Decreased seat count."), type: "info" });
     }
   };
 
@@ -86,7 +86,7 @@ useEffect(() => {
     try {
       const token = user?.api_token || localStorage.getItem('authToken');
       if (!token) {
-        return addToast({ id: 'auth-missing', message: t("toast.authMissing"), type: 'error' });
+        return addToast({ message: t("toast.authMissing"), type: 'error' });
       }
       if (paymentResponse?.payment_url) {
         const response = await fetch(paymentResponse.payment_url, {
@@ -98,20 +98,20 @@ useEffect(() => {
         const finalUrl = data.data?.url;
         if (finalUrl) {
           setPayment_url(finalUrl);
-          addToast({ id: 'payment-url-success', message: t("toast.paymentUrlSuccess"), type: 'success' });
+          addToast({  message: t("toast.paymentUrlSuccess"), type: 'success' });
         } else {
-          addToast({ id: 'payment-url-missing', message: t("toast.paymentUrlMissing"), type: 'error' });
+          addToast({ message: t("toast.paymentUrlMissing"), type: 'error' });
         }
       }
     } catch (error) {
       console.error(error);
-      addToast({ id: 'payment-fetch-failure', message: t("toast.paymentFetchFailure"), type: 'error' });
+      addToast({ message: t("toast.paymentFetchFailure"), type: 'error' });
     }
   };
 
   const handleRedirectToPayment = () => {
     if (payment_url) window.location.href = payment_url;
-    else addToast({ id: 'payment-url-missing', message: t("Payment URL is not available."), type: 'error' });
+    else addToast({  message: t("Payment URL is not available."), type: 'error' });
   };
 
   const handleSubmit = () => {
@@ -125,7 +125,7 @@ useEffect(() => {
     setErrors(errs);
     if (errs.length === 0 && selectedClass) {
       onBook(nationalId.trim(), seatsNo, selectedClass.id);
-      addToast({ id: 'booking-started', message: t("Booking in progress..."), type: "info" });
+      addToast({  message: t("Booking in progress..."), type: "info" });
     }
   };
 

@@ -22,3 +22,40 @@
   font-weight: 400;
   font-style: normal;
 }
+/* Add animation for slide-in and slide-out */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Apply slide-out animation when toast is removed */
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Ensure responsive design */
+@media (max-width: 640px) {
+  .fixed.top-5.right-5 {
+    width: calc(100% - 2rem);
+    max-width: 20rem;
+    top: 1rem;
+    right: 1rem;
+  }
+}

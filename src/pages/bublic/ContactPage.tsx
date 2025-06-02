@@ -32,7 +32,7 @@ const ContactForm: React.FC = () => {
 
     try {
       const res = await axios.post(
-        "https://app.telefreik.com/api/v1/contact",
+        "https://demo.telefreik.com/api/v1/contact",
         formData,
         {
           headers: {

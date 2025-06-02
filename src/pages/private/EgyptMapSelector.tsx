@@ -116,7 +116,7 @@ export default function EgyptMapSelector({
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => setCurrent({ name: "موقعك", coords: [coords.latitude, coords.longitude] }),
-      () => addToast({ message: "فشل جلب الموقع", type: "error", id: "" }),
+      () => addToast({ message: "فشل جلب الموقع", type: "error"}),
       { enableHighAccuracy: true }
     );
   };
@@ -151,9 +151,9 @@ export default function EgyptMapSelector({
       
       setNewLabel("");
       setCandidate(null);
-      addToast({ message: "تم إضافة العنوان بنجاح", type: "success", id: "address-added" });
+      addToast({ message: "تم إضافة العنوان بنجاح", type: "success"});
     } catch {
-      addToast({ message: "فشل إضافة العنوان", type: "error", id: "address-error" });
+      addToast({ message: "فشل إضافة العنوان", type: "error",});
     }
   };
 
@@ -172,7 +172,6 @@ export default function EgyptMapSelector({
       addToast({
         message: mapDialogType === "boarding" ? "تم تحديد نقطة الركوب" : "تم تحديد نقطة العودة",
         type: "success",
-        id: "address-selected",
       });
     }
   };

@@ -66,14 +66,12 @@ const AddressCard: React.FC<Props> = ({
       addToast({
         message: "تم تحديد عنوان الركوب",
         type: "success",
-        id: "boarding-set",
       });
     } else {
       setReturnAddressId(id);
       addToast({
         message: "تم تحديد عنوان العودة",
         type: "success",
-        id: "return-set",
       });
     }
     setMapDialogOpen(false);

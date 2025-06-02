@@ -200,7 +200,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        "https://app.telefreik.com/api/transports/locations"
+        "https://demo.telefreik.com/api/transports/locations"
       );
       const data = await response.json();
       setLocations(data.data);
@@ -223,7 +223,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         },
       };
 
-      const paymentUrl = `https://app.telefreik.com/api/transports/orders/${reservationId}/pay`;
+      const paymentUrl = `https://demo.telefreik.com/api/transports/orders/${reservationId}/pay`;
       const response = await axios.post(paymentUrl, null, config);
       const { url } = response?.data?.data;
 
@@ -260,7 +260,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
   
       // Make the API call to confirm the reservation
       const response = await fetch(
-        `https://app.telefreik.com/api/transports/trips/${selectedTrip?.id}/create-ticket`,
+        `https://demo.telefreik.com/api/transports/trips/${selectedTrip?.id}/create-ticket`,
         {
           method: "POST",
           headers: {
@@ -322,7 +322,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
   
       // Make the API call to confirm the reservation
       const response = await fetch(
-        `https://app.telefreik.com/api/transports/buses/orders/${reservationData?.id}/return-ticket`,
+        `https://demo.telefreik.com/api/transports/buses/orders/${reservationData?.id}/return-ticket`,
         {
           method: "POST",
           headers: {
@@ -410,7 +410,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         setRoundTripCycleStep("SEARCHING");
       }
       // Fetch outbound trips
-      const outboundUrl = new URL("https://app.telefreik.com/api/transports/trips");
+      const outboundUrl = new URL("https://demo.telefreik.com/api/transports/trips");
       outboundUrl.searchParams.append("city_from", from);
       outboundUrl.searchParams.append("city_to", to);
       outboundUrl.searchParams.append("date", departure);
@@ -429,7 +429,6 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
 
       clearAllFilters()
       addToast({
-        id: Date.now().toString(),
         message: "successfully brings trip for one way!",
         type: "success",
       });
@@ -440,7 +439,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
       }
       // Fetch return trips if trip type is "round"
       if (tripType === "round" && returnDate) {
-        const returnUrl = new URL("https://app.telefreik.com/api/transports/trips");
+        const returnUrl = new URL("https://demo.telefreik.com/api/transports/trips");
         returnUrl.searchParams.append("city_from", to); // Swap "from" and "to" for return trips
         returnUrl.searchParams.append("city_to", from);
         returnUrl.searchParams.append("date", returnDate);
@@ -646,7 +645,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
       const date = searchParams.get("date");
 
       const response = await fetch(
-        `https://app.telefreik.com/api/transports/trips/${tripId}/seats?from_city_id=${fromCityId}&to_city_id=${toCityId}&from_location_id=${fromLocationId}&to_location_id=${toLocationId}&date=${date}`
+        `https://demo.telefreik.com/api/transports/trips/${tripId}/seats?from_city_id=${fromCityId}&to_city_id=${toCityId}&from_location_id=${fromLocationId}&to_location_id=${toLocationId}&date=${date}`
       );
       const data = await response.json();
 
@@ -669,7 +668,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
       const date = searchParams.get("date");
 
       const response = await fetch(
-        `https://app.telefreik.com/api/transports/trips/${tripId}/seats?from_city_id=${fromCityId}&to_city_id=${toCityId}&from_location_id=${fromLocationId}&to_location_id=${toLocationId}&date=${date}`
+        `https://demo.telefreik.com/api/transports/trips/${tripId}/seats?from_city_id=${fromCityId}&to_city_id=${toCityId}&from_location_id=${fromLocationId}&to_location_id=${toLocationId}&date=${date}`
       );
       const data = await response.json();
 

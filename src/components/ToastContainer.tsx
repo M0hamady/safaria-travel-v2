@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useToast } from "../context/ToastContext";
 import {
   CheckCircle as SuccessIcon,
@@ -9,78 +9,145 @@ import {
 } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 
+interface Toast {
+  id: string;
+  message: string;
+  type: "success" | "error" | "info" | "warning";
+  createdAt: number;
+}
+
 const ToastContainer: React.FC = () => {
   const { toasts, removeToast } = useToast();
-  const MIN_TIMER = 1000; // Minimum time (in ms) the toast should be visible (1 second)
-  const MAX_TIMER = 3000; // Maximum time (in ms) the toast should be visible (3 seconds)
-  const ONE_MINUTE = 60000; // 1 minute (in ms)
+  const MIN_TIMER = 1000; // Minimum time (in ms)
+  const DEFAULT_DURATION = 3000; // Default time (in ms)
   const [progress, setProgress] = useState<{ [key: string]: number }>({});
   const [timeRemaining, setTimeRemaining] = useState<{ [key: string]: number }>({});
+  const timerRefs = useRef<{ [key: string]: { intervalId: NodeJS.Timeout; timeoutId: NodeJS.Timeout } }>({});
+  const pauseRefs = useRef<{ [key: string]: boolean }>({});
+  const pauseStartRefs = useRef<{ [key: string]: number }>({});
+  const pausedDurationRefs = useRef<{ [key: string]: number }>({});
 
   useEffect(() => {
-    const timers = toasts.map((toast) => {
-      const duration = Math.max(MIN_TIMER, MAX_TIMER);
-      let intervalId: NodeJS.Timeout;
-      let removeAfterOneMinute: NodeJS.Timeout;
+    const timers = toasts.map((toast: Toast) => {
+      const duration = Math.max(MIN_TIMER, DEFAULT_DURATION);
 
-      // Start the progress bar from 0% and increment it
+      // Initialize progress and time remaining
       setProgress((prev) => ({
         ...prev,
         [toast.id]: 0,
       }));
-
-      // Initialize the timeRemaining with the duration
       setTimeRemaining((prev) => ({
         ...prev,
-        [toast.id]: Math.floor(duration / 1000), // Convert to seconds
+        [toast.id]: Math.floor(duration / 1000),
       }));
+      pausedDurationRefs.current[toast.id] = 0; // Initialize paused duration
 
-      intervalId = setInterval(() => {
-        setProgress((prev) => {
-          const newProgress = (prev[toast.id] || 0) + (100 / duration);
-          if (newProgress >= 100) {
-            clearInterval(intervalId);
-            removeToast(toast.id);
-          }
-          return {
+      // Progress and time update interval
+      const intervalId = setInterval(() => {
+        if (!pauseRefs.current[toast.id]) {
+          const elapsed = Date.now() - toast.createdAt - (pausedDurationRefs.current[toast.id] || 0);
+          const newProgress = Math.min((elapsed / duration) * 100, 100);
+          const newTimeRemaining = Math.max(0, Math.floor((duration - elapsed) / 1000));
+
+          setProgress((prev) => ({
             ...prev,
             [toast.id]: newProgress,
-          };
-        });
+          }));
 
-        // Update the timeRemaining every second
-        setTimeRemaining((prev) => {
-          const newTime = (prev[toast.id] || 0) - 1;
-          if (newTime <= 0) {
-            clearInterval(intervalId);
-            removeToast(toast.id);
-          }
-          return {
+          setTimeRemaining((prev) => ({
             ...prev,
-            [toast.id]: newTime,
-          };
-        });
-      }, 1000); // Update progress and time every second
+            [toast.id]: newTimeRemaining,
+          }));
 
-      // Timer to remove toast after 1 minute
-      removeAfterOneMinute = setTimeout(() => {
-        removeToast(toast.id); // Remove toast if it exceeds 1 minute
-      }, ONE_MINUTE);
+          // Check if toast should be removed (deferred to avoid render-time update)
+          setTimeout(() => {
+            if (newProgress >= 100 || newTimeRemaining <= 0) {
+              if (timerRefs.current[toast.id]) {
+                clearInterval(timerRefs.current[toast.id].intervalId);
+                clearTimeout(timerRefs.current[toast.id].timeoutId);
+                delete timerRefs.current[toast.id];
+                delete pausedDurationRefs.current[toast.id];
+                delete pauseStartRefs.current[toast.id];
+                removeToast(toast.id);
+              }
+            }
+          }, 0);
+        }
+      }, 1000);
 
-      setTimeout(() => {
-        clearInterval(intervalId);
-        clearTimeout(removeAfterOneMinute);
-        removeToast(toast.id);
+      // Auto-dismiss after duration
+      const timeoutId = setTimeout(() => {
+        if (timerRefs.current[toast.id]) {
+          clearInterval(timerRefs.current[toast.id].intervalId);
+          delete timerRefs.current[toast.id];
+          delete pausedDurationRefs.current[toast.id];
+          delete pauseStartRefs.current[toast.id];
+          removeToast(toast.id);
+        }
       }, duration);
 
-      return intervalId;
+      timerRefs.current[toast.id] = { intervalId, timeoutId };
+
+      return toast.id;
     });
 
-    // Cleanup timers when component is unmounted or toasts change
+    // Cleanup timers for toasts that are no longer present
     return () => {
-      timers.forEach((timer) => clearTimeout(timer));
+      Object.keys(timerRefs.current).forEach((id) => {
+        if (!toasts.find((toast) => toast.id === id)) {
+          clearInterval(timerRefs.current[id].intervalId);
+          clearTimeout(timerRefs.current[id].timeoutId);
+          delete timerRefs.current[id];
+          delete pausedDurationRefs.current[id];
+          delete pauseStartRefs.current[id];
+        }
+      });
     };
-  }, [toasts,]);
+  }, [toasts, removeToast]);
+
+  const handleMouseEnter = (toastId: string) => {
+    pauseRefs.current[toastId] = true;
+    pauseStartRefs.current[toastId] = Date.now(); // Record when pause starts
+  };
+
+  const handleMouseLeave = (toastId: string) => {
+    if (pauseRefs.current[toastId]) {
+      const pauseDuration = Date.now() - (pauseStartRefs.current[toastId] || Date.now());
+      pausedDurationRefs.current[toastId] = (pausedDurationRefs.current[toastId] || 0) + pauseDuration;
+      pauseRefs.current[toastId] = false;
+
+      // Adjust timeout to account for paused duration
+      if (timerRefs.current[toastId]) {
+        clearTimeout(timerRefs.current[toastId].timeoutId);
+        const duration = Math.max(MIN_TIMER, DEFAULT_DURATION);
+        const toast = toasts.find((t) => t.id === toastId);
+        if (toast) {
+          const elapsed = Date.now() - toast.createdAt - (pausedDurationRefs.current[toastId] || 0);
+          const remaining = Math.max(0, duration - elapsed);
+          timerRefs.current[toastId].timeoutId = setTimeout(() => {
+            if (timerRefs.current[toastId]) {
+              clearInterval(timerRefs.current[toastId].intervalId);
+              delete timerRefs.current[toastId];
+              delete pausedDurationRefs.current[toastId];
+              delete pauseStartRefs.current[toastId];
+              removeToast(toastId);
+            }
+          }, remaining);
+        }
+      }
+    }
+  };
+
+  const handleClose = (toastId: string) => {
+    if (timerRefs.current[toastId]) {
+      clearInterval(timerRefs.current[toastId].intervalId);
+      clearTimeout(timerRefs.current[toastId].timeoutId);
+      delete timerRefs.current[toastId];
+      delete pausedDurationRefs.current[toastId];
+      delete pauseStartRefs.current[toastId];
+    }
+    removeToast(toastId);
+  };
 
   const getToastConfig = (type: string) => {
     switch (type) {
@@ -90,6 +157,7 @@ const ToastContainer: React.FC = () => {
           bg: "bg-green-100",
           text: "text-green-800",
           border: "border-green-300",
+          progress: "bg-green-500",
         };
       case "error":
         return {
@@ -97,6 +165,7 @@ const ToastContainer: React.FC = () => {
           bg: "bg-red-100",
           text: "text-red-800",
           border: "border-red-300",
+          progress: "bg-red-500",
         };
       case "info":
         return {
@@ -104,6 +173,7 @@ const ToastContainer: React.FC = () => {
           bg: "bg-blue-100",
           text: "text-blue-800",
           border: "border-blue-300",
+          progress: "bg-blue-500",
         };
       case "warning":
         return {
@@ -111,6 +181,7 @@ const ToastContainer: React.FC = () => {
           bg: "bg-yellow-100",
           text: "text-yellow-800",
           border: "border-yellow-300",
+          progress: "bg-yellow-500",
         };
       default:
         return {
@@ -118,25 +189,28 @@ const ToastContainer: React.FC = () => {
           bg: "bg-gray-100",
           text: "text-gray-800",
           border: "border-gray-300",
+          progress: "bg-gray-500",
         };
     }
   };
 
   return (
-    <div className="fixed top-5 right-5 z-50 space-y-3 w-80 max-w-full">
+    <div className="fixed top-5 right-5 z-50 space-y-3 w-80 max-w-full sm:w-96">
       {toasts.map((toast) => {
         const config = getToastConfig(toast.type);
 
         return (
           <div
             key={toast.id}
-            className={`grid grid-cols-[auto,1fr,auto] items-start p-4 rounded-lg shadow-lg border ${config.bg} ${config.text} ${config.border} transition-all duration-300 transform hover:scale-[1.02]`}
+            className={`grid grid-cols-[auto,1fr,auto] items-start p-4 rounded-lg shadow-lg border ${config.bg} ${config.text} ${config.border} transition-all duration-300 transform hover:scale-[1.02] animate-slide-in`}
             role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            onMouseEnter={() => handleMouseEnter(toast.id)}
+            onMouseLeave={() => handleMouseLeave(toast.id)}
           >
             {/* Toast Icon */}
-            <div className="flex-shrink-0 pt-0.5 mr-3">
-              {config.icon}
-            </div>
+            <div className="flex-shrink-0 pt-0.5 mr-3">{config.icon}</div>
 
             {/* Toast Message */}
             <div className="flex-1 min-w-0">
@@ -147,9 +221,9 @@ const ToastContainer: React.FC = () => {
             <div className="ml-3 flex-shrink-0 flex justify-center items-start">
               <IconButton
                 size="small"
-                onClick={() => removeToast(toast.id)}
+                onClick={() => handleClose(toast.id)}
                 className="opacity-70 hover:opacity-100 focus:outline-none"
-                aria-label="Close"
+                aria-label="Close toast"
               >
                 <CloseIcon className="w-4 h-4" />
               </IconButton>
@@ -158,17 +232,17 @@ const ToastContainer: React.FC = () => {
             {/* Progress Bar */}
             <div className="w-full mt-2 h-1.5 rounded-full bg-gray-200 col-span-3">
               <div
-                className="h-full rounded-full"
+                className="h-full rounded-full transition-all duration-1000"
                 style={{
                   width: `${progress[toast.id] || 0}%`,
-                  background: config.bg, // Matching the toast background color
+                  backgroundColor: config.progress,
                 }}
               ></div>
             </div>
 
             {/* Timer Display */}
-            <div className="mt-2 text-xs text-gray-600">
-              {timeRemaining[toast.id]}s left
+            <div className="mt-2 text-xs text-gray-600 col-span-3">
+              {timeRemaining[toast.id] >= 0 ? `${timeRemaining[toast.id]}s left` : "0s left"}
             </div>
           </div>
         );

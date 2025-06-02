@@ -148,7 +148,7 @@ export const usePrivateTripData = (tripId: string | undefined) => {
             const token = localStorage.getItem("authToken");
             if (!token) throw new Error("Missing token");
 
-            const res = await fetch("https://app.telefreik.com/api/transports/profile/address-book", {
+            const res = await fetch("https://demo.telefreik.com/api/transports/profile/address-book", {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -167,7 +167,6 @@ export const usePrivateTripData = (tripId: string | undefined) => {
         } catch (err) {
             console.error("Fetch addresses error:", err);
             addToast({
-                id: "address-fetch-error",
                 message: "🚨 Failed to load saved addresses.",
                 type: "error",
             });
@@ -182,7 +181,7 @@ export const usePrivateTripData = (tripId: string | undefined) => {
             const token = localStorage.getItem("authToken");
             if (!token) throw new Error("Missing token");
 
-            const res = await fetch("https://app.telefreik.com/api/transports/profile/address-book", {
+            const res = await fetch("https://demo.telefreik.com/api/transports/profile/address-book", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -212,7 +211,6 @@ export const usePrivateTripData = (tripId: string | undefined) => {
             }
 
             addToast({
-                id: "address-added",
                 message: "📍 Address added successfully.",
                 type: "success",
             });
@@ -221,7 +219,6 @@ export const usePrivateTripData = (tripId: string | undefined) => {
         } catch (err) {
             console.error("Add address error:", err);
             addToast({
-                id: "address-add-fail",
                 message: "❌ Could not add address.",
                 type: "error",
             });
@@ -239,7 +236,6 @@ export const usePrivateTripData = (tripId: string | undefined) => {
 
         if (!tripId || !trip) {
             addToast({
-                id: "invalid-trip",
                 message: "Invalid trip data. Please refresh and try again.",
                 type: "error",
             });
@@ -248,7 +244,6 @@ export const usePrivateTripData = (tripId: string | undefined) => {
 
         if (!boardingAddressIdFinal || !boardingDate) {
             addToast({
-                id: "missing-boarding",
                 message: "Please select a boarding address and time.",
                 type: "error",
             });
@@ -257,7 +252,6 @@ export const usePrivateTripData = (tripId: string | undefined) => {
 
         if (tripType === "round" && (!returnAddressIdFinal || !returnDate)) {
             addToast({
-                id: "missing-return",
                 message: "Please select a return address and time.",
                 type: "error",
             });
@@ -314,7 +308,6 @@ export const usePrivateTripData = (tripId: string | undefined) => {
         } catch (err) {
             console.error("Ticket creation or payment error:", err);
             addToast({
-                id: "payment-error",
                 message: "🚨 An unexpected error occurred during payment.",
                 type: "error",
             });

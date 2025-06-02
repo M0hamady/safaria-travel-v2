@@ -48,14 +48,12 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       await onSubmit(rating, comment);
       setSubmitted(true);
       addToast({
-        id: Date.now().toString(),
         message: t("order.reviewSuccess") || "Review submitted successfully!",
         type: "success",
       });
     } catch (err) {
       console.error("Failed to submit review:", err);
       addToast({
-        id: Date.now().toString(),
         message: t("order.reviewError") || "Failed to submit review.",
         type: "warning",
       });

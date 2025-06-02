@@ -107,7 +107,6 @@ useEffect(() => {
   useEffect(() => {
     if (error) {
       addToast({
-        id: Date.now().toString(),
         message: `${error} : ${title}`,
         type: "error",
       });

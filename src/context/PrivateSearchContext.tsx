@@ -9,7 +9,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Location, PrivateTrip, SearchValues, Trip, } from "../types/types";
 
-const API_BASE = "https://app.telefreik.com";
+const API_BASE = "https://demo.telefreik.com";
 export interface TripFilters {
   company: string[];             // e.g., ["Telefreik", "SuperJet"]
   priceRange: [number, number]; // e.g., [0, 1000]

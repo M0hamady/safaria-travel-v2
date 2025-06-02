@@ -80,7 +80,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
   useEffect(() => {
     if (error) {
       addToast({
-        id: Date.now().toString(),
         message: `${helperText} : ${label}`,
         type: "error",
       });

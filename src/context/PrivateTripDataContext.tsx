@@ -154,7 +154,7 @@ useEffect(() => {
       if (privateTrip) setTrip(privateTrip);
     } catch (err) {
       console.error(err);
-      addToast({ id: "trip-fetch", message: "⚠️ Failed to load trip.", type: "error" });
+      addToast({ message: "⚠️ Failed to load trip.", type: "error" });
     }
   }, [fetchTripById, addToast]);
 
@@ -165,7 +165,7 @@ const fetchAddresses = useCallback(async () => {
   try {
    
 
-    const res = await fetch("https://app.telefreik.com/api/transports/profile/address-book", {
+    const res = await fetch("https://demo.telefreik.com/api/transports/profile/address-book", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -188,7 +188,6 @@ const fetchAddresses = useCallback(async () => {
   } catch (err) {
     console.error(err);
     addToast({
-      id: "address-fetch",
       message: "❌ Failed to fetch addresses.",
       type: "error",
     });
@@ -232,7 +231,7 @@ useEffect(() => {
   const addNewAddress = useCallback(async (payload: AddAddressPayload) => {
     try {
       const token = localStorage.getItem("authToken");
-      const res = await fetch("https://app.telefreik.com/api/transports/profile/address-book", {
+      const res = await fetch("https://demo.telefreik.com/api/transports/profile/address-book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -260,11 +259,11 @@ useEffect(() => {
         setReturnAddressId(`${newAddress.id}`);
         setAddressesReturn(newAddress);
       }
-      addToast({ id: "address-add", message: "✅ Address added successfully", type: "success" });
+      addToast({  message: "✅ Address added successfully", type: "success" });
       return newAddress;
     } catch (err) {
       console.error(err);
-      addToast({ id: "address-add-fail", message: "❌ Could not add address", type: "error" });
+      addToast({ message: "❌ Could not add address", type: "error" });
       throw err;
     }
   }, [tripType, boardingAddressId, returnAddressId, addToast]);
@@ -316,7 +315,7 @@ useEffect(() => {
       }
     } catch (err) {
       console.error("Ticket/payment error:", err);
-      addToast({ id: "ticket-error", message: "🚨 Ticket/payment process failed", type: "error" });
+      addToast({  message: "🚨 Ticket/payment process failed", type: "error" });
     } finally {
       setIsCreatingTicket(false);
     }

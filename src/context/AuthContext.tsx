@@ -116,7 +116,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { requiresOTP: true };
       }
       addToast({
-        id: Date.now().toString(),
         message: "welcome!",
         type: "success",
       });

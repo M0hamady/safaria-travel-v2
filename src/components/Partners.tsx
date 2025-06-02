@@ -7,7 +7,7 @@ import { Partner } from "../types/types"; // Ensure Partner interface is defined
 import axios from "axios";
 const getPartners = async (): Promise<any> => {
 	const res = await axios.get(
-		`https://app.telefreik.com/api/v1/partners`,
+		`https://demo.telefreik.com/api/v1/partners`,
 		{
 			headers: {
 				"Content-Type": "application/json",

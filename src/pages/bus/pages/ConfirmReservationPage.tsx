@@ -179,8 +179,8 @@ const ConfirmReservationPage: React.FC = () => {
 
           const endpoint =
             tripType === "round"
-              ? "https://app.telefreik.com/api/v2/transports/buses/create-ticket"
-              : `https://app.telefreik.com/api/transports/trips/${selectedTrip?.id}/create-ticket`;
+              ? "https://demo.telefreik.com/api/v2/transports/buses/create-ticket"
+              : `https://demo.telefreik.com/api/transports/trips/${selectedTrip?.id}/create-ticket`;
 
           const body =
             tripType === "round"
@@ -249,7 +249,7 @@ const ConfirmReservationPage: React.FC = () => {
         },
       };
 
-      const paymentUrl = `https://app.telefreik.com/api/transports/orders/${reservationId}/pay`;
+      const paymentUrl = `https://demo.telefreik.com/api/transports/orders/${reservationId}/pay`;
       const response = await axios.post(paymentUrl, null, config);
       const { url } = response?.data?.data;
 

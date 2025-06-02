@@ -81,7 +81,6 @@ const SearchBar = () => {
     }
     // Add transport selection guide
     addToast({
-      id: "transport-selection",
       message: t(`toast.${searchType}_selection_info`),
       type: "info",
     });
@@ -91,7 +90,6 @@ const SearchBar = () => {
   useEffect(() => {
     if (currentSearchValues.departure && currentTripType === "round") {
       addToast({
-        id: "return-date-reminder",
         message: t("toast.please_select_return_date"),
         type: "warning",
       });
@@ -184,7 +182,6 @@ const SearchBar = () => {
     if (currentTripType === "round" && !currentSearchValues.return) {
       setShowNoReturnTripWarning(true);
       addToast({
-        id: "no-return-warning",
         message: t("warning_select_return_trip"),
         type: "warning",
       });

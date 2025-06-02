@@ -72,10 +72,10 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
   const handleMapSelect = (id: string) => {
     if (mapDialogType === "boarding") {
       setBoardingAddressId(id);
-      addToast({ message: t("address.boardingSet"), type: "success", id: "boarding-set" });
+      addToast({ message: t("address.boardingSet"), type: "success" });
     } else {
       setReturnAddressId(id);
-      addToast({ message: t("address.returnSet"), type: "success", id: "return-set" });
+      addToast({ message: t("address.returnSet"), type: "success",  });
     }
     setMapDialogType(null);
   };

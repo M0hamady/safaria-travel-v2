@@ -17,7 +17,7 @@ import { TicketOrder } from "../pages/bus/pages/ConfirmReservationPage";
 // -------------------------
 // API Base
 // -------------------------
-const API_BASE_URL = "https://app.telefreik.com/api/transports/trains";
+const API_BASE_URL = "https://demo.telefreik.com/api/transports/trains";
 
 // -------------------------
 // Interfaces
@@ -213,7 +213,6 @@ const bookTicket = async (tripId: string, payload: TicketPayload) => {
   if (!token) {
     console.log(user);
     addToast({
-      id: "authorization",
       message: "Authorization token not found.",
       type: "error",
     });
@@ -222,7 +221,6 @@ const bookTicket = async (tripId: string, payload: TicketPayload) => {
   }
 
   addToast({
-    id: "booking-start",
     message: "Processing your ticket booking...",
     type: "info",
   });
@@ -241,7 +239,6 @@ const bookTicket = async (tripId: string, payload: TicketPayload) => {
     );
 
     addToast({
-      id: "booking-success",
       message: "Ticket booked successfully. Redirecting to payment...",
       type: "success",
     });
@@ -268,7 +265,7 @@ const bookTicket = async (tripId: string, payload: TicketPayload) => {
       setPayment_url(finalUrl)
     if (finalUrl) {
       addToast({
-          id: "payment-url-success",
+          
           message: t("toast.paymentUrlSuccess"),
           type: "success",
         });
@@ -276,7 +273,6 @@ const bookTicket = async (tripId: string, payload: TicketPayload) => {
 
       } else {
         addToast({
-          id: "payment-url-missing",
           message: t("toast.paymentUrlMissing"),
           type: "error",
         });
@@ -285,7 +281,6 @@ const bookTicket = async (tripId: string, payload: TicketPayload) => {
   } catch (err) {
     console.error(err);
     addToast({
-      id: "booking-failure",
       message: "Failed to book ticket. Please try again later.",
       type: "error",
     });
