@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { apiFetch, BASE_URL } from "../components/utilies/api";
-import {  useNavigate } from "react-router-dom";
+import {  useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "./ToastContext";
 
 export interface UserProfile {
@@ -43,7 +43,7 @@ interface AuthContextType {
     password: string,
     password_confirmation: string
   ) => Promise<void>;
-  forgotPasswordResting: (mobile: string,code:string,password:string, passwordConfirmation:string) => Promise<void>;
+  forgotPasswordResting: (mobile: string,code:string,password:string, password_confirmation:string) => Promise<void>;
 
   verifyOTP: (mobile: string, code: string) => Promise<void>;
   resendOTP: (mobile: string) => Promise<void>;
@@ -81,6 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const location = useLocation();
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -97,49 +98,52 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Login function using the global API helper.
   // It calls the login endpoint and checks if OTP verification is required.
-  const login = async (
-    mobile: string,
-    password: string
-  ): Promise<{ requiresOTP: boolean }> => {
+const login = async (mobile: string, password: string): Promise<{ requiresOTP: boolean }> => {
     try {
+      const cleanedMobile = mobile.startsWith("0") ? mobile.slice(1) : mobile;
       const data = await apiFetch<any>(
         `${BASE_URL}/api/v1/mobile/customer/login`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mobile, password, phonecode: 20 }),
+          headers: { "Content-Type": "application/json",Accept:"application/json" },
+          body: JSON.stringify({ mobile: cleanedMobile, password, phonecode: 20 }),
         }
       );
 
-      // If the response indicates OTP verification is needed, return that flag.
       if (data.need_verfication) {
         return { requiresOTP: true };
       }
+
       addToast({
-        message: "welcome!",
+        message: "Welcome!",
         type: "success",
       });
-      // Otherwise, store token and user data and update the context.
-      localStorage.setItem("authToken", data.data.api_token);
-      localStorage.setItem("userProfile", JSON.stringify(data));
-      setIsAuthenticated(true);
-      navigate(-1)
 
-      const userProfile2: UserProfile = {
+      localStorage.setItem("authToken", data.data.api_token);
+      const userProfile: UserProfile = {
         id: data.data.id,
         name: data.data.name,
         email: data.data.email,
         mobile: data.data.mobile,
-        phonecode:data.data.phonecode,
+        phonecode: data.data.phonecode,
         status: data.data.status,
         avatar: data.data.avatar,
         country_code: data.data.country_code,
         api_token: data.data.api_token,
-        is_profile_completed: data.data.is_profile_completed
+        is_profile_completed: data.data.is_profile_completed,
       };
-      localStorage.setItem("userProfile", JSON.stringify(userProfile2));
+      localStorage.setItem("userProfile", JSON.stringify(userProfile));
+      setIsAuthenticated(true);
+      setUser(userProfile);
 
-      setUser(userProfile2);
+      // Check redirectPath
+      const redirectPath = location.state?.from?.pathname || location.pathname;
+      if (redirectPath.includes("forgot-password") || redirectPath.includes("register")) {
+        navigate("/");
+      } else {
+        navigate(-1);
+      }
+
       return { requiresOTP: false };
     } catch (error) {
       throw error;
@@ -279,21 +283,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw error;
     }
   };
-  const forgotPasswordResting = async (mobile: string,code:string,password:string, passwordConfirmation:string) => {
-    try {
-      await apiFetch<any>(
-        `${BASE_URL}/api/v1/mobile/customer/reset-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" ,Accept : "application/json"},
-          body: JSON.stringify({ mobile, phonecode: 20,code,password,passwordConfirmation }),
-        }
-      );
-    } catch (error) {
-      console.error("Forget Password Error:", error);
-      throw error;
-    }
-  };
+const forgotPasswordResting = async (mobile: string, code: string, password: string, password_confirmation: string) => {
+  try {
+    // Remove leading '0' from mobile number if present
+    const cleanedMobile = mobile.startsWith('0') ? mobile.slice(1) : mobile;
+
+    await apiFetch<any>(
+      `${BASE_URL}/api/v1/mobile/customer/reset-password`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json",Accept:"application/json" },
+        body: JSON.stringify({ mobile: cleanedMobile, phonecode: 20, code, password, password_confirmation }),
+      }
+    );
+  } catch (error) {
+    console.error("Forget Password Error:", error);
+    throw error;
+  }
+};
 
   const resetPassword = async (
     current_password: string,

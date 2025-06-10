@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -6,7 +6,7 @@ import VerifyOTP from "./VerifyOTP";
 import { useToast } from "../../context/ToastContext";
 
 const LoginPage: React.FC = () => {
-  const { login, verifyOTP, resendOTP, isAuthenticated } = useContext(AuthContext);
+  const { login, verifyOTP, resendOTP } = useContext(AuthContext);
   const { t } = useTranslation();
   const [mobile, setMobile] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -18,12 +18,6 @@ const LoginPage: React.FC = () => {
   const prevPage = params.get("prev") || "/";
   const redirectPath = prevPage;
   const { addToast } = useToast();
-  
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate(redirectPath);
-    }
-  }, [isAuthenticated, navigate, redirectPath]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +32,13 @@ const LoginPage: React.FC = () => {
         });
         setRequiresOTP(true);
       } else {
-        navigate(redirectPath);
+        console.log(redirectPath);
+        console.log(redirectPath.includes("forgot-password")  || redirectPath.includes("register"));
+       if (redirectPath.includes("forgot-password")  || redirectPath.includes("register")) {
+  navigate("/");
+} else {
+  navigate(redirectPath);
+}
       }
     } catch (err: any) {
       setError(t("login.error"));

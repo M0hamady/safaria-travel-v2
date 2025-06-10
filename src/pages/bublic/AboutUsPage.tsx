@@ -62,8 +62,8 @@ const AboutUs: React.FC = () => {
           </div>
           <div  className="flex-col justify-center items-center">
             <img
-              className="object-cover h-[300px] mx-auto"
-              src={images.appImage}
+              className="object-cover h-[400px] mx-auto"
+              src={images.safariaMobile}
               alt={t("about_Us.preview_image_alt2")}
             />
             <p className="text-black text-base max-w-[400px] md:text-xl font-normal font-[Cairo] leading-relaxed">

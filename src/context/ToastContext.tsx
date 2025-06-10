@@ -76,9 +76,9 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
         }
-        audioRef.current = new Audio(soundFiles[toast.type]);
-        audioRef.current.volume = volume;
-        audioRef.current.play().catch((error) => console.error("Audio playback failed:", error));
+        // audioRef.current = new Audio(soundFiles[toast.type]);
+        // audioRef.current.volume = volume;
+        // audioRef.current.play().catch((error) => console.error("Audio playback failed:", error));
       }
 
       // Trigger vibration for success or error
