@@ -101,7 +101,7 @@ const TripListItem: React.FC<Props> = ({ trip, onSelect, getMinPrice }) => {
         <div className="mt-6 w-full grid grid-cols-1   col-span-4  ">
 
           {trip.train.classes.map((trainClass) => (
-            <div key={trainClass.id} className="flex justify-between p-3 border rounded-md mt-2 w-full">
+            <div key={trainClass.id} className="flex justify-between p-3 px-8 border rounded-md mt-2 w-full">
               <div>
                 <h4 className="text-md font-bold">{isRTL ? trainClass.arDesc : trainClass.enDesc}</h4>
                 <p className="text-primary text-lg font-extrabold">{t("price_unit")}: {trainClass.cost} </p>
