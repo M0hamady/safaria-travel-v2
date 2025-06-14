@@ -33,7 +33,7 @@ const TripListItem: React.FC<Props> = ({ trip, onSelect, getMinPrice }) => {
   return (
     <li className="p-4 md:p-6 border rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer">
       <div className="grid grid-cols-2 md:grid-cols-[auto,1fr] gap-4 items-center w-full">
-        
+
         {/* Train Image */}
         <img
           src={images.trainSafaria}
@@ -43,15 +43,42 @@ const TripListItem: React.FC<Props> = ({ trip, onSelect, getMinPrice }) => {
 
         {/* Train & Trip Details */}
         <div className="grid grid-cols-1 gap-4 text-center md:text-left w-full rtl:text-right">
+          <div className='flex w-full justify-between'>
+
           <h3 className="font-semibold text-lg max-sm:ltr:text-left">{t("train_number")}: {trip.train.name}</h3>
+          {/* we will add container has routes of trip each route has id and name while hover preview list in drobdown miu=nue  */}
+          <div className="relative group">
+            <h3 className="font-semibold text-lg max-sm:ltr:text-left px-2 py-2 bg-primary rounded text-white">
+              {t("train_route")}
+            </h3>
+
+            {/* Dropdown on hover */}
+            <div className="absolute z-10 hidden group-hover:block bg-white  shadow-md border rounded-md mt-2 w-64 text-sm text-left rtl:text-right">
+              <ul className="p-2 max-h-60 overflow-y-auto">
+                {trip.route && trip.route.length > 0 ? (
+                  trip.route.map((route) => (
+                    <li
+                      key={route.id}
+                      className="py-1 px-2 hover:bg-gray-100  transition"
+                    >
+                      {route.name}
+                    </li>
+                  ))
+                ) : (
+                  <li className="py-1 px-2 text-gray-500">{t("no_routes")}</li>
+                )}
+              </ul>
+            </div>
+          </div>
+          </div>
 
           <div className="flex justify-between flex-wrap gap-4 items-center">
             {/* Departure Info */}
             <div className="text-left rtl:text-right">
-            <p className="text-gray-500 text-sm">{t("departure")}</p>
+              <p className="text-gray-500 text-sm">{t("departure")}</p>
               <p className="text-lg font-bold">{selectedDepartureLocation?.name}</p>
               <p className="text-sm">{trip.station_from.name}</p>
-              <p className="font-medium"><DateTimeDisplay value={trip.start_time}  /></p>
+              <p className="font-medium"><DateTimeDisplay value={trip.start_time} /></p>
             </div>
 
             {/* Railway Visual */}

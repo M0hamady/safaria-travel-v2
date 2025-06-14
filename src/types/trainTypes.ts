@@ -32,6 +32,10 @@ export interface Station {
     name: string;
     classes: TrainClass[];
   }
+  export interface Route {
+    id: string;
+    name: string;
+  }
   
   // Trip structure
   export interface Trip {
@@ -45,6 +49,7 @@ export interface Station {
     distance: string; // e.g. "203" kilometers
     train: Train;
     price: number;
+    route:Route[];
 
   }
   
