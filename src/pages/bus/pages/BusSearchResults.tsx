@@ -77,10 +77,10 @@ const BusSearchResults: React.FC = () => {
         id="bus-search-trips"
         className="col-span-1 lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-4 max-sm:min-h-screen max-md:-translate-y-40 md:mx-4"
       >
-        <div className="lg:col-span-1  rounded-lg shadow-md p-4">
+        <div className="lg:col-span-1  rounded-lg p-4">
           <BusSearchFilters />
         </div>
-        <div className="lg:col-span-3   rounded-lg shadow-md p-4">
+        <div className="lg:col-span-3   rounded-lg  p-4">
           <BusSearchTrips />
         </div>
       </section>

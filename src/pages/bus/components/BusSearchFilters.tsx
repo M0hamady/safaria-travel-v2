@@ -149,8 +149,8 @@ const BusSearchFilters: React.FC = () => {
   return (
     <div className="mb-6 px-8 max-sm:px-0 max-sm:w-full max-sm:my-0 ">
       {/* Desktop View: Inline filters */}
-      <div className="hidden md:block">
-        <div className="flex w-full mb-6 text-dark opacity-70 justify-between px-4">
+      <div className="hidden md:block ">
+        <div className="flex w-full mb-6 text-dark opacity-70 justify-between px-4 rounded-xl bg-white  p-6">
           <h2 className="font-bold flex gap-2 items-center">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
