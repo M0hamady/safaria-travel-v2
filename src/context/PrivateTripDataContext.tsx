@@ -161,7 +161,8 @@ useEffect(() => {
 
 const fetchAddresses = useCallback(async () => {
   setAddressesLoading(true);
-
+if (token) {
+  
   try {
    
 
@@ -194,7 +195,8 @@ const fetchAddresses = useCallback(async () => {
   } finally {
     setAddressesLoading(false);
   }
-}, [addToast, navigate]);
+}
+}, []);
 
 useEffect(() => {
   fetchAddresses();
