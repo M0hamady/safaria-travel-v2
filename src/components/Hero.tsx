@@ -3,9 +3,9 @@ import images from '../assets';
 
 const Hero: React.FC = () => {
   return (
-    <section className="relative h-[65vh] xl:h-[65vh] lg:h-[75vh]    w-full overflow-hidden">
+    <section className="relative h-[65vh]  lg:h-[75vh] 2xl:h-[40rem]    w-full overflow-hidden">
       {/* Background Image for Desktop */}
-      <div className="hidden md:block absolute inset-0">
+      <div className="hidden md:block absolute inset-0 z-0">
         <img
           src={images.safariabus}
           alt="Bus Horizontal"
