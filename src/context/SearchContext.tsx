@@ -687,7 +687,10 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
       !seat ||
       seat.class === "space" ||
       seat.class === "door" ||
-      seat.class === "driver"
+      seat.class === "driver" ||
+      seat.class === "available" ||
+      seat.class === "booked" 
+
     )
       return;
 
@@ -711,9 +714,12 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
   const handleSeatClickReturn = (seat: Seat | undefined) => {
     if (
       !seat ||
+      !seat ||
       seat.class === "space" ||
       seat.class === "door" ||
-      seat.class === "driver"
+      seat.class === "driver" ||
+      seat.class === "available" ||
+      seat.class === "booked" 
     )
       return;
 
