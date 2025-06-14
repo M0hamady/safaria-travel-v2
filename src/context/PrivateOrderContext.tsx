@@ -21,7 +21,7 @@ export const PrivateOrderProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   useEffect(() => {
     if (user?.api_token) fetchPrivateOrders();
-  }, [user?.api_token]);
+  }, []);
 
   const fetchPrivateOrders = async () => {
     if (!user?.api_token) return;

@@ -23,7 +23,7 @@ export const TrainOrderProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   useEffect(() => {
     if (user?.api_token) fetchTrainOrders();
-  }, [user?.api_token]);
+  }, []);
 
   const fetchTrainOrders = async () => {
     if (!user?.api_token) return;

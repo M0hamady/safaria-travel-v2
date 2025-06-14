@@ -23,7 +23,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     if (user?.api_token) fetchOrders();
-  }, [user?.api_token]);
+  }, []);
 
   // Fetch all orders
   const fetchOrders = async () => {
