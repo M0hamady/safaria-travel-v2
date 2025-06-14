@@ -175,7 +175,7 @@ const SearchBar = () => {
     if (toMatch) {
       handleInputChange_private("to", toMatch.id); // 👈 convert to string
     }
-  }, [searchType, setSearchType]);
+  }, [searchType, ]);
 
   // Warn about no return trip
   useEffect(() => {
