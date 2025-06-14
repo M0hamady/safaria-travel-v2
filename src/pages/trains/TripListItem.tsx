@@ -43,7 +43,7 @@ const TripListItem: React.FC<Props> = ({ trip, onSelect, getMinPrice }) => {
 
         {/* Train & Trip Details */}
         <div className="grid grid-cols-1 gap-4 text-center md:text-left w-full rtl:text-right">
-          <div className='flex w-full justify-between'>
+          <div className='flex w-full justify-between  max-sm:flex-col'>
 
           <h3 className="font-semibold text-lg max-sm:ltr:text-left">{t("train_number")}: {trip.train.name}</h3>
           {/* we will add container has routes of trip each route has id and name while hover preview list in drobdown miu=nue  */}
