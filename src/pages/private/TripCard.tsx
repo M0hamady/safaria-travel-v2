@@ -1,4 +1,4 @@
-import { FC, useCallback } from "react";
+import { FC, useCallback, useContext } from "react";
 import { Trip } from "../../types/types";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { BusinessCenter, EventSeat, ShareOutlined } from "@mui/icons-material";
 import { usePrivateSearchContext } from "../../context/PrivateSearchContext";
 import ImageSlider from "../../components/utilies/ImageSlider";
+import { AuthContext } from "../../context/AuthContext";
 const categoryBadgeClasses: Record<string, string> = {
   unknown: "bg-gray-200 text-gray-800",
   limousine: "bg-purple-200 text-purple-800",
@@ -16,7 +17,18 @@ const categoryBadgeClasses: Record<string, string> = {
 };
 export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
   const navigate = useNavigate();
-  const handleSelect = () => navigate(`/private-trips-search/trip/${trip.id}`);
+    const { isAuthenticated, user, logout } = useContext(AuthContext);
+      const currentPath = window.location.pathname + window.location.search;
+
+  const handleSelect = () => {
+    if (!isAuthenticated || !user) {
+            navigate(`/login?prev=${encodeURIComponent(currentPath)}`);
+
+    }else {
+
+      navigate(`/private-trips-search/trip/${trip.id}`)
+    }
+  };
   const { t } = useTranslation();
   const { tripType } =
     usePrivateSearchContext();
