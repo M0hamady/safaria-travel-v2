@@ -205,7 +205,7 @@ const AddressCard: React.FC<Props> = ({
         <DialogTitle>
           {variant === "primary" ? "اختر عنوان الركوب" : "اختر عنوان العودة"}
         </DialogTitle>
-        <DialogContent className="h-[70vh] p-0">
+        <DialogContent className="h-[50rem] p-0">
           <EgyptMapSelector locations={addresses} onSelect={handleMapSelect} mapDialogType=   {variant === "primary" ? "boarding" : "return"} />
         </DialogContent>
         <DialogActions>

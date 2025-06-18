@@ -9,6 +9,7 @@ import dayjs from "dayjs";
 import { usePrivateTripDataContext } from "../../context/PrivateTripDataContext";
 import { useNavigate } from "react-router-dom";
 import { usePrivateSearchContext } from "../../context/PrivateSearchContext";
+import DatePicker from "../../components/utilies/DatePicker";
 
 type Props = {
   addresses: Address[];
@@ -28,11 +29,13 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
     setReturnAddressId,
     returnDateTime,
     setReturnDateTime,
+    fetchAddresses
   } = usePrivateTripDataContext();
 
   const {
     searchValues,
     tripType,
+    fetchLocations
   } = usePrivateSearchContext();
 
   const [mapDialogType, setMapDialogType] = useState<"boarding" | "return" | null>(null);
@@ -41,6 +44,7 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
 
   // Initial datetime setup
   useEffect(() => {
+    fetchAddresses()
     if (searchValues?.departure) {
       const formatted = dayjs(searchValues.departure).format("YYYY-MM-DDTHH:mm");
       const formatted2 = dayjs(searchValues.return).format("YYYY-MM-DDTHH:mm");
@@ -79,24 +83,47 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
     }
     setMapDialogType(null);
   };
+const renderDateTimeInput = (
+  value: string,
+  onChange: (v: string) => void,
+  label: string,
+  minDate?: string
+) => {
+  const getCurrentTime = (): string => {
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  };
 
-  const renderDateTimeInput = (
-    value: string,
-    onChange: (v: string) => void,
-    label: string,
-    minDate?: string
-  ) => (
-    <div className="flex flex-col space-y-1">
+  const handleContainerClick = () => {
+    if (!value) return;
+
+    const [datePart] = value.split('T');
+    const newTime = getCurrentTime();
+    const updatedDateTime = `${datePart}T${newTime}`;
+
+    onChange(updatedDateTime);
+  };
+
+  return (
+    <div
+      className="flex flex-col space-y-1 cursor-pointer"
+      onClick={handleContainerClick}
+    >
       <label className="text-sm text-gray-600">{label}</label>
       <input
         type="datetime-local"
         className="w-full border px-3 py-2 rounded-lg text-sm"
         value={value}
-        min={minDate}
+        min={value}
+        max={value}
         onChange={(e) => onChange(e.target.value)}
+        onClick={(e) => e.stopPropagation()} // Prevent input click from triggering div click
       />
     </div>
   );
+};
+
 
   const renderAddressSelect = (
     label: string,
@@ -153,14 +180,28 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
                 variant="primary"
               />
             )}
+{boardingAddressId && (
+  <DatePicker
+    label={t("address.boardingDate")}
+    value={boardingDateTime}
+    type="datetime-local"
+    onChange={(e) => setBoardingDateTime(e.target.value)}
+    minDate={boardingDateTime}
+    error={false}
+    maxDate={boardingDateTime}
+    helperText=""
+    required
+    fullWidth
+  />
+)}
 
-        {boardingAddressId &&
+        {/* {boardingAddressId &&
           renderDateTimeInput(
             boardingDateTime,
             setBoardingDateTime,
             t("address.boardingDate"),
             dayjs().format("YYYY-MM-DDTHH:mm")
-          )}
+          )} */}
       </div>
 
       {/* Return Section */}

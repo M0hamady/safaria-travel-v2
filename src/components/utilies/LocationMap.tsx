@@ -1,58 +1,58 @@
 import React from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import L from "leaflet";
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 
 type Props = {
   latitude: number;
   longitude: number;
   zoom?: number;
-  markerColor?: string; // نستخدم لون الماركر إذا متاح
+  markerColor?: string; // Not directly used in Google Maps Markers (you'll need custom icons for color)
 };
 
-// لإنشاء أيقونة مخصصة باللون المطلوب
-const createCustomIcon = (color: string) => {
-  return L.divIcon({
-    className: "custom-marker",
-    html: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="${color}" viewBox="0 0 24 24"><path d="M12 2C8.13401 2 5 5.13401 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13401 15.866 2 12 2Z"/></svg>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 24],
-  });
-};
-
-// كمبوننت لتحديث الزوم والإحداثيات عند التغيير
-const MapUpdater = ({ latitude, longitude, zoom }: { latitude: number; longitude: number; zoom: number }) => {
-  const map = useMap();
-  React.useEffect(() => {
-    map.setView([latitude, longitude], zoom);
-  }, [latitude, longitude, zoom, map]);
-  return null;
+const containerStyle = {
+  width: "100%",
+  height: "100%",
 };
 
 const LocationMap: React.FC<Props> = ({
   latitude,
   longitude,
   zoom = 13,
-  markerColor = "#2b6cb0", // لون أزرق إفتراضي
+  markerColor,
 }) => {
-  const icon = createCustomIcon(markerColor);
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: "AIzaSyCDPdRtF8MT2mJBMA_YyYiDPpTeaoYpzUI", // Replace with your API key
+  });
+
+  const center = { lat: latitude, lng: longitude };
+
+  const getColoredMarker = (color?: string) => {
+    if (!color) return undefined;
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="${color}" viewBox="0 0 24 24">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 4.97 7 13 7 13s7-8.03 7-13c0-3.87-3.13-7-7-7z"/>
+      </svg>
+    `;
+
+    return {
+      url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+      scaledSize: new google.maps.Size(36, 36),
+      anchor: new google.maps.Point(18, 36),
+    };
+  };
+
+  if (!isLoaded) return <div>Loading map...</div>;
 
   return (
-    <div className="w-full max-w-[400px] mx-auto bg-black h-64 rounded-lg overflow-hidden shadow-lg">
-      <MapContainer
-        center={[latitude, longitude]}
+    <div className="w-full max-w-[400px] mx-auto h-64 rounded-lg overflow-hidden shadow-lg">
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={center}
         zoom={zoom}
-        scrollWheelZoom={false}
-        style={{ width: "100%", height: "100%" }}
-        className="rounded-lg"
+        options={{ disableDefaultUI: true }}
       >
-        <MapUpdater latitude={latitude} longitude={longitude} zoom={zoom} />
-        <TileLayer
-          attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <Marker position={[latitude, longitude]} icon={icon}>
-        </Marker>
-      </MapContainer>
+        <Marker position={center} icon={getColoredMarker(markerColor)} />
+      </GoogleMap>
     </div>
   );
 };

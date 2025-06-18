@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Header from "../../components/Header";
 import { Loader } from "../../components/utilies/Loader";
@@ -9,11 +9,20 @@ import TripInfoSection from "./TripInfoSection";
 import TripBookingSection from "./TripBookingSection";
 import AddressSelectionSection from "./AddressSelectionSection";
 import { usePrivateSearchContext } from "../../context/PrivateSearchContext";
+import { usePrivateTripDataContext } from "../../context/PrivateTripDataContext";
 
 const PrivateTripDetailsPage = () => {
   const { tripId } = useParams<{ tripId: string }>();
   const { addToast } = useToast();
 
+  const {
+
+    fetchAddresses
+  } = usePrivateTripDataContext();
+  useEffect(() => {
+    fetchAddresses()
+  }, [])
+  
   const {
     trip,
     loading,
@@ -22,7 +31,8 @@ const PrivateTripDetailsPage = () => {
     handleCreateTicket,
     toggleMapExpansion,
     isMapExpanded,
-    addresses
+    addresses,
+    
   } = usePrivateTripData(tripId);
 
   if (loading) return <Loader />;

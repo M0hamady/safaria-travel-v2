@@ -16,6 +16,7 @@ interface DatePickerProps {
   disabled?: boolean;
   id?: string;
   name?: string;
+  type?: 'date' | 'datetime-local'; // add this
   beforeVal?: string; // New prop added
   clearButtonIcon?: React.ReactNode; // Customizable clear button icon
   calendarIcon?: React.ReactNode; // Customizable calendar icon
@@ -24,6 +25,7 @@ interface DatePickerProps {
 const DatePicker: React.FC<DatePickerProps> = ({
   label,
   value,
+  type,
   onChange,
   error = false,
   helperText = "",
@@ -112,7 +114,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
         {/* Input Field */}
         <input
-          type="date"
+          type={type || 'date'} // Add a `type` prop and default it to "date"
           id={id}
           name={name}
           value={value}
@@ -121,6 +123,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           onBlur={() => setFocused(false)}
           className="appearance-none w-full focus:outline-none bg-transparent cursor-pointer min-h-[50px] pt-4 text-gray-700"
           min={calculatedMaxDate}
+          max={minDate}
           required={required}
           disabled={disabled}
           ref={inputRef}
