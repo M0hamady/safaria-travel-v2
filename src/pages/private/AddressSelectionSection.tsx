@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Address } from "../../types/privateTypes";
 import { AddLocation, Cancel } from "@mui/icons-material";
 import { useToast } from "../../context/ToastContext";
@@ -37,11 +37,17 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
     tripType,
     fetchLocations
   } = usePrivateSearchContext();
+    const dialogRef = useRef<HTMLDivElement>(null);
+
 
   const [mapDialogType, setMapDialogType] = useState<"boarding" | "return" | null>(null);
   const [boardingAddress, setBoardingAddress] = useState<Address | undefined>();
   const [returnAddress, setReturnAddress] = useState<Address | undefined>();
-
+useEffect(() => {
+  if (mapDialogType && dialogRef.current) {
+    dialogRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}, [mapDialogType]);
   // Initial datetime setup
   useEffect(() => {
     fetchAddresses()
@@ -79,50 +85,50 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
       addToast({ message: t("address.boardingSet"), type: "success" });
     } else {
       setReturnAddressId(id);
-      addToast({ message: t("address.returnSet"), type: "success",  });
+      addToast({ message: t("address.returnSet"), type: "success", });
     }
     setMapDialogType(null);
   };
-const renderDateTimeInput = (
-  value: string,
-  onChange: (v: string) => void,
-  label: string,
-  minDate?: string
-) => {
-  const getCurrentTime = (): string => {
-    const now = new Date();
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const renderDateTimeInput = (
+    value: string,
+    onChange: (v: string) => void,
+    label: string,
+    minDate?: string
+  ) => {
+    const getCurrentTime = (): string => {
+      const now = new Date();
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    };
+
+    const handleContainerClick = () => {
+      if (!value) return;
+
+      const [datePart] = value.split('T');
+      const newTime = getCurrentTime();
+      const updatedDateTime = `${datePart}T${newTime}`;
+
+      onChange(updatedDateTime);
+    };
+
+    return (
+      <div
+        className="flex flex-col space-y-1 cursor-pointer"
+        onClick={handleContainerClick}
+      >
+        <label className="text-sm text-gray-600">{label}</label>
+        <input
+          type="datetime-local"
+          className="w-full border px-3 py-2 rounded-lg text-sm"
+          value={value}
+          min={value}
+          max={value}
+          onChange={(e) => onChange(e.target.value)}
+          onClick={(e) => e.stopPropagation()} // Prevent input click from triggering div click
+        />
+      </div>
+    );
   };
-
-  const handleContainerClick = () => {
-    if (!value) return;
-
-    const [datePart] = value.split('T');
-    const newTime = getCurrentTime();
-    const updatedDateTime = `${datePart}T${newTime}`;
-
-    onChange(updatedDateTime);
-  };
-
-  return (
-    <div
-      className="flex flex-col space-y-1 cursor-pointer"
-      onClick={handleContainerClick}
-    >
-      <label className="text-sm text-gray-600">{label}</label>
-      <input
-        type="datetime-local"
-        className="w-full border px-3 py-2 rounded-lg text-sm"
-        value={value}
-        min={value}
-        max={value}
-        onChange={(e) => onChange(e.target.value)}
-        onClick={(e) => e.stopPropagation()} // Prevent input click from triggering div click
-      />
-    </div>
-  );
-};
 
 
   const renderAddressSelect = (
@@ -159,9 +165,9 @@ const renderDateTimeInput = (
           <label className="text-base text-gray-700">{t("address.boardingLabel")}</label>
           {boardingAddressId && (
             <button
-        onClick={() =>
-          setMapDialogType("boarding")
-        }
+              onClick={() =>
+                setMapDialogType("boarding")
+              }
               className="text-sm text-blue-600 hover:text-blue-800 underline"
             >
               {t("common.change")}
@@ -172,28 +178,29 @@ const renderDateTimeInput = (
         {!boardingAddressId
           ? renderAddressSelect(t("address.boarding"), boardingAddressId, setBoardingAddressId)
           : boardingAddress && (
-              <AddressCard
-                address={boardingAddress}
-                onEdit={() =>   {
-                   setBoardingAddressId(null)
-                  setMapDialogType("boarding")}}
-                variant="primary"
-              />
-            )}
-{boardingAddressId && (
-  <DatePicker
-    label={t("address.boardingDate")}
-    value={boardingDateTime}
-    type="datetime-local"
-    onChange={(e) => setBoardingDateTime(e.target.value)}
-    minDate={boardingDateTime}
-    error={false}
-    maxDate={boardingDateTime}
-    helperText=""
-    required
-    fullWidth
-  />
-)}
+            <AddressCard
+              address={boardingAddress}
+              onEdit={() => {
+                setBoardingAddressId(null)
+                setMapDialogType("boarding")
+              }}
+              variant="primary"
+            />
+          )}
+        {boardingAddressId && (
+          <DatePicker
+            label={t("address.boardingDate")}
+            value={boardingDateTime}
+            type="datetime-local"
+            onChange={(e) => setBoardingDateTime(e.target.value)}
+            minDate={boardingDateTime}
+            error={false}
+            maxDate={boardingDateTime}
+            helperText=""
+            required
+            fullWidth
+          />
+        )}
 
         {/* {boardingAddressId &&
           renderDateTimeInput(
@@ -211,10 +218,11 @@ const renderDateTimeInput = (
             <label className="text-base text-gray-700">{t("address.returnLabel")}</label>
             {returnAddressId && (
               <button
-                onClick={() =>   {
-                   setReturnAddressId(null)
-                  
-                  setMapDialogType("return")}}
+                onClick={() => {
+                  setReturnAddressId(null)
+
+                  setMapDialogType("return")
+                }}
                 className="text-sm text-green-600 hover:text-green-800 underline"
               >
                 {t("common.change")}
@@ -224,38 +232,48 @@ const renderDateTimeInput = (
 
           {!returnAddressId
             ? renderAddressSelect(
-                t("address.return"),
-                returnAddressId,
-                setReturnAddressId,
-                boardingAddressId ?? undefined
-              )
+              t("address.return"),
+              returnAddressId,
+              setReturnAddressId,
+              boardingAddressId ?? undefined
+            )
             : returnAddress && (
-                <AddressCard
-                  address={returnAddress}
-                  onEdit={() =>{
-                     setReturnAddressId(null)
-                    setMapDialogType("return")
-                    }
-                    
-                    }
-                  variant="secondary"
-                />
-              )}
+              <AddressCard
+                address={returnAddress}
+                onEdit={() => {
+                  setReturnAddressId(null)
+                  setMapDialogType("return")
+                }
 
-          {tripType === "round" && returnAddressId &&
-            renderDateTimeInput(
-              returnDateTime,
-              setReturnDateTime,
-              t("address.returnDate"),
-              boardingDateTime
+                }
+                variant="secondary"
+              />
             )}
+          {tripType === "round" && returnAddressId && (
+            <DatePicker
+              label={t("address.returnDate")}
+              value={returnDateTime}
+              type="datetime-local"
+              onChange={(e) => setReturnDateTime(e.target.value)}
+              minDate={returnDateTime}
+              error={false}
+              maxDate={returnDateTime}
+              helperText=""
+              required
+              fullWidth
+            />
+          )}
+
         </div>
       )}
 
       {/* Map Dialog */}
       {mapDialogType && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg w-11/12 sm:w-3/4 lg:w-1/2 max-h-[90vh] flex flex-col">
+<div
+          ref={dialogRef}
+          className="fixed inset-0 inset-y-8 z-50 flex items-center mt-5 max-sm:items-start justify-center bg-black bg-opacity-50 overflow-y-auto"
+        >          {/* if this run scroll to it auutomaticaaly by giving it is  */}
+          <div className="bg-white rounded-lg absolute top-12 mx-auto shadow-lg w-11/12 sm:w-3/4 lg:w-1/2 max-h-[90vh] flex flex-col max-sm:h-full">
             <div className="flex justify-between items-center p-4 border-b">
               <h3 className="text-lg font-medium flex items-center gap-2">
                 <AddLocation className="text-blue-500" />
@@ -267,7 +285,7 @@ const renderDateTimeInput = (
                 <Cancel />
               </button>
             </div>
-            <EgyptMapSelector onSelect={handleMapSelect} mapDialogType={mapDialogType}   />
+            <EgyptMapSelector onSelect={handleMapSelect} mapDialogType={mapDialogType} />
           </div>
         </div>
       )}

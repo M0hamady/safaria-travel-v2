@@ -1,28 +1,75 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
+import { Address } from '../../types/privateTypes';
+import { usePrivateTripDataContext } from '../../context/PrivateTripDataContext';
+import { useToast } from '../../context/ToastContext';
 import {
-  GoogleMap,
-  Marker,
-  InfoWindow,
-  DirectionsRenderer,
-  useJsApiLoader
-} from "@react-google-maps/api";
-import { Address } from "../../types/privateTypes";
-import { usePrivateTripDataContext } from "../../context/PrivateTripDataContext";
-import { useToast } from "../../context/ToastContext";
-import {
-  Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, Button, Fab
-} from "@mui/material";
-import {
-  GpsFixed, AddLocation, Place, Cancel, Save
-} from "@mui/icons-material";
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Fab,
+} from '@mui/material';
+import { GpsFixed, AddLocation, Place, Cancel, Save } from '@mui/icons-material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import NotesIcon from '@mui/icons-material/Notes';
+import { useGoogleMaps } from '../../context/GoogleMapsProvider';
 
-const containerStyle = {
-  width: "100%",
-  height: "22rem",
-};
+// Custom map styles for EgyptMapSelector
+const mapStyles = [
+  {
+    featureType: 'all',
+    elementType: 'geometry',
+    stylers: [{ color: '#f5f5f5' }],
+  },
+  {
+    featureType: 'all',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#717171' }],
+  },
+  {
+    featureType: 'all',
+    elementType: 'labels.text.stroke',
+    stylers: [{ color: '#ffffff' }],
+  },
+  {
+    featureType: 'administrative',
+    elementType: 'geometry',
+    stylers: [{ color: '#d1d1d1' }],
+  },
+  {
+    featureType: 'landscape',
+    elementType: 'geometry',
+    stylers: [{ color: '#e0e0e0' }],
+  },
+  {
+    featureType: 'poi',
+    elementType: 'labels',
+    stylers: [{ visibility: 'off' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry',
+    stylers: [{ color: '#ffffff' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#8a8a8a' }],
+  },
+  {
+    featureType: 'transit',
+    elementType: 'labels',
+    stylers: [{ visibility: 'off' }],
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry',
+    stylers: [{ color: '#b3e0ff' }],
+  },
+];
 
 const defaultZoom = 7;
 const centerEgypt = { lat: 28.8, lng: 30.8 };
@@ -30,7 +77,7 @@ const centerEgypt = { lat: 28.8, lng: 30.8 };
 interface Props {
   locations?: Address[];
   onSelect?: (id: string) => void;
-  mapDialogType?: "boarding" | "return";
+  mapDialogType?: 'boarding' | 'return';
   selectedId?: string;
 }
 
@@ -40,176 +87,34 @@ const MemoizedInfoWindow = React.memo(InfoWindow);
 export default function EgyptMapSelector({
   locations = [],
   onSelect,
-  mapDialogType = "boarding",
+  mapDialogType = 'boarding',
   selectedId,
 }: Props) {
-  const { 
-    addNewAddress, 
-    addresses, 
-    boardingAddressId, 
+  const {
+    addNewAddress,
+    addresses,
+    boardingAddressId,
     returnAddressId,
-    addressesReturn 
+    addressesReturn,
   } = usePrivateTripDataContext();
-  
-  const { addToast } = useToast();
 
-  const [query, setQuery] = useState("");
+  const { addToast } = useToast();
+  const { isLoaded, loadError } = useGoogleMaps();
+
+  const [query, setQuery] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [current, setCurrent] = useState<{ name: string; coords: google.maps.LatLngLiteral } | null>(null);
   const [candidate, setCandidate] = useState<{ coords: google.maps.LatLngLiteral; label: string } | null>(null);
   const [openAdd, setOpenAdd] = useState(false);
-  const [newLabel, setNewLabel] = useState("");
+  const [newLabel, setNewLabel] = useState('');
   const [activeInfoWindow, setActiveInfoWindow] = useState<string | null>(null);
-  const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
-  const [distance, setDistance] = useState<string | null>(null);
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const effectiveLocations = locations.length ? locations : addresses;
 
-  // Fixed: Added 'directions' library
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyCDPdRtF8MT2mJBMA_YyYiDPpTeaoYpzUI",
-    libraries: [ 'geometry',"places"]
-  });
-
-  useEffect(() => {
-    if (query.length < 2) return setSuggestions([]);
-    const ctrl = new AbortController();
-    const timer = setTimeout(async () => {
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=eg&bounded=1`,
-          { signal: ctrl.signal }
-        );
-        const data = await res.json();
-        setSuggestions(data);
-        if (data.length > 0) {
-          setCurrent({
-            name: data[0].display_name,
-            coords: { 
-              lat: parseFloat(data[0].lat), 
-              lng: parseFloat(data[0].lon) 
-            }
-          });
-        }
-      } catch { }
-    }, 300);
-    return () => {
-      clearTimeout(timer);
-      ctrl.abort();
-    };
-  }, [query]);
-
-  // Calculate route between boarding and return points
-  useEffect(() => {
-    if (!boardingAddressId || !returnAddressId || !addressesReturn) {
-      setDirections(null);
-      setDistance(null);
-      return;
-    }
-
-    const boardingAddress = addresses.find(addr => addr.id === boardingAddressId);
-    
-    // Fixed: Use addressesReturn directly
-    const returnAddress = addressesReturn;
-
-    if (!boardingAddress || !returnAddress) return;
-
-    const origin = {
-      lat: boardingAddress.map_location.lat,
-      lng: boardingAddress.map_location.lng
-    };
-
-    const destination = {
-      lat: returnAddress.map_location.lat,
-      lng: returnAddress.map_location.lng
-    };
-
-    // if (window.google && window.google.maps) {
-    //   const directionsService = new google.maps.DirectionsService();
-      
-    //   directionsService.route(
-    //     {
-    //       origin,
-    //       destination,
-    //       travelMode: google.maps.TravelMode.DRIVING,
-    //       region: 'eg'
-    //     },
-    //     (result, status) => {
-    //       if (status === google.maps.DirectionsStatus.OK && result) {
-    //         setDirections(result);
-            
-    //         // Calculate distance
-    //         let totalDistance = 0;
-    //         result.routes[0].legs.forEach(leg => {
-    //           if (leg.distance) {
-    //             totalDistance += leg.distance.value;
-    //           }
-    //         });
-            
-    //         // Convert to kilometers and format
-    //         setDistance((totalDistance / 1000).toFixed(1) + ' كم');
-    //       } else {
-    //         console.error(`Directions request failed: ${status}`);
-    //       }
-    //     }
-    //   );
-    // }
-  }, [boardingAddressId, returnAddressId, addresses, addressesReturn]);
-
-  const locateMe = useCallback(() => {
-    if (!navigator.geolocation) {
-      addToast({ message: "Geolocation is not supported by your browser", type: "error" });
-      return;
-    }
-    
-    addToast({ message: "جاري تحديد موقعك الحالي...", type: "info" });
-    
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setCurrent({
-          name: "موقعي الحالي",
-          coords: { lat: coords.latitude, lng: coords.longitude },
-        });
-        setActiveInfoWindow('current');
-        mapRef.current?.panTo({ lat: coords.latitude, lng: coords.longitude });
-        mapRef.current?.setZoom(16);
-        addToast({ message: "تم تحديد موقعك بنجاح", type: "success" });
-      },
-      (error) => {
-        let message = "فشل جلب الموقع";
-        switch(error.code) {
-          case error.PERMISSION_DENIED:
-            message = "تم رفض إذن الوصول للموقع";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            message = "معلومات الموقع غير متوفرة";
-            break;
-          case error.TIMEOUT:
-            message = "انتهى الوقت المحدد لطلب الموقع";
-            break;
-        }
-        addToast({ message, type: "error" });
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  }, [addToast]);
-
-  const handleDoubleClick = useCallback((event: google.maps.MapMouseEvent) => {
-    console.log();
-    if (event.latLng) {
-      const lat = event.latLng.lat(), lng = event.latLng.lng();
-      setCandidate({
-        coords: { lat, lng },
-        label: `${lat.toFixed(4)}, ${lng.toFixed(4)}`
-      });
-      setOpenAdd(true);
-      setActiveInfoWindow('current');
-    }
-  }, []);
-
   const handleSuggestion = useCallback((item: any) => {
-    const lat = parseFloat(item.lat), lng = parseFloat(item.lon);
+    const lat = parseFloat(item.lat),
+      lng = parseFloat(item.lon);
     setCurrent({ name: item.display_name, coords: { lat, lng } });
     setQuery(item.display_name);
     setSuggestions([]);
@@ -217,6 +122,77 @@ export default function EgyptMapSelector({
     mapRef.current?.setZoom(16);
     setActiveInfoWindow('current');
   }, []);
+
+  const handleDoubleClick = useCallback((event: google.maps.MapMouseEvent) => {
+    if (event.latLng) {
+      const lat = event.latLng.lat(),
+        lng = event.latLng.lng();
+      setCandidate({
+        coords: { lat, lng },
+        label: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+      });
+      setOpenAdd(true);
+      setActiveInfoWindow('current');
+    }
+  }, []);
+
+  const copyToClipboard = useCallback(
+    (text: string) => {
+      navigator.clipboard.writeText(text);
+      addToast({ message: 'تم نسخ الإحداثيات', type: 'success' });
+    },
+    [addToast]
+  );
+
+  const handleSaveCurrentLocation = useCallback(async () => {
+    if (!current) return;
+    const alreadySaved = addresses.some(
+      (addr) =>
+        +addr.map_location.lat === current.coords.lat &&
+        +addr.map_location.lng === current.coords.lng
+    );
+
+    if (alreadySaved) {
+      addToast({ message: 'تم حفظ هذا الموقع مسبقًا', type: 'info' });
+      return;
+    }
+
+    try {
+      await addNewAddress({
+        name: 'موقعي الحالي',
+        map_location: {
+          lat: String(current.coords.lat),
+          lng: String(current.coords.lng),
+          address_name: current.name,
+        },
+        notes: '',
+      });
+      addToast({
+        message: 'تم حفظ موقعك الحالي بنجاح',
+        type: 'success',
+      });
+      setActiveInfoWindow(null);
+    } catch {
+      addToast({ message: 'فشل حفظ الموقع', type: 'error' });
+    }
+  }, [addNewAddress, addToast, addresses, current]);
+
+  const handleAddressSelect = useCallback(
+    (id: string) => {
+      setActiveInfoWindow(null);
+      if (onSelect) {
+        onSelect(id);
+        addToast({
+          message:
+            mapDialogType === 'boarding'
+              ? 'تم تحديد نقطة الركوب'
+              : 'تم تحديد نقطة العودة',
+          type: 'success',
+        });
+      }
+    },
+    [addToast, mapDialogType, onSelect]
+  );
 
   const saveAddress = useCallback(async () => {
     if (!candidate || !newLabel.trim()) return;
@@ -228,102 +204,156 @@ export default function EgyptMapSelector({
           lng: String(candidate.coords.lng),
           address_name: candidate.label,
         },
-        notes: "",
+        notes: '',
       });
-      addToast({ 
-        message: `تم إضافة العنوان "${newLabel}" بنجاح`, 
-        type: "success",
+      addToast({
+        message: `تم إضافة العنوان "${newLabel}" بنجاح`,
+        type: 'success',
       });
       setOpenAdd(false);
-      setNewLabel("");
+      setNewLabel('');
       setCandidate(null);
       setActiveInfoWindow(null);
     } catch {
-      addToast({ message: "فشل إضافة العنوان", type: "error" });
+      addToast({ message: 'فشل إضافة العنوان', type: 'error' });
     }
   }, [addNewAddress, addToast, candidate, newLabel]);
 
-  const handleSaveCurrentLocation = useCallback(async () => {
-    if (!current) return;
-    const alreadySaved = addresses.some(
-      (addr) =>
-        +addr.map_location.lat === current.coords.lat &&
-        +addr.map_location.lng === current.coords.lng
-    );
-    
-    if (alreadySaved) {
-      addToast({ message: "تم حفظ هذا الموقع مسبقًا", type: "info" });
+  useEffect(() => {
+    if (!query || query.length < 2) {
+      setSuggestions([]);
       return;
     }
 
-    try {
-      await addNewAddress({
-        name: "موقعي الحالي",
-        map_location: {
-          lat: String(current.coords.lat),
-          lng: String(current.coords.lng),
-          address_name: current.name,
-        },
-        notes: "",
-      });
-      addToast({ 
-        message: "تم حفظ موقعك الحالي بنجاح", 
-        type: "success",
-      });
-      setActiveInfoWindow(null);
-    } catch {
-      addToast({ message: "فشل حفظ الموقع", type: "error" });
-    }
-  }, [addNewAddress, addToast, addresses, current]);
+    const ctrl = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            query
+          )}&limit=5&countrycodes=eg&bounded=1`,
+          { signal: ctrl.signal }
+        );
 
-  const handleAddressSelect = useCallback((id: string) => {
-    setActiveInfoWindow(null);
-    if (onSelect) {
-      onSelect(id);
+        if (!res.ok) throw new Error(`Search failed: ${res.status}`);
+
+        const data = await res.json();
+        setSuggestions(data);
+        if (data.length > 0) {
+          setCurrent({
+            name: data[0].display_name,
+            coords: {
+              lat: parseFloat(data[0].lat),
+              lng: parseFloat(data[0].lon),
+            },
+          });
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        addToast({
+          message: 'فشل في البحث عن المواقع',
+          type: 'error',
+        });
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+      ctrl.abort();
+    };
+  }, [query, addToast]);
+
+  const locateMe = useCallback(() => {
+    if (!navigator.geolocation) {
       addToast({
-        message: mapDialogType === "boarding"
-          ? "تم تحديد نقطة الركوب"
-          : "تم تحديد نقطة العودة",
-        type: "success",
+        message: 'متصفحك لا يدعم خدمة الموقع الجغرافي',
+        type: 'error',
       });
+      return;
     }
-  }, [addToast, mapDialogType, onSelect]);
 
-  const copyToClipboard = useCallback((text: string) => {
-    navigator.clipboard.writeText(text);
-    addToast({ message: 'تم نسخ الإحداثيات', type: 'success', });
+    addToast({
+      message: 'جاري تحديد موقعك الحالي...',
+      type: 'info',
+    });
+
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setCurrent({
+          name: 'موقعي الحالي',
+          coords: { lat: coords.latitude, lng: coords.longitude },
+        });
+        setActiveInfoWindow('current');
+        mapRef.current?.panTo({ lat: coords.latitude, lng: coords.longitude });
+        mapRef.current?.setZoom(16);
+        addToast({
+          message: 'تم تحديد موقعك بنجاح',
+          type: 'success',
+        });
+      },
+      (error) => {
+        let message = 'فشل جلب الموقع';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message = 'تم رفض إذن الوصول للموقع';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = 'معلومات الموقع غير متوفرة';
+            break;
+          case error.TIMEOUT:
+            message = 'انتهى الوقت المحدد لطلب الموقع';
+            break;
+        }
+        addToast({
+          message,
+          type: 'error',
+        });
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   }, [addToast]);
 
-  // Calculate distance between two points
-  const calculateDistance = (point1: google.maps.LatLngLiteral, point2: google.maps.LatLngLiteral) => {
-    if (!window.google || !window.google.maps || !window.google.maps.geometry) 
-      return "...";
-    
-    const distance = window.google.maps.geometry.spherical.computeDistanceBetween(
-      new google.maps.LatLng(point1),
-      new google.maps.LatLng(point2)
-    );
-    
-    return (distance / 1000).toFixed(1) + " كم";
-  };
-
-  // Get boarding and return points for distance calculation
-  const getBoardingPoint = () => {
-    if (!boardingAddressId) return null;
-    const boardingAddress = addresses.find(addr => addr.id === boardingAddressId);
-    if (!boardingAddress) return null;
-    
-    return {
-      lat: boardingAddress.map_location.lat,
-      lng: boardingAddress.map_location.lng
-    };
-  };
-
-  if (!isLoaded || typeof google === "undefined") {
+  if (loadError) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-50 rounded-lg">
+      <div className="flex flex-col items-center  justify-center h-full bg-red-50 p-4 rounded-lg text-center">
+        <div className="text-red-600 mb-3">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-12 w-12 mx-auto"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+        </div>
+        <h3 className="text-xl font-bold text-red-700 mb-2">خطأ في تحميل الخريطة</h3>
+        <p className="text-gray-600 mb-4">
+          تعذر تحميل خدمة خرائط جوجل. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.
+        </p>
+        <p className="text-sm text-gray-500">التفاصيل الفنية: {loadError.message}</p>
+        <Button
+          variant="contained"
+          color="error"
+          className="mt-4"
+          onClick={() => window.location.reload()}
+        >
+          إعادة المحاولة
+        </Button>
+      </div>
+    );
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center h-[40rem] bg-gray-50 rounded-lg">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
           <p className="mt-4 text-gray-600">جاري تحميل الخريطة...</p>
         </div>
       </div>
@@ -331,40 +361,40 @@ export default function EgyptMapSelector({
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-[40rem]  max-sm:h-[48rem] mx-auto rounded-lg overflow-hidden">
       <Fab
         onClick={locateMe}
-        size="small"
-        className="absolute top-12 left-4 z-10 bg-white shadow-lg"
+        size="medium"
+        className="absolute md:top-4 left-4 z-10 bg-white shadow-lg hover:bg-gray-100 max-sm:top-[35rem]"
         aria-label="تحديد الموقع الحالي"
       >
-        <GpsFixed />
+        <GpsFixed className="text-blue-600" />
       </Fab>
 
-      <div className="absolute top-12 right-4 z-50 w-80">
+      <div className="absolute md:top-12 max-sm:top-[5rem] right-4 z-50 w-full max-w-xs sm:max-w-sm">
         <div className="relative">
           <TextField
             fullWidth
             size="small"
             className="bg-white shadow-md rounded-lg"
             placeholder="ابحث عن موقع..."
-            value={query}
+            value={query || ''}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && suggestions.length > 0) {
+              if (e.key === 'Enter' && suggestions.length > 0) {
                 handleSuggestion(suggestions[0]);
                 e.preventDefault();
               }
             }}
-            InputProps={{ 
+            InputProps={{
               endAdornment: <AddLocation className="text-gray-400" />,
-              className: "pr-9"
+              className: 'pr-9',
             }}
           />
           {query && (
-            <button 
+            <button
               className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              onClick={() => setQuery("")}
+              onClick={() => setQuery('')}
             >
               <Cancel fontSize="small" />
             </button>
@@ -381,7 +411,7 @@ export default function EgyptMapSelector({
                 <div className="flex items-start">
                   <Place className="mt-0.5 text-blue-500" fontSize="small" />
                   <div className="mr-2">
-                    <div className="font-medium text-gray-800">{s.display_name.split(",")[0]}</div>
+                    <div className="font-medium text-gray-800">{s.display_name.split(',')[0]}</div>
                     <div className="text-xs text-gray-500 truncate">{s.display_name}</div>
                   </div>
                 </div>
@@ -392,99 +422,72 @@ export default function EgyptMapSelector({
       </div>
 
       <GoogleMap
-        mapContainerStyle={containerStyle}
+        mapContainerClassName="w-full h-full"
         center={current?.coords || centerEgypt}
-        zoom={current ? 14 : defaultZoom}
+        zoom={current ? 16 : defaultZoom}
         onLoad={(map) => {
           mapRef.current = map;
-          const bounds = new google.maps.LatLngBounds(
-            new google.maps.LatLng(22.0, 24.7),
-            new google.maps.LatLng(31.7, 36.9)
-          );
-          map.fitBounds(bounds);
-        }} 
+          try {
+            const bounds = new google.maps.LatLngBounds(
+              new google.maps.LatLng(22.0, 24.7),
+              new google.maps.LatLng(31.7, 36.9)
+            );
+            map.fitBounds(bounds);
+          } catch (error) {
+            console.error('Map bounds error:', error);
+            addToast({
+              message: 'حدث خطأ في ضبط حدود الخريطة',
+              type: 'error',
+            });
+          }
+        }}
         onDblClick={handleDoubleClick}
         options={{
           disableDefaultUI: true,
           disableDoubleClickZoom: true,
-          gestureHandling: "greedy",
-          styles: [
-            {
-              featureType: "poi",
-              elementType: "labels",
-              stylers: [{ visibility: "off" }]
-            },
-            {
-              featureType: "transit",
-              elementType: "labels",
-              stylers: [{ visibility: "off" }]
-            }
-          ]
+          gestureHandling: 'greedy',
+          styles: mapStyles,
         }}
       >
-        {/* Display route between boarding and return points */}
-        {directions && (
-          <DirectionsRenderer 
-            directions={directions} 
-            options={{
-              polylineOptions: {
-                strokeColor: "#3B82F6",
-                strokeOpacity: 0.8,
-                strokeWeight: 5
-              },
-              suppressMarkers: true
-            }}
-          />
-        )}
-
         {current && (
           <MemoizedMarker
             position={current.coords}
             icon={{
-              url: "https://maps.google.com/mapfiles/kml/shapes/man.png",
-              scaledSize: new google.maps.Size(40, 40),
+              url: 'https://maps.google.com/mapfiles/kml/shapes/man.png',
+              scaledSize: new google.maps.Size(48, 48),
             }}
             onClick={() => setActiveInfoWindow('current')}
             zIndex={1000}
           >
             {activeInfoWindow === 'current' && (
-              <MemoizedInfoWindow 
+              <MemoizedInfoWindow
                 onCloseClick={() => setActiveInfoWindow(null)}
-                options={{ maxWidth: 300 }}
+                options={{ maxWidth: 320 }}
               >
                 <div className="space-y-3">
-                  <h3 className="font-bold text-gray-800">{current.name}</h3>
+                  <h3 className="font-bold text-gray-800 text-lg">{current.name}</h3>
                   <div className="flex items-center text-sm text-gray-600">
                     <span className="mr-1">الإحداثيات:</span>
                     {current.coords.lat.toFixed(6)}, {current.coords.lng.toFixed(6)}
-                    <button 
+                    <button
                       className="ml-2 text-blue-500 hover:text-blue-700"
                       onClick={(e) => {
                         e.stopPropagation();
-                        copyToClipboard(`${current.coords.lat.toFixed(6)}, ${current.coords.lng.toFixed(6)}`);
+                        copyToClipboard(
+                          `${current.coords.lat.toFixed(6)}, ${current.coords.lng.toFixed(6)}`
+                        );
                       }}
                     >
                       <ContentCopyIcon fontSize="small" />
                     </button>
                   </div>
-                  
-                  {/* Show distance to boarding point if available */}
-                  {mapDialogType === "return" && boardingAddressId && (
-                    <div className="mt-2 text-sm">
-                      <span className="font-medium">المسافة من نقطة الركوب: </span>
-                      {getBoardingPoint() 
-                        ? calculateDistance(getBoardingPoint()!, current.coords)
-                        : "..."}
-                    </div>
-                  )}
-                  
                   <Button
                     variant="contained"
                     size="small"
                     fullWidth
                     onClick={handleSaveCurrentLocation}
                     startIcon={<Save />}
-                    className="mt-2"
+                    className="mt-2 bg-blue-600 hover:bg-blue-700"
                   >
                     حفظ هذا الموقع
                   </Button>
@@ -495,29 +498,32 @@ export default function EgyptMapSelector({
         )}
 
         {effectiveLocations.map((loc) => {
-          const pos = { lat: +loc.map_location.lat, lng: +loc.map_location.lng };
-          
+          const pos = {
+            lat: +loc.map_location.lat,
+            lng: +loc.map_location.lng,
+          };
+
           const isBoarding = String(loc.id) === boardingAddressId;
           const isSelected = String(loc.id) === selectedId;
           const isReturn = String(loc.id) === addressesReturn?.id;
-          
+
           const getMarkerIcon = () => {
-            if (isBoarding) {
+            if (isReturn) {
               return {
                 url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
                   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="#10B981"><path d="M16 0c-5.523 0-10 4.477-10 10 0 10 10 22 10 22s10-12 10-22c0-5.523-4.477-10-10-10zm0 16c-3.314 0-6-2.686-6-6s2.686-6 6-6 6 2.686 6 6-2.686 6-6 6z"/></svg>'
                 )}`,
-                scaledSize: new google.maps.Size(40, 40),
-                anchor: new google.maps.Point(20, 40)
+                scaledSize: new google.maps.Size(48, 48),
+                anchor: new google.maps.Point(24, 48),
               };
             }
-            if (isReturn) {
+            if (isBoarding) {
               return {
                 url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
                   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="#3B82F6"><path d="M16 0c-5.523 0-10 4.477-10 10 0 10 10 22 10 22s10-12 10-22c0-5.523-4.477-10-10-10zm0 16c-3.314 0-6-2.686-6-6s2.686-6 6-6 6 2.686 6 6-2.686 6-6 6z"/></svg>'
                 )}`,
-                scaledSize: new google.maps.Size(40, 40),
-                anchor: new google.maps.Point(20, 40)
+                scaledSize: new google.maps.Size(48, 48),
+                anchor: new google.maps.Point(24, 48),
               };
             }
             if (isSelected) {
@@ -525,16 +531,16 @@ export default function EgyptMapSelector({
                 url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
                   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="#F59E0B"><path d="M16 0c-5.523 0-10 4.477-10 10 0 10 10 22 10 22s10-12 10-22c0-5.523-4.477-10-10-10zm0 16c-3.314 0-6-2.686-6-6s2.686-6 6-6 6 2.686 6 6-2.686 6-6 6z"/></svg>'
                 )}`,
-                scaledSize: new google.maps.Size(36, 36),
-                anchor: new google.maps.Point(18, 36)
+                scaledSize: new google.maps.Size(40, 40),
+                anchor: new google.maps.Point(20, 40),
               };
             }
             return {
               url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="#EF4444"><path d="M16 0c-5.523 0-10 4.477-10 10 0 10 10 22 10 22s10-12 10-22c0-5.523-4.477-10-10-10zm0 16c-3.314 0-6-2.686-6-6s2.686-6 6-6 6 2.686 6 6-2.686 6-6 6z"/></svg>'
               )}`,
-              scaledSize: new google.maps.Size(32, 32),
-              anchor: new google.maps.Point(16, 32)
+              scaledSize: new google.maps.Size(36, 36),
+              anchor: new google.maps.Point(18, 36),
             };
           };
 
@@ -550,17 +556,23 @@ export default function EgyptMapSelector({
               zIndex={isBoarding || isReturn || isSelected ? 100 : 10}
             >
               {activeInfoWindow === `address-${loc.id}` && (
-                <MemoizedInfoWindow 
+                <MemoizedInfoWindow
                   onCloseClick={() => setActiveInfoWindow(null)}
-                  options={{ maxWidth: 300, minWidth: 250 }}
+                  options={{ maxWidth: 320, minWidth: 280 }}
                 >
                   <div className="max-w-xs">
                     <div className="flex items-start gap-3">
-                      <div className={`flex-shrink-0 w-5 h-5 rounded-full mt-1 ${
-                        isBoarding ? 'bg-green-500' : 
-                        isReturn ? 'bg-blue-500' : 
-                        isSelected ? 'bg-yellow-500' : 'bg-red-500'
-                      }`}></div>
+                      <div
+                        className={`flex-shrink-0 w-6 h-6 rounded-full mt-1 ${
+                          isBoarding
+                            ? 'bg-green-500'
+                            : isReturn
+                            ? 'bg-blue-500'
+                            : isSelected
+                            ? 'bg-yellow-500'
+                            : 'bg-red-500'
+                        }`}
+                      ></div>
                       <div className="flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="text-lg font-bold text-gray-800">{loc.name}</h3>
@@ -580,7 +592,7 @@ export default function EgyptMapSelector({
                             </span>
                           )}
                         </div>
-                        
+
                         <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
                           <div className="flex items-start">
                             <Place className="flex-shrink-0 mt-0.5 text-gray-400" fontSize="small" />
@@ -590,29 +602,13 @@ export default function EgyptMapSelector({
                               </p>
                               {loc.map_location.address_name && (
                                 <p className="text-xs text-gray-500 mt-1">
-                                  <span className="font-medium">معلم:</span> {loc.map_location.address_name}
+                                  <span className="font-medium">معلم:</span>{' '}
+                                  {loc.map_location.address_name}
                                 </p>
                               )}
                             </div>
                           </div>
                         </div>
-
-                        {/* Show distance to boarding point */}
-                        {mapDialogType === "return" && boardingAddressId && !isBoarding && (
-                          <div className="mt-3 p-2 bg-blue-50 rounded-lg border border-blue-100 text-sm text-blue-700">
-                            <div className="flex items-start">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 mt-0.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                              </svg>
-                              <div>
-                                <span className="font-medium">المسافة من نقطة الركوب: </span>
-                                {getBoardingPoint() 
-                                  ? calculateDistance(getBoardingPoint()!, pos)
-                                  : "..."}
-                              </div>
-                            </div>
-                          </div>
-                        )}
 
                         {loc.notes && (
                           <div className="mt-3 p-2 bg-yellow-50 rounded-lg border border-yellow-100 text-sm text-gray-700">
@@ -626,12 +622,12 @@ export default function EgyptMapSelector({
                         )}
                       </div>
                     </div>
-                    
-                    <div className="mt-3 flex justify-between items-center pt-2 border-t border-gray-100">
+
+                    <div className="mt-3 flex justify-between items-center pt-2 border-t border-gray-200">
                       <span className="text-xs text-gray-500">
                         {pos.lat.toFixed(6)}, {pos.lng.toFixed(6)}
                       </span>
-                      <button 
+                      <button
                         className="text-xs flex items-center text-blue-600 hover:text-blue-800"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -658,19 +654,17 @@ export default function EgyptMapSelector({
               url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="#8B5CF6"><path d="M16 0c-5.523 0-10 4.477-10 10 0 10 10 22 10 22s10-12 10-22c0-5.523-4.477-10-10-10zm0 16c-3.314 0-6-2.686-6-6s2.686-6 6-6 6 2.686 6 6-2.686 6-6 6z"/></svg>'
               )}`,
-              scaledSize: new google.maps.Size(36, 36),
-              anchor: new google.maps.Point(18, 36)
+              scaledSize: new google.maps.Size(40, 40),
+              anchor: new google.maps.Point(20, 40),
             }}
           >
             {activeInfoWindow === 'candidate' && (
-              <MemoizedInfoWindow
-                onCloseClick={() => setActiveInfoWindow(null)}
-              >
+              <MemoizedInfoWindow onCloseClick={() => setActiveInfoWindow(null)}>
                 <div className="space-y-3">
-                  <h3 className="font-bold text-purple-700">إضافة موقع جديد</h3>
+                  <h3 className="font-bold text-purple-700 text-lg">إضافة موقع جديد</h3>
                   <p className="text-sm text-gray-600">
                     {candidate.label}
-                    <button 
+                    <button
                       className="ml-2 text-purple-500 hover:text-purple-700"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -680,30 +674,13 @@ export default function EgyptMapSelector({
                       <ContentCopyIcon fontSize="small" />
                     </button>
                   </p>
-                  
-                  {/* Show distance to boarding point */}
-                  {mapDialogType === "return" && boardingAddressId && (
-                    <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-100 text-sm text-blue-700">
-                      <div className="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                        <span>
-                          <span className="font-medium">المسافة من نقطة الركوب: </span>
-                          {getBoardingPoint() 
-                            ? calculateDistance(getBoardingPoint()!, candidate.coords)
-                            : "..."}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                  
                   <Button
                     variant="contained"
                     color="primary"
                     size="small"
                     onClick={() => setOpenAdd(true)}
                     startIcon={<AddLocation />}
+                    className="bg-purple-600 hover:bg-purple-700"
                   >
                     إضافة هذا الموقع
                   </Button>
@@ -714,34 +691,22 @@ export default function EgyptMapSelector({
         )}
       </GoogleMap>
 
-      {/* Display total distance when both points are selected */}
-      {distance && boardingAddressId && addressesReturn?.id && (
-        <div className="absolute bottom-4 left-4 z-50 bg-white px-4 py-2 rounded-lg shadow-lg flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-          </svg>
-          <span className="font-medium">المسافة الإجمالية: {distance}</span>
-        </div>
-      )}
-
-      <Dialog 
-        open={openAdd} 
+      <Dialog
+        open={openAdd}
         onClose={() => {
           setOpenAdd(false);
           setCandidate(null);
         }}
-        maxWidth="xs" 
+        maxWidth="sm"
         fullWidth
       >
-        <DialogTitle className="bg-blue-50 text-blue-700">
-          {mapDialogType === "boarding" 
-            ? "➕ إضافة عنوان الركوب" 
-            : "➕ إضافة عنوان العودة"}
+        <DialogTitle className="bg-blue-50 text-blue-700 text-lg font-semibold">
+          {mapDialogType === 'boarding' ? '➕ إضافة عنوان الركوب' : '➕ إضافة عنوان العودة'}
         </DialogTitle>
         <DialogContent className="pt-4">
-          <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
             <div className="flex items-center text-sm text-gray-600">
-              <Place fontSize="small" className="text-blue-500 mr-1" />
+              <Place fontSize="small" className="text-blue-500 mr-2" />
               <span>{candidate?.label}</span>
             </div>
           </div>
@@ -754,16 +719,18 @@ export default function EgyptMapSelector({
             autoFocus
             variant="outlined"
             helperText="مثال: منزل العائلة، مكان العمل، إلخ"
+            className="rounded-lg"
           />
         </DialogContent>
-        <DialogActions className="px-4 pb-3">
-          <Button 
+        <DialogActions className="px-4 pb-4">
+          <Button
             onClick={() => {
               setOpenAdd(false);
               setCandidate(null);
-            }} 
+            }}
             startIcon={<Cancel />}
             variant="outlined"
+            className="text-gray-600 hover:text-gray-800"
           >
             إلغاء
           </Button>

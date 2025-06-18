@@ -5,6 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { HelmetProvider } from "react-helmet-async";
 import 'leaflet/dist/leaflet.css';
+import { GoogleMapsProvider } from './context/GoogleMapsProvider';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -12,8 +13,11 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <HelmetProvider>
+    <GoogleMapsProvider>
 
       <App />
+          </GoogleMapsProvider>
+
     </HelmetProvider>
 
   </React.StrictMode>

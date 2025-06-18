@@ -1,16 +1,17 @@
-import React from "react";
-import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import React from 'react';
+import { GoogleMap, Marker } from '@react-google-maps/api';
+import { useGoogleMaps } from '../../context/GoogleMapsProvider';
 
 type Props = {
-  latitude: number;
-  longitude: number;
+  latitude: number | string;
+  longitude: number | string;
   zoom?: number;
-  markerColor?: string; // Not directly used in Google Maps Markers (you'll need custom icons for color)
+  markerColor?: string;
 };
 
 const containerStyle = {
-  width: "100%",
-  height: "100%",
+  width: '100%',
+  height: '100%',
 };
 
 const LocationMap: React.FC<Props> = ({
@@ -19,11 +20,12 @@ const LocationMap: React.FC<Props> = ({
   zoom = 13,
   markerColor,
 }) => {
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyCDPdRtF8MT2mJBMA_YyYiDPpTeaoYpzUI", // Replace with your API key
-  });
+  const { isLoaded, loadError } = useGoogleMaps();
 
-  const center = { lat: latitude, lng: longitude };
+  const center = {
+    lat: typeof latitude === 'string' ? parseFloat(latitude) : latitude,
+    lng: typeof longitude === 'string' ? parseFloat(longitude) : longitude,
+  };
 
   const getColoredMarker = (color?: string) => {
     if (!color) return undefined;
@@ -41,7 +43,21 @@ const LocationMap: React.FC<Props> = ({
     };
   };
 
-  if (!isLoaded) return <div>Loading map...</div>;
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center h-64 bg-red-50 rounded-lg">
+        <p className="text-red-600 text-sm">Error loading map: {loadError.message}</p>
+      </div>
+    );
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-[400px] mx-auto h-64 rounded-lg overflow-hidden shadow-lg">
