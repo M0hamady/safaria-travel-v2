@@ -366,6 +366,7 @@
   "luggageInfo": "Luggage: 1 large + 1 small",
   "roundTripPrice": "Round Trip Price",
   "goingTripPrice": "going Trip Price",
+  "train_route": "train route",
   "select": "Select",
   "priceSummary": {
     "discount": "Discount",

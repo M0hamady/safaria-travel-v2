@@ -76,102 +76,102 @@ const App: React.FC = () => {
       dir={currentLanguage === "ar" ? "rtl" : "ltr"}
       className={currentLanguage === "ar" ? "font-ar" : "font-en"}
     >
-      
+
       <BrowserRouter>
         <ModalProvider>
           <ToastProvider>
             <SearchTypeProvider>
               <SearchProvider>
                 <PrivateSearchProvider>
-                <TrainsProvider>
-                  <AuthProvider>
-                    <OrderProvider>
-                    <TrainOrderProvider>
-                    <PrivateOrderProvider>
-                    <PrivateTripDataProvider>
-                      <Navbar />
-                      <ToastContainer />
-                      <ModalContainer />
+                  <TrainsProvider>
+                    <AuthProvider>
+                      <OrderProvider>
+                        <TrainOrderProvider>
+                          <PrivateOrderProvider>
+                            <PrivateTripDataProvider>
+                              <Navbar />
+                              <ToastContainer />
+                              <ModalContainer />
 
-                      <Routes>
-                        {/* ------------------- Public Routes ------------------- */}
-                        <Route path="/" element={<WelcomePage />} />
-                        <Route path="/about" element={<AboutUsPage />} />
-                        <Route path="/contact" element={<ContactPage />} />
-                        <Route path="/terms" element={<Terms />} />
-                        <Route path="/privacy" element={<Privacy />} />
+                              <Routes>
+                                {/* ------------------- Public Routes ------------------- */}
+                                <Route path="/" element={<WelcomePage />} />
+                                <Route path="/about" element={<AboutUsPage />} />
+                                <Route path="/contact" element={<ContactPage />} />
+                                <Route path="/terms" element={<Terms />} />
+                                <Route path="/privacy" element={<Privacy />} />
 
-                        {/* ------------------- Bus Routes ------------------- */}
-                        <Route path="/bus-search" element={<BusSearchResults />} />
-                        <Route path="/bus-search/trip/:tripId" element={<TripDetailsPage />} />
-                        <Route path="/bus-search-return" element={<BusSearchResultsReturn />} />
-                        <Route path="/bus-search-return/trip/:tripId" element={<TripDetailsPageReturn />} />
+                                {/* ------------------- Bus Routes ------------------- */}
+                                <Route path="/bus-search" element={<BusSearchResults />} />
+                                <Route path="/bus-search/trip/:tripId" element={<TripDetailsPage />} />
+                                <Route path="/bus-search-return" element={<BusSearchResultsReturn />} />
+                                <Route path="/bus-search-return/trip/:tripId" element={<TripDetailsPageReturn />} />
 
-                        {/* ------------------- Private Trip Routes ------------------- */}
-                        <Route path="/private-trips-search" element={<PrivateTripSearchResults />} />
-                        <Route path="/private-trips-search/trip/:tripId" element={<PrivateTripDetailsPage />} />
-                        <Route path="/private-trips-search/trip/shared/:tripId" element={<PrivateTripDetailsPageData />} />
-                        <Route path="/private-search/trip/:tripId" element={<TripDetailsPage />} />
+                                {/* ------------------- Private Trip Routes ------------------- */}
+                                <Route path="/private-trips-search" element={<PrivateTripSearchResults />} />
+                                <Route path="/private-trips-search/trip/:tripId" element={<PrivateTripDetailsPage />} />
+                                <Route path="/private-trips-search/trip/shared/:tripId" element={<PrivateTripDetailsPageData />} />
+                                <Route path="/private-search/trip/:tripId" element={<TripDetailsPage />} />
 
-                        {/* ------------------- Train Routes (Planned) ------------------- */}
-                        {/* Add your train routes here */}
-                            <Route path="/train-search" element={<TrainSearchResultsContainer />} />
-                            <Route path="/train-search/trip/:tripId" element={<TrainTripDetailsPage />} />
+                                {/* ------------------- Train Routes (Planned) ------------------- */}
+                                {/* Add your train routes here */}
+                                <Route path="/train-search" element={<TrainSearchResultsContainer />} />
+                                <Route path="/train-search/trip/:tripId" element={<TrainTripDetailsPage />} />
 
-                        {/* ------------------- Auth Routes ------------------- */}
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/register" element={<RegistrationPage />} />
-                        <Route path="/verify-otp" element={<VerifyOTPPage />} />
-                        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                        <Route path="/forgot-password/verify" element={<ResetPasswordPage />} />
-                        <Route path="/success-payment" element={<SuccessPayment />} />
+                                {/* ------------------- Auth Routes ------------------- */}
+                                <Route path="/login" element={<LoginPage />} />
+                                <Route path="/register" element={<RegistrationPage />} />
+                                <Route path="/verify-otp" element={<VerifyOTPPage />} />
+                                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                                <Route path="/forgot-password/verify" element={<ResetPasswordPage />} />
+                                <Route path="/success-payment" element={<SuccessPayment />} />
 
-                        {/* ------------------- Protected Routes ------------------- */}
-                        <Route
-                          path="/confirm-reservation"
-                          element={
-                            <AuthRoute>
-                              <ConfirmReservationPage />
-                            </AuthRoute>
-                          }
-                        />
-                        <Route
-                          path="/confirm-reservation/return"
-                          element={
-                            <AuthRoute>
-                              <ConfirmReservationPageReturn />
-                            </AuthRoute>
-                          }
-                        />
-                        <Route
-                          path="/dashboard/*"
-                          element={
-                            <AuthRoute>
-                              <DashboardLayout />
-                            </AuthRoute>
-                          }
-                        />
-                        <Route
-                          path="/profile"
-                          element={
-                            <AuthRoute>
-                              <ProfilePage />
-                            </AuthRoute>
-                          }
-                        />
+                                {/* ------------------- Protected Routes ------------------- */}
+                                <Route
+                                  path="/confirm-reservation"
+                                  element={
+                                    <AuthRoute>
+                                      <ConfirmReservationPage />
+                                    </AuthRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/confirm-reservation/return"
+                                  element={
+                                    <AuthRoute>
+                                      <ConfirmReservationPageReturn />
+                                    </AuthRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/dashboard/*"
+                                  element={
+                                    <AuthRoute>
+                                      <DashboardLayout />
+                                    </AuthRoute>
+                                  }
+                                />
+                                <Route
+                                  path="/profile"
+                                  element={
+                                    <AuthRoute>
+                                      <ProfilePage />
+                                    </AuthRoute>
+                                  }
+                                />
 
-                        {/* ------------------- Error Handling ------------------- */}
-                        <Route path="/error" element={<ErrorPage />} />
-                        <Route path="*" element={<NotFoundPage />} />
-                      </Routes>
+                                {/* ------------------- Error Handling ------------------- */}
+                                <Route path="/error" element={<ErrorPage />} />
+                                <Route path="*" element={<NotFoundPage />} />
+                              </Routes>
 
-                      <Footer />
-                    </PrivateTripDataProvider>
-                    </PrivateOrderProvider>
-                    </TrainOrderProvider>
-                    </OrderProvider>
-                  </AuthProvider>
-                </TrainsProvider>
+                              <Footer />
+                            </PrivateTripDataProvider>
+                          </PrivateOrderProvider>
+                        </TrainOrderProvider>
+                      </OrderProvider>
+                    </AuthProvider>
+                  </TrainsProvider>
                 </PrivateSearchProvider>
               </SearchProvider>
             </SearchTypeProvider>

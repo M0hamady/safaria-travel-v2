@@ -23,7 +23,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({
   const handleClick = () => {
     const currentPath = window.location.pathname + window.location.search;
     if (!isAuthenticated) {
-      navigate(`/login?prev=${encodeURIComponent(currentPath)}`);
+    navigate(`/login?prev=${encodeURIComponent(currentPath)}`);
     } else if (isAuthenticated && tripType ==="round") {
       navigate(`/bus-search-return`);
     }else{

@@ -185,6 +185,7 @@
     "pricePerPerson": "السعر للفرد",
     "select": "اختيار"
   },
+
   "filters": {
     "title": "الفلاتر",
     "company": "الشركة",
@@ -379,6 +380,7 @@
     "offers": "يقدم",
   "tripWith": "رحلة مع",
   "seatsAvailable": "مقاعد متاحة",
+  "train_route": "محطات المرور",
   "seats": "مقعد",
   "luggageInfo": "الحقائب: حقيبة كبيرة + حقيبة صغيرة",
   "roundTripPrice": "سعر الرحلة ذهابًا وإيابًا",

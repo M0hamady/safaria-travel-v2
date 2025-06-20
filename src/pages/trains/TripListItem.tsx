@@ -6,6 +6,7 @@ import images from '../../assets';
 import { TrainsContext } from '../../context/TrainsContext';
 import DateTimeDisplay from '../../components/utilies/DateTimeDisplay';
 import i18next from 'i18next';
+import { AltRoute, PinDrop } from '@mui/icons-material';
 
 interface Props {
   trip: Trip;
@@ -48,8 +49,8 @@ const TripListItem: React.FC<Props> = ({ trip, onSelect, getMinPrice }) => {
           <h3 className="font-semibold text-lg max-sm:ltr:text-left">{t("train_number")}: {trip.train.name}</h3>
           {/* we will add container has routes of trip each route has id and name while hover preview list in drobdown miu=nue  */}
           <div className="relative group">
-            <h3 className="font-semibold text-lg max-sm:ltr:text-left px-2 py-2 bg-primary rounded text-white">
-              {t("train_route")}
+            <h3 className="font-semibold text-lg max-sm:ltr:text-left px-2 py-2 rounded text-primary underline flex">
+              <span className='min-w-full'>{t("train_route")}  </span><span> <AltRoute/> </span>
             </h3>
 
             {/* Dropdown on hover */}
@@ -59,9 +60,9 @@ const TripListItem: React.FC<Props> = ({ trip, onSelect, getMinPrice }) => {
                   trip.route.map((route) => (
                     <li
                       key={route.id}
-                      className="py-1 px-2 hover:bg-gray-100  transition"
+                      className="py-1 px-2 hover:bg-gray-100  transition flex border-b-2 "
                     >
-                      {route.name}
+                       <span> <PinDrop /> </span> {route.name}
                     </li>
                   ))
                 ) : (
