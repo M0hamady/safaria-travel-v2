@@ -82,6 +82,12 @@ const WelcomePage = () => {
         </motion.p>
         <Partners />
       </section>
+      {/* Features Section */}
+      <section className="-mt-44 max-sm:mt-96" id="features">
+        <motion.div className="w-full">
+          <FeaturesSection />
+        </motion.div>
+      </section>
 
       {/* Download App Section */}
       <section className="container mx-auto my-16" id="download">

@@ -1,15 +1,291 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSearchContext } from "../../../context/SearchContext";
-import { FormatDateTimeOptions } from "../../../types/types";
 import { useTranslation } from "react-i18next";
+import { useSearchContext } from "../../../context/SearchContext";
+import { FormatDateTimeOptions, Trip, Station } from "../../../types/types";
 
-interface Station {
-  name: string;
-  arrival_at: string;
+// Utility functions
+const getCategoryClass = (category: string): string => {
+  const categoryStyles: Record<string, string> = {
+    Comfort: "bg-[#C2DEFF] text-primary",
+    Prime_Mix: "bg-[#C2FBFF] text-[#00939C]",
+    First10: "bg-[#FFC2E3] text-[#A50059]",
+    first_class: "bg-[#FFC2C2] text-[#AE0000]",
+    "Business 40": "bg-[#FFE3C2] text-[#AD5E00]",
+    Economy: "bg-[#E4FFC2] text-[#4C8900]",
+  };
+  return categoryStyles[category] || "bg-yellow-100 text-yellow-800";
+};
+
+const convertTimeToMinutes = (timeStr: string): number => {
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
+const formatDateTime = (
+  dateTimeStr: string,
+  options?: FormatDateTimeOptions
+): string => {
+  const locale = options?.locale || "en-GB";
+  const defaultFormatOptions: Intl.DateTimeFormatOptions = {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  };
+  const formatOptions = { ...defaultFormatOptions, ...options?.formatOptions };
+
+  const isoDateStr = dateTimeStr.replace(" ", "T");
+  const dateObj = new Date(isoDateStr);
+
+  if (isNaN(dateObj.getTime())) {
+    console.warn(`Invalid date/time provided: "${dateTimeStr}"`);
+    return new Date().toLocaleString(locale, formatOptions);
+  }
+
+  return dateObj.toLocaleString(locale, formatOptions);
+};
+
+interface TripCardProps {
+  trip: Trip;
+  duration: string;
+  onSelect: (departure: Station, arrival: Station) => void;
 }
 
+const TripCard: React.FC<TripCardProps> = ({ trip, duration, onSelect }) => {
+  const { t } = useTranslation();
+  const departureStations = trip.stations_from || [];
+  const arrivalStations = trip.stations_to || [];
+  const [selectedDeparture, setSelectedDeparture] = useState<Station | null>(
+    departureStations[0] || null
+  );
+  const [selectedArrival, setSelectedArrival] = useState<Station | null>(
+    arrivalStations[0] || null
+  );
+
+  return (
+    <div className="w-full  h-fit  relative">
+      <div className="w-full  ">
+        <div className="w-full h-fit px-4 pb-4  bg-white rounded-2xl shadow-[0_4px_4px_rgba(217,217,217,0.25)] flex flex-col justify-start items-end gap-4">
+          <div className="self-stretch border-b border-[#dde2eb] flex flex-col justify-start items-end">
+            {/* header */}
+            <div className="self-stretch py-4 border-b border-[#e8ecf2] flex justify-start items-center gap-5">
+              <div className="flex-1 flex justify-start items-center gap-5">
+                <img
+                  className="w-[75px] h-10 object-cover"
+                  src={trip.company_data?.avatar || "https://placehold.co/75x40"}
+                  alt="Company Logo"
+                />
+              </div>
+              <div className="flex justify-start items-start gap-2">
+                <div className="w-6 h-6 relative overflow-hidden">
+                </div>
+                <div className="text-[#68696a] text-xl font-normal font-['Cairo'] leading-7">
+                  {duration}
+                </div>
+              </div>
+            </div>
+            {/* boody ya3m */}
+            <div className="w-full py-4 flex justify-start items-center max-sm:flex-col max-sm:items-start max-sm:gap-4 ">
+              {/* left side container stations  */}
+              <div className="w-full flex flex-col flex-wrap md:flex-nowrap justify-between gap-6 ">
+                <div className="flex-row flex h-full w-full gap-3 ">
+                  {/* lines draws */}
+                  <div className="h-100  w-[1rem] flex flex-col items-center justify-center opacity-30 py-2">
+                    <div className="w-2 h-2 rounded-full bg-black"></div>
+                    <div className="w-1 h-full bg-black">{""}</div>
+                    <div className="w-2 h-2 rounded-full bg-black"></div>
+                  </div>
+                  {/* stations */}
+                  <div className="">
+                    {/* Departure Station */}
+                    <div className="flex-1 flex flex-col w-fit max-w-full   justify-start items-start gap-1">
+                      {/* Departure Header */}
+                      <div className="text-[#1e1e1e] w-fit text-base font-bold font-['Cairo'] leading-normal">
+                        {trip.cities_from[0].name} ( {selectedDeparture?.name} )
+                      </div>
+
+                      {/* Departure Station Selector + Time */}
+                      <div className="flex flex-row-reverse gap-3 max-sm:flex-col  w-full items-start ">
+                        {/* Station List Scrollable */}
+                        <div className="w-fit max-w-full max-sm:max-w-[18rem]   overflow-auto scrollbar-hide h-[3rem] rounded-lg flex justify-start items-center ">
+                          {departureStations.map((station) => (
+                            <button
+                              key={station.id}
+                              className={`px-2 py-2.5  border-black/20 flex-shrink-0 flex justify-center items-center gap-4 ${selectedDeparture?.id === station.id
+                            ? "bg-primary text-white duration-500 rounded-full "
+                                : " text-black rounded-non duration-500"
+                                }`}
+                              onClick={() => setSelectedDeparture(station)}
+                            >
+                              <div className="text-base whitespace-nowrap font-normal font-['Cairo'] leading-normal">
+                                {station.name}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Departure Time */}
+                        <div className="text-[#68696a] text-base font-normal font-['Cairo'] whitespace-nowrap text-start max-sm:w-full">
+                          {selectedDeparture
+                            ? formatDateTime(selectedDeparture.arrival_at)
+                            : t("busSearchTrips.noStationSelected")}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Arrival Station */}
+                    <div className="flex-1 flex flex-col w-fit justify-start items-start gap-1 mt-8 ">
+                      {/* Arrival Header */}
+                      <div className="text-[#1e1e1e] text-base font-bold font-['Cairo'] leading-normal">
+                        {trip.cities_to[0].name} ( {selectedArrival?.name} )
+                      </div>
+
+                      {/* Arrival Station Selector + Time */}
+                      <div className="flex flex-row-reverse gap-2 w-full  max-sm:flex-col items-start ">
+                        {/* Station List Scrollable */}
+                        <div className="w-fit max-w-full max-sm:max-w-[18rem]  overflow-auto scrollbar-hide h-[3rem] rounded-lg flex justify-start items-center">
+                          {arrivalStations.map((station) => (
+                            <button
+                              key={station.id}
+                              className={`px-3 py-2.5  -black/20 flex-shrink-0 flex justify-center items-center gap-2.5 ${selectedArrival?.id === station.id
+                                 ? "bg-primary text-white duration-500 rounded-full "
+                                : " text-black rounded-non duration-500"
+                                }`}
+                              onClick={() => setSelectedArrival(station)}
+                            >
+                              <div className="text-base whitespace-nowrap font-normal font-['Cairo'] leading-normal">
+                                {station.name}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Arrival Time */}
+                        <div className="text-[#68696a] text-base font-normal font-['Cairo'] whitespace-nowrap text-start w-full">
+                          {selectedArrival
+                            ? formatDateTime(selectedArrival.arrival_at)
+                            : t("busSearchTrips.noStationSelected")}
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+              {/* right side image  */}
+              <div className="flex flex-col justify-start items-center gap-4">
+                <img
+                  className="w-[154.84px] h-[100px] object-contain"
+                  src={trip.company_data?.bus_image || "https://placehold.co/155x100"}
+                  alt="Bus"
+                />
+                {/* <div className="flex justify-center items-start gap-4">
+                  <div className="w-5 h-0 outline outline-1 outline-[#0074c3]" />
+                  <div className="w-5 h-0 outline outline-1 outline-[#b9c4d5]" />
+                  <div className="w-5 h-0 outline outline-1 outline-[#b9c4d5]" />
+                </div> */}
+              </div>
+            </div>
+          </div>
+          {/* footer */}
+          {/* Footer Section */}
+          <div className="flex flex-col md:flex-row items-center justify-between px-4 py-3 w-full">
+            <div className="flex items-center gap-4 mb-4 md:mb-0 w-full max-sm:justify-between ">
+              <div className="flex gap-4">
+
+              <div className="flex items-center bg gap-4">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M7 15.25V16.257C7.00005 16.6511 6.92244 17.0414 6.77162 17.4055C6.6208 17.7696 6.39971 18.1004 6.121 18.379L5.5 19H14.5L13.879 18.379C13.6003 18.1004 13.3792 17.7696 13.2284 17.4055C13.0776 17.0414 13 16.6511 13 16.257V15.25M19 3.25V13C19 13.5967 18.7629 14.169 18.341 14.591C17.919 15.0129 17.3467 15.25 16.75 15.25H3.25C2.65326 15.25 2.08097 15.0129 1.65901 14.591C1.23705 14.169 1 13.5967 1 13V3.25M19 3.25C19 2.65326 18.7629 2.08097 18.341 1.65901C17.919 1.23705 17.3467 1 16.75 1H3.25C2.65326 1 2.08097 1.23705 1.65901 1.65901C1.23705 2.08097 1 2.65326 1 3.25M19 3.25V10C19 10.5967 18.7629 11.169 18.341 11.591C17.919 12.0129 17.3467 12.25 16.75 12.25H3.25C2.65326 12.25 2.08097 12.0129 1.65901 11.591C1.23705 11.169 1 10.5967 1 10V3.25"
+                    stroke="#B9C4D5"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g clipPath="url(#clip0_3328_177)">
+                    <path
+                      d="M22.8 10.8H22.4476L22.5008 10.732C22.6962 10.4805 22.7837 10.1617 22.7441 9.84572C22.7044 9.52972 22.5409 9.24241 22.2894 9.047C22.0379 8.85159 21.7191 8.76408 21.4031 8.80373C21.0871 8.84337 20.7998 9.00692 20.6044 9.2584L19.4044 10.8H14.8968L18.0844 7.6128L20.0236 7.8528C20.3394 7.89192 20.6578 7.80401 20.9088 7.6084C21.0339 7.51194 21.1384 7.39151 21.2164 7.25414C21.2944 7.11677 21.3441 6.96524 21.3628 6.8084C21.3998 6.49316 21.311 6.17606 21.1158 5.92578C20.9207 5.67549 20.6347 5.51217 20.32 5.4712L20.2372 5.4608L20.486 5.212C20.7105 4.98664 20.8366 4.6815 20.8366 4.3634C20.8366 4.0453 20.7105 3.74016 20.486 3.5148C20.2572 3.29697 19.9533 3.17549 19.6374 3.17549C19.3215 3.17549 19.0176 3.29697 18.7888 3.5148L18.5396 3.7636L18.5284 3.68C18.4876 3.36518 18.324 3.07924 18.0733 2.88446C17.8226 2.68967 17.5052 2.60181 17.19 2.64C16.8739 2.67937 16.5863 2.84261 16.3905 3.09387C16.1947 3.34512 16.1066 3.66384 16.1456 3.98L16.3856 5.9184L13.2 9.1032V4.5956L14.7424 3.3956C14.9936 3.19982 15.1568 2.91226 15.196 2.59619C15.2352 2.28011 15.1472 1.96141 14.9514 1.7102C14.7556 1.45899 14.4681 1.29584 14.152 1.25664C13.8359 1.21745 13.5172 1.30542 13.266 1.5012L13.2 1.5524V1.2C13.2 0.88174 13.0736 0.576515 12.8485 0.351472C12.6235 0.126428 12.3183 0 12 0C11.6817 0 11.3765 0.126428 11.1515 0.351472C10.9264 0.576515 10.8 0.88174 10.8 1.2V1.5524L10.732 1.4992C10.6075 1.40244 10.4651 1.33116 10.3131 1.28942C10.161 1.24768 10.0022 1.23629 9.84572 1.25593C9.68925 1.27556 9.53818 1.32581 9.40114 1.40383C9.26409 1.48184 9.14376 1.58608 9.047 1.7106C8.95024 1.83512 8.87896 1.97748 8.83722 2.12955C8.79548 2.28161 8.78409 2.44042 8.80373 2.59688C8.82336 2.75335 8.87361 2.90442 8.95162 3.04146C9.02964 3.17851 9.13388 3.29884 9.2584 3.3956L10.8 4.5956V9.1032L7.6128 5.9156L7.8528 3.9764C7.8905 3.66137 7.8019 3.34423 7.60638 3.09435C7.41087 2.84447 7.12435 2.68219 6.8095 2.64301C6.49465 2.60383 6.1771 2.69093 5.9263 2.88526C5.6755 3.07959 5.51187 3.36534 5.4712 3.68L5.4608 3.7628L5.212 3.514C4.98307 3.29636 4.67927 3.17499 4.3634 3.17499C4.04753 3.17499 3.74373 3.29636 3.5148 3.514C3.40335 3.62543 3.31494 3.75773 3.25462 3.90333C3.1943 4.04894 3.16326 4.205 3.16326 4.3626C3.16326 4.5202 3.1943 4.67626 3.25462 4.82187C3.31494 4.96747 3.40335 5.09977 3.5148 5.2112L3.7636 5.4604L3.678 5.4712C3.36345 5.51264 3.0779 5.67636 2.88323 5.92689C2.68856 6.17741 2.60045 6.49456 2.638 6.8096C2.65724 6.96623 2.70719 7.11753 2.78498 7.25483C2.86278 7.39214 2.96689 7.51275 3.09136 7.60976C3.21583 7.70677 3.35821 7.77828 3.51035 7.82019C3.6625 7.8621 3.82141 7.87359 3.978 7.854L5.9164 7.614L9.1032 10.8H4.5956L3.3956 9.2576C3.29866 9.13321 3.17817 9.02914 3.041 8.95131C2.90384 8.87349 2.75269 8.82345 2.59619 8.80404C2.28011 8.76485 1.96141 8.85282 1.7102 9.0486C1.45899 9.24438 1.29584 9.53194 1.25664 9.84801C1.21745 10.1641 1.30542 10.4828 1.5012 10.734L1.5524 10.8H1.2C0.88174 10.8 0.576515 10.9264 0.351472 11.1515C0.126428 11.3765 0 11.6817 0 12C0 12.3183 0.126428 12.6235 0.351472 12.8485C0.576515 13.0736 0.88174 13.2 1.2 13.2H1.5524L1.4992 13.268C1.30379 13.5195 1.21628 13.8383 1.25593 14.1543C1.29557 14.4703 1.45912 14.7576 1.7106 14.953C1.96208 15.1484 2.28088 15.2359 2.59688 15.1963C2.91288 15.1566 3.20019 14.9931 3.3956 14.7416L4.5956 13.2H9.1032L5.9156 16.3872L3.9764 16.1472C3.8199 16.1277 3.6611 16.1393 3.50907 16.1812C3.35705 16.2232 3.21478 16.2947 3.0904 16.3916C2.96602 16.4886 2.86198 16.6091 2.78421 16.7463C2.70645 16.8835 2.65649 17.0347 2.6372 17.1912C2.60014 17.5065 2.68881 17.8237 2.884 18.0741C3.07919 18.3245 3.36518 18.4878 3.68 18.5288L3.7628 18.5392L3.514 18.788C3.2895 19.0134 3.16345 19.3185 3.16345 19.6366C3.16345 19.9547 3.2895 20.2598 3.514 20.4852C3.74283 20.703 4.04667 20.8245 4.3626 20.8245C4.67853 20.8245 4.98237 20.703 5.2112 20.4852L5.4604 20.2364L5.4712 20.322C5.51114 20.6372 5.67448 20.9237 5.92538 21.1187C6.17629 21.3137 6.49428 21.4012 6.8096 21.362C6.96623 21.3428 7.11753 21.2928 7.25483 21.215C7.39214 21.1372 7.51275 21.0331 7.60976 20.9086C7.70677 20.7842 7.77828 20.6418 7.82019 20.4896C7.8621 20.3375 7.87359 20.1786 7.854 20.022L7.614 18.0836L10.8 14.8968V19.4044L9.2576 20.6044C9.00639 20.8002 8.84324 21.0877 8.80404 21.4038C8.76485 21.7199 8.85282 22.0386 9.0486 22.2898C9.24438 22.541 9.53194 22.7042 9.84801 22.7434C10.1641 22.7826 10.4828 22.6946 10.734 22.4988L10.8 22.4476V22.8C10.8 23.1183 10.9264 23.4235 11.1515 23.6485C11.3765 23.8736 11.6817 24 12 24C12.3183 24 12.6235 23.8736 12.8485 23.6485C13.0736 23.4235 13.2 23.1183 13.2 22.8V22.4476L13.268 22.5008C13.5195 22.6962 13.8383 22.7837 14.1543 22.7441C14.4703 22.7044 14.7576 22.5409 14.953 22.2894C15.1484 22.0379 15.2359 21.7191 15.1963 21.4031C15.1566 21.0871 14.9931 20.7998 14.7416 20.6044L13.2 19.4044V14.8968L16.3872 18.0844L16.1472 20.0236C16.108 20.3396 16.196 20.6583 16.3917 20.9095C16.5875 21.1607 16.875 21.3238 17.191 21.363C17.507 21.4022 17.8257 21.3142 18.0769 21.1185C18.3281 20.9227 18.4912 20.6352 18.5304 20.3192L18.5408 20.2364L18.7896 20.4852C19.0185 20.7028 19.3223 20.8242 19.6382 20.8242C19.9541 20.8242 20.2579 20.7028 20.4868 20.4852C20.5983 20.3738 20.6867 20.2415 20.747 20.0959C20.8073 19.9503 20.8383 19.7942 20.8383 19.6366C20.8383 19.479 20.8073 19.3229 20.747 19.1773C20.6867 19.0317 20.5983 18.8994 20.4868 18.788L20.238 18.5388L20.3236 18.528C20.6382 18.4866 20.9237 18.3228 21.1184 18.0723C21.313 17.8218 21.4011 17.5046 21.3636 17.1896C21.3444 17.033 21.2944 16.8817 21.2166 16.7444C21.1388 16.6071 21.0347 16.4865 20.9102 16.3894C20.7858 16.2924 20.6434 16.2209 20.4912 16.179C20.3391 16.1371 20.1802 16.1256 20.0236 16.1452L18.0852 16.3852L14.8968 13.2H19.4044L20.6044 14.7424C20.8002 14.9936 21.0877 15.1568 21.4038 15.196C21.7199 15.2352 22.0386 15.1472 22.2898 14.9514C22.541 14.7556 22.7042 14.4681 22.7434 14.152C22.7826 13.8359 22.6946 13.5172 22.4988 13.266L22.4476 13.2H22.8C23.1183 13.2 23.4235 13.0736 23.6485 12.8485C23.8736 12.6235 24 12.3183 24 12C24 11.6817 23.8736 11.3765 23.6485 11.1515C23.4235 10.9264 23.1183 10.8 22.8 10.8ZM22.8 12.4H21.628C21.5531 12.4 21.4797 12.4211 21.4162 12.4608C21.3527 12.5005 21.3016 12.5573 21.2687 12.6246C21.2359 12.6919 21.2226 12.7671 21.2304 12.8416C21.2382 12.9161 21.2667 12.9869 21.3128 13.046L21.8672 13.7564C21.8996 13.7979 21.9236 13.8453 21.9377 13.8961C21.9518 13.9468 21.9557 13.9998 21.9494 14.052C21.943 14.1043 21.9264 14.1548 21.9004 14.2006C21.8745 14.2465 21.8399 14.2868 21.7984 14.3192C21.7569 14.3516 21.7095 14.3756 21.6587 14.3897C21.608 14.4038 21.555 14.4077 21.5028 14.4014C21.4505 14.395 21.4 14.3784 21.3542 14.3524C21.3083 14.3265 21.268 14.2919 21.2356 14.2504L19.9156 12.5544C19.8782 12.5063 19.8304 12.4675 19.7757 12.4407C19.721 12.4139 19.6609 12.4 19.6 12.4H13.9312C13.8521 12.4 13.7748 12.4235 13.709 12.4674C13.6433 12.5114 13.592 12.5739 13.5617 12.6469C13.5315 12.72 13.5235 12.8004 13.539 12.878C13.5544 12.9556 13.5925 13.0269 13.6484 13.0828L17.6572 17.0912C17.7004 17.134 17.7528 17.1665 17.8103 17.1863C17.8679 17.206 17.9292 17.2125 17.9896 17.2052L20.1212 16.9396C20.2271 16.9268 20.3338 16.9564 20.418 17.022C20.4596 17.0539 20.4944 17.0938 20.5203 17.1394C20.5463 17.1849 20.5629 17.2352 20.5692 17.2872C20.5815 17.3925 20.5519 17.4985 20.4869 17.5822C20.4219 17.666 20.3267 17.7209 20.2216 17.7352L19.3248 17.8452C19.2504 17.8544 19.1801 17.8843 19.1219 17.9315C19.0637 17.9787 19.0199 18.0413 18.9956 18.1122C18.9712 18.1831 18.9673 18.2594 18.9842 18.3324C19.0011 18.4054 19.0382 18.4722 19.0912 18.5252L19.92 19.3544C19.9949 19.4294 20.0369 19.531 20.0369 19.637C20.0369 19.743 19.9949 19.8446 19.92 19.9196C19.8436 19.9918 19.7425 20.0321 19.6374 20.0321C19.5323 20.0321 19.4312 19.9918 19.3548 19.9196L18.5256 19.0912C18.4726 19.0382 18.4058 19.0011 18.3327 18.9842C18.2597 18.9673 18.1834 18.9713 18.1125 18.9957C18.0416 19.0201 17.979 19.0639 17.9318 19.1222C17.8846 19.1804 17.8547 19.2508 17.8456 19.3252L17.736 20.2188C17.7221 20.3244 17.6673 20.4203 17.5833 20.4859C17.4994 20.5514 17.393 20.5813 17.2872 20.5692C17.2352 20.5629 17.185 20.5462 17.1396 20.5203C17.0941 20.4943 17.0543 20.4595 17.0224 20.418C16.9898 20.3765 16.9658 20.329 16.9516 20.2782C16.9375 20.2274 16.9335 20.1743 16.94 20.122L17.2056 17.9896C17.2132 17.9292 17.2068 17.8678 17.1871 17.8102C17.1673 17.7526 17.1347 17.7003 17.0916 17.6572L13.0828 13.6484C13.0269 13.5925 12.9556 13.5544 12.878 13.539C12.8004 13.5235 12.72 13.5315 12.6469 13.5617C12.5739 13.592 12.5114 13.6433 12.4674 13.709C12.4235 13.7748 12.4 13.8521 12.4 13.9312V19.6C12.4 19.6609 12.4139 19.721 12.4407 19.7757C12.4675 19.8304 12.5063 19.8782 12.5544 19.9156L14.2496 21.2356C14.2912 21.2677 14.326 21.3078 14.3521 21.3534C14.3782 21.399 14.3951 21.4493 14.4018 21.5014C14.4084 21.5536 14.4048 21.6065 14.391 21.6572C14.3772 21.7079 14.3535 21.7554 14.3214 21.797C14.2893 21.8386 14.2492 21.8734 14.2036 21.8995C14.158 21.9256 14.1077 21.9425 14.0556 21.9492C14.0034 21.9558 13.9505 21.9522 13.8998 21.9384C13.8491 21.9246 13.8016 21.9009 13.76 21.8688L13.0476 21.3128C12.9885 21.2663 12.9176 21.2373 12.8428 21.2293C12.7681 21.2212 12.6926 21.2344 12.6249 21.2673C12.5573 21.3002 12.5004 21.3515 12.4606 21.4153C12.4208 21.4791 12.3998 21.5528 12.4 21.628V22.8C12.4 22.9061 12.3579 23.0078 12.2828 23.0828C12.2078 23.1579 12.1061 23.2 12 23.2C11.8939 23.2 11.7922 23.1579 11.7172 23.0828C11.6421 23.0078 11.6 22.9061 11.6 22.8V21.628C11.6 21.5531 11.5789 21.4797 11.5392 21.4162C11.4995 21.3527 11.4427 21.3016 11.3754 21.2687C11.3081 21.2359 11.2329 21.2226 11.1584 21.2304C11.0839 21.2382 11.0131 21.2667 10.954 21.3128L10.2436 21.8672C10.1598 21.9327 10.0535 21.9623 9.94795 21.9494C9.84241 21.9365 9.74631 21.8822 9.6808 21.7984C9.61529 21.7146 9.58574 21.6083 9.59864 21.5028C9.61154 21.3972 9.66584 21.3011 9.7496 21.2356L11.4456 19.9156C11.4937 19.8782 11.5325 19.8304 11.5593 19.7757C11.5861 19.721 11.6 19.6609 11.6 19.6V13.9312C11.6 13.8521 11.5765 13.7748 11.5326 13.709C11.4886 13.6433 11.4261 13.592 11.3531 13.5617C11.28 13.5315 11.1996 13.5235 11.122 13.539C11.0444 13.5544 10.9731 13.5925 10.9172 13.6484L6.9088 17.6572C6.86575 17.7003 6.8331 17.7526 6.81334 17.8102C6.79359 17.8678 6.78724 17.9292 6.7948 17.9896L7.0604 20.1212C7.06696 20.1737 7.06306 20.2269 7.04892 20.2779C7.03477 20.3288 7.01067 20.3764 6.978 20.418C6.94608 20.4596 6.90618 20.4944 6.86064 20.5203C6.8151 20.5463 6.76484 20.5629 6.7128 20.5692C6.60748 20.5815 6.50155 20.5519 6.41777 20.4869C6.334 20.4219 6.27907 20.3267 6.2648 20.2216L6.1548 19.3252C6.14567 19.2508 6.11581 19.1804 6.06862 19.1222C6.02144 19.0639 5.95883 19.0201 5.88793 18.9957C5.81704 18.9713 5.74072 18.9673 5.66767 18.9842C5.59462 19.0011 5.52779 19.0382 5.4748 19.0912L4.6456 19.92C4.56933 19.9924 4.46817 20.0328 4.363 20.0328C4.25783 20.0328 4.15667 19.9924 4.0804 19.92C4.00553 19.845 3.96349 19.7434 3.96349 19.6374C3.96349 19.5314 4.00553 19.4298 4.0804 19.3548L4.9088 18.526C4.96183 18.473 4.99891 18.4062 5.01582 18.3332C5.03273 18.2602 5.02879 18.1839 5.00444 18.113C4.98009 18.0421 4.93631 17.9795 4.8781 17.9323C4.81989 17.8851 4.74958 17.8552 4.6752 17.846L3.7812 17.7364C3.67555 17.7226 3.57958 17.6678 3.51401 17.5838C3.44845 17.4998 3.41856 17.3934 3.4308 17.2876C3.43714 17.2356 3.45378 17.1854 3.47974 17.14C3.50571 17.0945 3.54047 17.0547 3.582 17.0228C3.62347 16.9902 3.67097 16.9662 3.72177 16.952C3.77257 16.9379 3.82567 16.9339 3.878 16.9404L6.0104 17.206C6.07083 17.2136 6.13218 17.2072 6.18979 17.1875C6.24739 17.1677 6.29973 17.1351 6.3428 17.092L10.3516 13.0828C10.4075 13.0269 10.4456 12.9556 10.461 12.878C10.4765 12.8004 10.4685 12.72 10.4383 12.6469C10.408 12.5739 10.3567 12.5114 10.291 12.4674C10.2252 12.4235 10.1479 12.4 10.0688 12.4H4.4C4.33911 12.4 4.27903 12.4139 4.22434 12.4407C4.16965 12.4675 4.12179 12.5063 4.0844 12.5544L2.7644 14.2496C2.73225 14.2912 2.69223 14.326 2.64662 14.3521C2.60101 14.3782 2.5507 14.3951 2.49857 14.4018C2.44644 14.4084 2.39351 14.4048 2.34279 14.391C2.29208 14.3772 2.24458 14.3535 2.203 14.3214C2.16142 14.2893 2.12659 14.2492 2.10048 14.2036C2.07437 14.158 2.0575 14.1077 2.05083 14.0556C2.04416 14.0034 2.04783 13.9505 2.06162 13.8998C2.07541 13.8491 2.09905 13.8016 2.1312 13.76L2.6872 13.0476C2.73374 12.9885 2.7627 12.9176 2.77075 12.8428C2.7788 12.7681 2.76561 12.6926 2.73271 12.6249C2.6998 12.5573 2.64851 12.5004 2.58471 12.4606C2.52091 12.4208 2.44719 12.3998 2.372 12.4H1.2C1.09391 12.4 0.992172 12.3579 0.917157 12.2828C0.842143 12.2078 0.8 12.1061 0.8 12C0.8 11.8939 0.842143 11.7922 0.917157 11.7172C0.992172 11.6421 1.09391 11.6 1.2 11.6H2.372C2.44691 11.6 2.5203 11.5789 2.58382 11.5392C2.64734 11.4995 2.69843 11.4427 2.73128 11.3754C2.76413 11.3081 2.77741 11.2329 2.76962 11.1584C2.76183 11.0839 2.73327 11.0131 2.6872 10.954L2.1328 10.2436C2.10036 10.2021 2.07641 10.1547 2.06232 10.1039C2.04822 10.0532 2.04425 10.0002 2.05064 9.94795C2.05703 9.89569 2.07365 9.8452 2.09955 9.79936C2.12545 9.75352 2.16013 9.71324 2.2016 9.6808C2.24307 9.64836 2.29053 9.62441 2.34125 9.61032C2.39198 9.59622 2.44499 9.59225 2.49725 9.59864C2.54951 9.60503 2.6 9.62165 2.64584 9.64755C2.69168 9.67345 2.73196 9.70813 2.7644 9.7496L4.0844 11.4456C4.12179 11.4937 4.16965 11.5325 4.22434 11.5593C4.27903 11.5861 4.33911 11.6 4.4 11.6H10.0688C10.1479 11.6 10.2252 11.5765 10.291 11.5326C10.3567 11.4886 10.408 11.4261 10.4383 11.3531C10.4685 11.28 10.4765 11.1996 10.461 11.122C10.4456 11.0444 10.4075 10.9731 10.3516 10.9172L6.3428 6.9088C6.29973 6.86575 6.24739 6.8331 6.18979 6.81334C6.13218 6.79359 6.07083 6.78724 6.0104 6.7948L3.88 7.0604C3.77407 7.07312 3.66741 7.04351 3.5832 6.978C3.54162 6.94608 3.50683 6.90618 3.48087 6.86064C3.45491 6.8151 3.43829 6.76484 3.432 6.7128C3.41972 6.60748 3.44925 6.50155 3.51425 6.41777C3.57925 6.334 3.67453 6.27907 3.7796 6.2648L4.6764 6.1548C4.75078 6.14561 4.82109 6.1157 4.8793 6.06849C4.93751 6.02128 4.98129 5.95866 5.00564 5.88778C5.02999 5.81689 5.03393 5.7406 5.01702 5.66758C5.00011 5.59456 4.96303 5.52776 4.91 5.4748L4.08 4.6456C4.00513 4.57061 3.96309 4.46897 3.96309 4.363C3.96309 4.25703 4.00513 4.1554 4.08 4.0804C4.15636 4.00816 4.25748 3.9679 4.3626 3.9679C4.46772 3.9679 4.56884 4.00816 4.6452 4.0804L5.4744 4.9088C5.52736 4.96183 5.59416 4.99891 5.66718 5.01582C5.7402 5.03273 5.81649 5.02879 5.88738 5.00444C5.95826 4.98009 6.02088 4.93631 6.06809 4.8781C6.1153 4.81989 6.14521 4.74958 6.1544 4.6752L6.264 3.7812C6.2773 3.67533 6.33198 3.57903 6.41608 3.51337C6.50018 3.44771 6.60687 3.41802 6.7128 3.4308C6.76521 3.43727 6.81581 3.45404 6.8617 3.48016C6.90759 3.50629 6.94785 3.54123 6.98017 3.58299C7.01248 3.62475 7.03621 3.6725 7.04998 3.72348C7.06375 3.77445 7.06729 3.82765 7.0604 3.88L6.7948 6.0124C6.78724 6.07283 6.79359 6.13418 6.81334 6.19179C6.8331 6.24939 6.86575 6.30173 6.9088 6.3448L10.9172 10.3516C10.9731 10.4075 11.0444 10.4456 11.122 10.461C11.1996 10.4765 11.28 10.4685 11.3531 10.4383C11.4261 10.408 11.4886 10.3567 11.5326 10.291C11.5765 10.2252 11.6 10.1479 11.6 10.0688V4.4C11.6 4.33911 11.5861 4.27903 11.5593 4.22434C11.5325 4.16965 11.4937 4.12179 11.4456 4.0844L9.7504 2.7644C9.66643 2.69948 9.6117 2.60385 9.59823 2.49857C9.58477 2.39329 9.61368 2.28697 9.6786 2.203C9.74353 2.11903 9.83915 2.0643 9.94443 2.05083C10.0497 2.03737 10.156 2.06628 10.24 2.1312L10.9524 2.6872C11.0115 2.73374 11.0824 2.7627 11.1572 2.77075C11.2319 2.7788 11.3075 2.76561 11.3751 2.73271C11.4427 2.6998 11.4996 2.64851 11.5394 2.58471C11.5792 2.52091 11.6002 2.44719 11.6 2.372V1.2C11.6 1.09391 11.6421 0.992172 11.7172 0.917157C11.7922 0.842143 11.8939 0.8 12 0.8C12.1061 0.8 12.2078 0.842143 12.2828 0.917157C12.3579 0.992172 12.4 1.09391 12.4 1.2V2.372C12.4 2.44691 12.4211 2.5203 12.4608 2.58382C12.5005 2.64734 12.5573 2.69843 12.6246 2.73128C12.6919 2.76413 12.7671 2.77741 12.8416 2.76962C12.9161 2.76183 12.9869 2.73327 13.046 2.6872L13.7564 2.1328C13.7979 2.10036 13.8453 2.07641 13.8961 2.06232C13.9468 2.04822 13.9998 2.04425 14.052 2.05064C14.1043 2.05703 14.1548 2.07365 14.2006 2.09955C14.2465 2.12545 14.2868 2.16013 14.3192 2.2016C14.3516 2.24307 14.3756 2.29053 14.3897 2.34125C14.4038 2.39198 14.4077 2.44499 14.4014 2.49725C14.395 2.54951 14.3784 2.6 14.3524 2.64584C14.3265 2.69168 14.2919 2.73196 14.2504 2.7644L12.5544 4.0844C12.5063 4.12179 12.4675 4.16965 12.4407 4.22434C12.4139 4.27903 12.4 4.33911 12.4 4.4V10.0688C12.4 10.1479 12.4235 10.2252 12.4674 10.291C12.5114 10.3567 12.5739 10.408 12.6469 10.4383C12.72 10.4685 12.8004 10.4765 12.878 10.461C12.9556 10.4456 13.0269 10.4075 13.0828 10.3516L17.0912 6.3428C17.1343 6.29973 17.1669 6.24739 17.1867 6.18979C17.2064 6.13218 17.2128 6.07083 17.2052 6.0104L16.9396 3.88C16.933 3.82756 16.9368 3.77434 16.9509 3.72339C16.965 3.67245 16.989 3.6248 17.0216 3.5832C17.0536 3.54166 17.0936 3.5069 17.1392 3.48094C17.1848 3.45499 17.2351 3.43835 17.2872 3.432C17.3925 3.41983 17.4984 3.4494 17.5821 3.51438C17.6659 3.57936 17.7208 3.67458 17.7352 3.7796L17.8452 4.6764C17.8544 4.75078 17.8843 4.82109 17.9315 4.8793C17.9787 4.93751 18.0413 4.98129 18.1122 5.00564C18.1831 5.02999 18.2594 5.03393 18.3324 5.01702C18.4054 5.00011 18.4722 4.96303 18.5252 4.91L19.3544 4.08C19.4307 4.00758 19.5318 3.9672 19.637 3.9672C19.7422 3.9672 19.8433 4.00758 19.9196 4.08C19.9945 4.15499 20.0365 4.25663 20.0365 4.3626C20.0365 4.46857 19.9945 4.57021 19.9196 4.6452L19.0912 5.4744C19.0382 5.52736 19.0011 5.59416 18.9842 5.66718C18.9673 5.7402 18.9712 5.81649 18.9956 5.88738C19.0199 5.95826 19.0637 6.02088 19.1219 6.06809C19.1801 6.1153 19.2504 6.14521 19.3248 6.1544L20.2188 6.264C20.3244 6.27779 20.4204 6.3326 20.486 6.41658C20.5516 6.50056 20.5814 6.60696 20.5692 6.7128C20.5629 6.76477 20.5462 6.81495 20.5203 6.86042C20.4943 6.90589 20.4595 6.94572 20.418 6.9776C20.3765 7.01017 20.329 7.03421 20.2782 7.04835C20.2274 7.0625 20.1743 7.06645 20.122 7.06L17.9896 6.7944C17.9292 6.78705 17.8679 6.7935 17.8103 6.81324C17.7527 6.83299 17.7004 6.86552 17.6572 6.9084L13.6484 10.9172C13.5925 10.9731 13.5544 11.0444 13.539 11.122C13.5235 11.1996 13.5315 11.28 13.5617 11.3531C13.592 11.4261 13.6433 11.4886 13.709 11.5326C13.7748 11.5765 13.8521 11.6 13.9312 11.6H19.6C19.6609 11.6 19.721 11.5861 19.7757 11.5593C19.8304 11.5325 19.8782 11.4937 19.9156 11.4456L21.2356 9.7504C21.3005 9.66643 21.3961 9.6117 21.5014 9.59823C21.6067 9.58477 21.713 9.61368 21.797 9.6786C21.881 9.74353 21.9357 9.83915 21.9492 9.94443C21.9626 10.0497 21.9337 10.156 21.8688 10.24L21.3128 10.9524C21.2663 11.0115 21.2373 11.0824 21.2293 11.1572C21.2212 11.2319 21.2344 11.3075 21.2673 11.3751C21.3002 11.4427 21.3515 11.4996 21.4153 11.5394C21.4791 11.5792 21.5528 11.6002 21.628 11.6H22.8C22.9061 11.6 23.0078 11.6421 23.0828 11.7172C23.1579 11.7922 23.2 11.8939 23.2 12C23.2 12.1061 23.1579 12.2078 23.0828 12.2828C23.0078 12.3579 22.9061 12.4 22.8 12.4Z"
+                      fill="#B9C4D5"
+                    />
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_3328_177">
+                      <rect width="24" height="24" fill="white" />
+                    </clipPath>
+                  </defs>
+                </svg>
+              </div>
+              {trip.category && (
+                <div
+                  className={`rounded-full px-3 py-1 text-sm font-medium ${trip.category === "Comfort"
+                    ? "bg-[#C2DEFF] text-primary" : trip.category === "Prime_Mix"
+                      ? "bg-[#C2FBFF] text-[#00939C]" : trip.category === "First10"
+                        ? "bg-[#FFC2E3] text-[#A50059]" : trip.category === "first_class"
+                          ? "bg-[#FFC2C2] text-[#AE0000]" : trip.category === "Business 40"
+                            ? "bg-[#FFE3C2] text-[#AD5E00]" : trip.category === "Economy"
+                              ? "bg-[#E4FFC2] text-[#4C8900]"
+                              : "bg-yellow-100 text-yellow-800"
+                    }`}
+                >
+                  {trip.category}
+                </div>
+              )}
+              </div>
+              {trip.available_seats !== 0 && (
+                <div className="text-sm text-gray-600">
+                  {trip.available_seats} {t("busSearchTrips.seatsFree")}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-4 justify-between w-full md:flex-row md:w-[220px]  md:items-end">
+              <div className="text-start">
+                <div className="text-lg font-bold text-gray-800 flex flex-row w-full">
+                  {trip.prices_start_with.final_price}{" "}
+                  {t("busSearchTrips.LE")}
+                </div>
+                <div className="text-[10px] text-gray-500 w-full">
+                  {t("busSearchTrips.pricePerPerson")}
+                </div>
+              </div>
+              <button
+                className="bg-primary hover:bg-prtext-primary text-white font-semibold py-2 px-6 rounded-md shadow transition duration-200"
+                onClick={() => {
+                  if (selectedDeparture && selectedArrival) {
+                    onSelect(selectedDeparture, selectedArrival);
+                  }
+                }}
+
+              >
+                {t("busSearchTrips.select")}
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const BusSearchTrips: React.FC = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const {
     getFilteredTrips,
     tripFilters,
@@ -18,87 +294,36 @@ const BusSearchTrips: React.FC = () => {
     setTripFilters,
     handleTripSelection,
   } = useSearchContext();
+  const [sortOption, setSortOption] = useState("lowestPrice");
   const filteredTrips = getFilteredTrips();
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-
-
   const duration = "2h 30m";
 
-  // Local state for sorting option (e.g., lowest price, highest price, etc.)
-  const [sortOption, setSortOption] = React.useState("lowestPrice");
-
-  // Helper to convert "HH:mm" to minutes (for sorting)
-  const convertTimeToMinutes = (timeStr: string): number => {
-    const [hours, minutes] = timeStr.split(":").map(Number);
-    return hours * 60 + minutes;
-  };
-
-  // Helper to format a time string using the departure date (from searchValues)
-  const formatDateTime = (
-    dateTimeStr: string,
-    options?: FormatDateTimeOptions
-  ): string => {
-    const locale = options?.locale || "en-GB";
-    const defaultFormatOptions: Intl.DateTimeFormatOptions = {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    };
-    const formatOptions = {
-      ...defaultFormatOptions,
-      ...options?.formatOptions,
-    };
-
-    const isoDateStr = dateTimeStr.replace(" ", "T");
-    const dateObj = new Date(isoDateStr);
-
-    if (isNaN(dateObj.getTime())) {
-      console.warn(
-        `Invalid date/time provided: "${dateTimeStr}". Using current date/time.`
-      );
-      return new Date().toLocaleString(locale, formatOptions);
-    }
-
-    return dateObj.toLocaleString(locale, formatOptions);
-  };
-
-  // Sort trips based on the selected sort option.
-  const finalTrips = React.useMemo(() => {
-    let trips = [...filteredTrips];
+  const finalTrips = useMemo(() => {
+    const trips = [...filteredTrips];
     switch (sortOption) {
       case "lowestPrice":
-        trips.sort(
+        return trips.sort(
           (a, b) =>
             a.prices_start_with.final_price - b.prices_start_with.final_price
         );
-        break;
       case "highestPrice":
-        trips.sort(
+        return trips.sort(
           (a, b) =>
             b.prices_start_with.final_price - a.prices_start_with.final_price
         );
-        break;
       case "arrivalTime":
-        trips.sort((a, b) => {
+        return trips.sort((a, b) => {
           const arrivalA = a.stations_to[0]?.arrival_at || "00:00";
           const arrivalB = b.stations_to[0]?.arrival_at || "00:00";
-          return (
-            convertTimeToMinutes(arrivalA) - convertTimeToMinutes(arrivalB)
-          );
+          return convertTimeToMinutes(arrivalA) - convertTimeToMinutes(arrivalB);
         });
-        break;
       case "departureTime":
-        trips.sort(
+        return trips.sort(
           (a, b) => convertTimeToMinutes(a.time) - convertTimeToMinutes(b.time)
         );
-        break;
       default:
-        break;
+        return trips;
     }
-    return trips;
   }, [filteredTrips, sortOption]);
 
   if (finalTrips.length === 0) {
@@ -110,18 +335,14 @@ const BusSearchTrips: React.FC = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4 space-y-8">
-      {/* Header */}
+    <div className="max-w-5xl mx-auto  space-y-8">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4 text-sm text-gray-600">
-          <span>
-            {t("busSearchTrips.results", { count: finalTrips.length })}
-          </span>
+          <span>{t("busSearchTrips.results", { count: finalTrips.length })}</span>
           <span>|</span>
           <button
-            className="text-prbg-primary font-medium hover:underline"
+            className="text-primary font-medium hover:underline"
             onClick={() => {
-              // Reset search values and filters
               setSearchValues({
                 from: "",
                 to: "",
@@ -135,235 +356,45 @@ const BusSearchTrips: React.FC = () => {
             {t("busSearchTrips.allTickets")}
           </button>
         </div>
-        <div className="flex gap-4">
-          {/* Sorting Dropdown */}
-          <select
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
-          >
-            <option value="lowestPrice">
-              {t("busSearchTrips.sortOptions.lowestPrice")}
+        <select
+          className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value)}
+        >
+          {[
+            "lowestPrice",
+            "highestPrice",
+            "arrivalTime",
+            "departureTime",
+          ].map((option) => (
+            <option key={option} value={option}>
+              {t(`busSearchTrips.sortOptions.${option}`)}
             </option>
-            <option value="highestPrice">
-              {t("busSearchTrips.sortOptions.highestPrice")}
-            </option>
-            <option value="arrivalTime">
-              {t("busSearchTrips.sortOptions.arrivalTime")}
-            </option>
-            <option value="departureTime">
-              {t("busSearchTrips.sortOptions.departureTime")}
-            </option>
-          </select>
-        </div>
+          ))}
+        </select>
       </div>
 
-      {/* Trips List */}
       <div className="space-y-6">
-        {finalTrips.map((trip, tripIndex) => {
-          const departureStations = trip.stations_from || [];
-          const arrivalStations = trip.stations_to || [];
-
-          return (
-            <div key={tripIndex} className="space-y-4">
-              {departureStations.flatMap((departure_Station, depIndex) =>
-                arrivalStations.map((arrival_Station, arrIndex) => (
-                  <div key={`${tripIndex}-${depIndex}-${arrIndex}`}>
-                    <div
-                      key={trip.id}
-                      className="bg-white rounded-lg shadow-lg overflow-hidden"
-                    >
-                      {/* Header Section */}
-                      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                        <img
-                          src={
-                            trip.company_data?.avatar ||
-                            "https://via.placeholder.com/83x40"
-                          }
-                          alt="Company Logo"
-                          className="w-20 h-10 object-cover"
-                        />
-                        <div className="flex items-center gap-2 text-gray-600 text-sm">
-                          <svg
-                            className="w-6 h-6"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M12 6V12H16.5M21 12C21 13.1819 20.7672 14.3522 20.3149 15.4442C19.8626 16.5361 19.1997 17.5282 18.364 18.364C17.5282 19.1997 16.5361 19.8626 15.4442 20.3149C14.3522 20.7672 13.1819 21 12 21C10.8181 21 9.64778 20.7672 8.55585 20.3149C7.46392 19.8626 6.47177 19.1997 5.63604 18.364C4.80031 17.5282 4.13738 16.5361 3.68508 15.4442C3.23279 14.3522 3 13.1819 3 12C3 9.61305 3.94821 7.32387 5.63604 5.63604C7.32387 3.94821 9.61305 3 12 3C14.3869 3 16.6761 3.94821 18.364 5.63604C20.0518 7.32387 21 9.61305 21 12Z"
-                              stroke="#69696A"
-                              strokeWidth="2"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                          <span>{duration}</span>
-                        </div>
-                      </div>
-                      {/* container body */}
-                      <div className="flex  justify-between max-sm:flex-col">
-
-                        {/* container station */}
-                        <div className="flex flex-row gap-0 items-start ">
-                          <div className=" h-full w-5 flex flex-col py-6    items-center justify-center align-middle opacity-45">
-                            <div className="w-2 h-2 bg-black rounded-full"></div>
-                            <div className="w-1 h-full bg-black opacity-40 rounded-full max-sm:min-h-[3.6rem]"></div>
-                            <div className="w-2 h-2 bg-black rounded-full"></div>
-                          </div>
-                          {/* Stations Preview Section */}
-                          <div className="px-4 py-3 border-b border-gray-200">
-                            <div className="mb-4 ">
-                              {/* <h4 className="text-lg font-semibold text-gray-800 mb-1">
-                        {t("busSearchTrips.departureStation")}
-                      </h4> */}
-                              {departure_Station ? (
-                                <div className="flex justify-between items-start flex-col">
-                                  <span className="text-lg font-semibold text-gray-800  ">
-                                    {tripFilters.stationFrom || departure_Station.name}
-                                  </span>
-                                  <span className="text-sm text-gray-500">
-                                    {formatDateTime(departure_Station.arrival_at)}
-                                  </span>
-                                </div>
-                              ) : (
-                                <p className="text-gray-500">
-                                  {t("busSearchTrips.noDepartureStation")}
-                                </p>
-                              )}
-                            </div>
-                            <div>
-                              {/* <h4 className="text-lg font-semibold text-gray-800 mb-1">
-                        {t("busSearchTrips.arrivalStation")}
-                      </h4> */}
-                              {arrival_Station ? (
-                                <div className="flex justify-between items-start flex-col">
-                                  <span className="text-lg font-semibold text-gray-800 ">
-                                    {tripFilters.stationTo || arrival_Station.name}
-                                  </span>
-                                  <span className="text-sm text-gray-500">
-                                    {formatDateTime(arrival_Station.arrival_at)}
-                                  </span>
-                                </div>
-                              ) : (
-                                <p className="text-gray-500">
-                                  {t("busSearchTrips.noArrivalStation")}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        {/* image container */}
-                        <div className="">
-                                  <img
-                          src={
-                            trip.company_data?.bus_image ||
-                            "https://via.placeholder.com/83x40"
-                          }
-                          alt="Company Logo"
-                          className="w-32 h-full object-contain"
-                        />
-                        </div>
-                      </div>
-
-
-                      {/* Footer Section */}
-                      <div className="flex flex-col md:flex-row items-center justify-between px-4 py-3">
-                        <div className="flex items-center gap-4 mb-4 md:mb-0 w-full">
-                          <div className="flex items-center gap-2">
-                            <svg
-                              width="20"
-                              height="20"
-                              viewBox="0 0 20 20"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M7 15.25V16.257C7.00005 16.6511 6.92244 17.0414 6.77162 17.4055C6.6208 17.7696 6.39971 18.1004 6.121 18.379L5.5 19H14.5L13.879 18.379C13.6003 18.1004 13.3792 17.7696 13.2284 17.4055C13.0776 17.0414 13 16.6511 13 16.257V15.25M19 3.25V13C19 13.5967 18.7629 14.169 18.341 14.591C17.919 15.0129 17.3467 15.25 16.75 15.25H3.25C2.65326 15.25 2.08097 15.0129 1.65901 14.591C1.23705 14.169 1 13.5967 1 13V3.25M19 3.25C19 2.65326 18.7629 2.08097 18.341 1.65901C17.919 1.23705 17.3467 1 16.75 1H3.25C2.65326 1 2.08097 1.23705 1.65901 1.65901C1.23705 2.08097 1 2.65326 1 3.25M19 3.25V10C19 10.5967 18.7629 11.169 18.341 11.591C17.919 12.0129 17.3467 12.25 16.75 12.25H3.25C2.65326 12.25 2.08097 12.0129 1.65901 11.591C1.23705 11.169 1 10.5967 1 10V3.25"
-                                stroke="#B9C4D5"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              />
-                            </svg>
-                            <svg
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <g clipPath="url(#clip0_3328_177)">
-                                <path
-                                  d="M22.8 10.8H22.4476L22.5008 10.732C22.6962 10.4805 22.7837 10.1617 22.7441 9.84572C22.7044 9.52972 22.5409 9.24241 22.2894 9.047C22.0379 8.85159 21.7191 8.76408 21.4031 8.80373C21.0871 8.84337 20.7998 9.00692 20.6044 9.2584L19.4044 10.8H14.8968L18.0844 7.6128L20.0236 7.8528C20.3394 7.89192 20.6578 7.80401 20.9088 7.6084C21.0339 7.51194 21.1384 7.39151 21.2164 7.25414C21.2944 7.11677 21.3441 6.96524 21.3628 6.8084C21.3998 6.49316 21.311 6.17606 21.1158 5.92578C20.9207 5.67549 20.6347 5.51217 20.32 5.4712L20.2372 5.4608L20.486 5.212C20.7105 4.98664 20.8366 4.6815 20.8366 4.3634C20.8366 4.0453 20.7105 3.74016 20.486 3.5148C20.2572 3.29697 19.9533 3.17549 19.6374 3.17549C19.3215 3.17549 19.0176 3.29697 18.7888 3.5148L18.5396 3.7636L18.5284 3.68C18.4876 3.36518 18.324 3.07924 18.0733 2.88446C17.8226 2.68967 17.5052 2.60181 17.19 2.64C16.8739 2.67937 16.5863 2.84261 16.3905 3.09387C16.1947 3.34512 16.1066 3.66384 16.1456 3.98L16.3856 5.9184L13.2 9.1032V4.5956L14.7424 3.3956C14.9936 3.19982 15.1568 2.91226 15.196 2.59619C15.2352 2.28011 15.1472 1.96141 14.9514 1.7102C14.7556 1.45899 14.4681 1.29584 14.152 1.25664C13.8359 1.21745 13.5172 1.30542 13.266 1.5012L13.2 1.5524V1.2C13.2 0.88174 13.0736 0.576515 12.8485 0.351472C12.6235 0.126428 12.3183 0 12 0C11.6817 0 11.3765 0.126428 11.1515 0.351472C10.9264 0.576515 10.8 0.88174 10.8 1.2V1.5524L10.732 1.4992C10.6075 1.40244 10.4651 1.33116 10.3131 1.28942C10.161 1.24768 10.0022 1.23629 9.84572 1.25593C9.68925 1.27556 9.53818 1.32581 9.40114 1.40383C9.26409 1.48184 9.14376 1.58608 9.047 1.7106C8.95024 1.83512 8.87896 1.97748 8.83722 2.12955C8.79548 2.28161 8.78409 2.44042 8.80373 2.59688C8.82336 2.75335 8.87361 2.90442 8.95162 3.04146C9.02964 3.17851 9.13388 3.29884 9.2584 3.3956L10.8 4.5956V9.1032L7.6128 5.9156L7.8528 3.9764C7.8905 3.66137 7.8019 3.34423 7.60638 3.09435C7.41087 2.84447 7.12435 2.68219 6.8095 2.64301C6.49465 2.60383 6.1771 2.69093 5.9263 2.88526C5.6755 3.07959 5.51187 3.36534 5.4712 3.68L5.4608 3.7628L5.212 3.514C4.98307 3.29636 4.67927 3.17499 4.3634 3.17499C4.04753 3.17499 3.74373 3.29636 3.5148 3.514C3.40335 3.62543 3.31494 3.75773 3.25462 3.90333C3.1943 4.04894 3.16326 4.205 3.16326 4.3626C3.16326 4.5202 3.1943 4.67626 3.25462 4.82187C3.31494 4.96747 3.40335 5.09977 3.5148 5.2112L3.7636 5.4604L3.678 5.4712C3.36345 5.51264 3.0779 5.67636 2.88323 5.92689C2.68856 6.17741 2.60045 6.49456 2.638 6.8096C2.65724 6.96623 2.70719 7.11753 2.78498 7.25483C2.86278 7.39214 2.96689 7.51275 3.09136 7.60976C3.21583 7.70677 3.35821 7.77828 3.51035 7.82019C3.6625 7.8621 3.82141 7.87359 3.978 7.854L5.9164 7.614L9.1032 10.8H4.5956L3.3956 9.2576C3.29866 9.13321 3.17817 9.02914 3.041 8.95131C2.90384 8.87349 2.75269 8.82345 2.59619 8.80404C2.28011 8.76485 1.96141 8.85282 1.7102 9.0486C1.45899 9.24438 1.29584 9.53194 1.25664 9.84801C1.21745 10.1641 1.30542 10.4828 1.5012 10.734L1.5524 10.8H1.2C0.88174 10.8 0.576515 10.9264 0.351472 11.1515C0.126428 11.3765 0 11.6817 0 12C0 12.3183 0.126428 12.6235 0.351472 12.8485C0.576515 13.0736 0.88174 13.2 1.2 13.2H1.5524L1.4992 13.268C1.30379 13.5195 1.21628 13.8383 1.25593 14.1543C1.29557 14.4703 1.45912 14.7576 1.7106 14.953C1.96208 15.1484 2.28088 15.2359 2.59688 15.1963C2.91288 15.1566 3.20019 14.9931 3.3956 14.7416L4.5956 13.2H9.1032L5.9156 16.3872L3.9764 16.1472C3.8199 16.1277 3.6611 16.1393 3.50907 16.1812C3.35705 16.2232 3.21478 16.2947 3.0904 16.3916C2.96602 16.4886 2.86198 16.6091 2.78421 16.7463C2.70645 16.8835 2.65649 17.0347 2.6372 17.1912C2.60014 17.5065 2.68881 17.8237 2.884 18.0741C3.07919 18.3245 3.36518 18.4878 3.68 18.5288L3.7628 18.5392L3.514 18.788C3.2895 19.0134 3.16345 19.3185 3.16345 19.6366C3.16345 19.9547 3.2895 20.2598 3.514 20.4852C3.74283 20.703 4.04667 20.8245 4.3626 20.8245C4.67853 20.8245 4.98237 20.703 5.2112 20.4852L5.4604 20.2364L5.4712 20.322C5.51114 20.6372 5.67448 20.9237 5.92538 21.1187C6.17629 21.3137 6.49428 21.4012 6.8096 21.362C6.96623 21.3428 7.11753 21.2928 7.25483 21.215C7.39214 21.1372 7.51275 21.0331 7.60976 20.9086C7.70677 20.7842 7.77828 20.6418 7.82019 20.4896C7.8621 20.3375 7.87359 20.1786 7.854 20.022L7.614 18.0836L10.8 14.8968V19.4044L9.2576 20.6044C9.00639 20.8002 8.84324 21.0877 8.80404 21.4038C8.76485 21.7199 8.85282 22.0386 9.0486 22.2898C9.24438 22.541 9.53194 22.7042 9.84801 22.7434C10.1641 22.7826 10.4828 22.6946 10.734 22.4988L10.8 22.4476V22.8C10.8 23.1183 10.9264 23.4235 11.1515 23.6485C11.3765 23.8736 11.6817 24 12 24C12.3183 24 12.6235 23.8736 12.8485 23.6485C13.0736 23.4235 13.2 23.1183 13.2 22.8V22.4476L13.268 22.5008C13.5195 22.6962 13.8383 22.7837 14.1543 22.7441C14.4703 22.7044 14.7576 22.5409 14.953 22.2894C15.1484 22.0379 15.2359 21.7191 15.1963 21.4031C15.1566 21.0871 14.9931 20.7998 14.7416 20.6044L13.2 19.4044V14.8968L16.3872 18.0844L16.1472 20.0236C16.108 20.3396 16.196 20.6583 16.3917 20.9095C16.5875 21.1607 16.875 21.3238 17.191 21.363C17.507 21.4022 17.8257 21.3142 18.0769 21.1185C18.3281 20.9227 18.4912 20.6352 18.5304 20.3192L18.5408 20.2364L18.7896 20.4852C19.0185 20.7028 19.3223 20.8242 19.6382 20.8242C19.9541 20.8242 20.2579 20.7028 20.4868 20.4852C20.5983 20.3738 20.6867 20.2415 20.747 20.0959C20.8073 19.9503 20.8383 19.7942 20.8383 19.6366C20.8383 19.479 20.8073 19.3229 20.747 19.1773C20.6867 19.0317 20.5983 18.8994 20.4868 18.788L20.238 18.5388L20.3236 18.528C20.6382 18.4866 20.9237 18.3228 21.1184 18.0723C21.313 17.8218 21.4011 17.5046 21.3636 17.1896C21.3444 17.033 21.2944 16.8817 21.2166 16.7444C21.1388 16.6071 21.0347 16.4865 20.9102 16.3894C20.7858 16.2924 20.6434 16.2209 20.4912 16.179C20.3391 16.1371 20.1802 16.1256 20.0236 16.1452L18.0852 16.3852L14.8968 13.2H19.4044L20.6044 14.7424C20.8002 14.9936 21.0877 15.1568 21.4038 15.196C21.7199 15.2352 22.0386 15.1472 22.2898 14.9514C22.541 14.7556 22.7042 14.4681 22.7434 14.152C22.7826 13.8359 22.6946 13.5172 22.4988 13.266L22.4476 13.2H22.8C23.1183 13.2 23.4235 13.0736 23.6485 12.8485C23.8736 12.6235 24 12.3183 24 12C24 11.6817 23.8736 11.3765 23.6485 11.1515C23.4235 10.9264 23.1183 10.8 22.8 10.8ZM22.8 12.4H21.628C21.5531 12.4 21.4797 12.4211 21.4162 12.4608C21.3527 12.5005 21.3016 12.5573 21.2687 12.6246C21.2359 12.6919 21.2226 12.7671 21.2304 12.8416C21.2382 12.9161 21.2667 12.9869 21.3128 13.046L21.8672 13.7564C21.8996 13.7979 21.9236 13.8453 21.9377 13.8961C21.9518 13.9468 21.9557 13.9998 21.9494 14.052C21.943 14.1043 21.9264 14.1548 21.9004 14.2006C21.8745 14.2465 21.8399 14.2868 21.7984 14.3192C21.7569 14.3516 21.7095 14.3756 21.6587 14.3897C21.608 14.4038 21.555 14.4077 21.5028 14.4014C21.4505 14.395 21.4 14.3784 21.3542 14.3524C21.3083 14.3265 21.268 14.2919 21.2356 14.2504L19.9156 12.5544C19.8782 12.5063 19.8304 12.4675 19.7757 12.4407C19.721 12.4139 19.6609 12.4 19.6 12.4H13.9312C13.8521 12.4 13.7748 12.4235 13.709 12.4674C13.6433 12.5114 13.592 12.5739 13.5617 12.6469C13.5315 12.72 13.5235 12.8004 13.539 12.878C13.5544 12.9556 13.5925 13.0269 13.6484 13.0828L17.6572 17.0912C17.7004 17.134 17.7528 17.1665 17.8103 17.1863C17.8679 17.206 17.9292 17.2125 17.9896 17.2052L20.1212 16.9396C20.2271 16.9268 20.3338 16.9564 20.418 17.022C20.4596 17.0539 20.4944 17.0938 20.5203 17.1394C20.5463 17.1849 20.5629 17.2352 20.5692 17.2872C20.5815 17.3925 20.5519 17.4985 20.4869 17.5822C20.4219 17.666 20.3267 17.7209 20.2216 17.7352L19.3248 17.8452C19.2504 17.8544 19.1801 17.8843 19.1219 17.9315C19.0637 17.9787 19.0199 18.0413 18.9956 18.1122C18.9712 18.1831 18.9673 18.2594 18.9842 18.3324C19.0011 18.4054 19.0382 18.4722 19.0912 18.5252L19.92 19.3544C19.9949 19.4294 20.0369 19.531 20.0369 19.637C20.0369 19.743 19.9949 19.8446 19.92 19.9196C19.8436 19.9918 19.7425 20.0321 19.6374 20.0321C19.5323 20.0321 19.4312 19.9918 19.3548 19.9196L18.5256 19.0912C18.4726 19.0382 18.4058 19.0011 18.3327 18.9842C18.2597 18.9673 18.1834 18.9713 18.1125 18.9957C18.0416 19.0201 17.979 19.0639 17.9318 19.1222C17.8846 19.1804 17.8547 19.2508 17.8456 19.3252L17.736 20.2188C17.7221 20.3244 17.6673 20.4203 17.5833 20.4859C17.4994 20.5514 17.393 20.5813 17.2872 20.5692C17.2352 20.5629 17.185 20.5462 17.1396 20.5203C17.0941 20.4943 17.0543 20.4595 17.0224 20.418C16.9898 20.3765 16.9658 20.329 16.9516 20.2782C16.9375 20.2274 16.9335 20.1743 16.94 20.122L17.2056 17.9896C17.2132 17.9292 17.2068 17.8678 17.1871 17.8102C17.1673 17.7526 17.1347 17.7003 17.0916 17.6572L13.0828 13.6484C13.0269 13.5925 12.9556 13.5544 12.878 13.539C12.8004 13.5235 12.72 13.5315 12.6469 13.5617C12.5739 13.592 12.5114 13.6433 12.4674 13.709C12.4235 13.7748 12.4 13.8521 12.4 13.9312V19.6C12.4 19.6609 12.4139 19.721 12.4407 19.7757C12.4675 19.8304 12.5063 19.8782 12.5544 19.9156L14.2496 21.2356C14.2912 21.2677 14.326 21.3078 14.3521 21.3534C14.3782 21.399 14.3951 21.4493 14.4018 21.5014C14.4084 21.5536 14.4048 21.6065 14.391 21.6572C14.3772 21.7079 14.3535 21.7554 14.3214 21.797C14.2893 21.8386 14.2492 21.8734 14.2036 21.8995C14.158 21.9256 14.1077 21.9425 14.0556 21.9492C14.0034 21.9558 13.9505 21.9522 13.8998 21.9384C13.8491 21.9246 13.8016 21.9009 13.76 21.8688L13.0476 21.3128C12.9885 21.2663 12.9176 21.2373 12.8428 21.2293C12.7681 21.2212 12.6926 21.2344 12.6249 21.2673C12.5573 21.3002 12.5004 21.3515 12.4606 21.4153C12.4208 21.4791 12.3998 21.5528 12.4 21.628V22.8C12.4 22.9061 12.3579 23.0078 12.2828 23.0828C12.2078 23.1579 12.1061 23.2 12 23.2C11.8939 23.2 11.7922 23.1579 11.7172 23.0828C11.6421 23.0078 11.6 22.9061 11.6 22.8V21.628C11.6 21.5531 11.5789 21.4797 11.5392 21.4162C11.4995 21.3527 11.4427 21.3016 11.3754 21.2687C11.3081 21.2359 11.2329 21.2226 11.1584 21.2304C11.0839 21.2382 11.0131 21.2667 10.954 21.3128L10.2436 21.8672C10.1598 21.9327 10.0535 21.9623 9.94795 21.9494C9.84241 21.9365 9.74631 21.8822 9.6808 21.7984C9.61529 21.7146 9.58574 21.6083 9.59864 21.5028C9.61154 21.3972 9.66584 21.3011 9.7496 21.2356L11.4456 19.9156C11.4937 19.8782 11.5325 19.8304 11.5593 19.7757C11.5861 19.721 11.6 19.6609 11.6 19.6V13.9312C11.6 13.8521 11.5765 13.7748 11.5326 13.709C11.4886 13.6433 11.4261 13.592 11.3531 13.5617C11.28 13.5315 11.1996 13.5235 11.122 13.539C11.0444 13.5544 10.9731 13.5925 10.9172 13.6484L6.9088 17.6572C6.86575 17.7003 6.8331 17.7526 6.81334 17.8102C6.79359 17.8678 6.78724 17.9292 6.7948 17.9896L7.0604 20.1212C7.06696 20.1737 7.06306 20.2269 7.04892 20.2779C7.03477 20.3288 7.01067 20.3764 6.978 20.418C6.94608 20.4596 6.90618 20.4944 6.86064 20.5203C6.8151 20.5463 6.76484 20.5629 6.7128 20.5692C6.60748 20.5815 6.50155 20.5519 6.41777 20.4869C6.334 20.4219 6.27907 20.3267 6.2648 20.2216L6.1548 19.3252C6.14567 19.2508 6.11581 19.1804 6.06862 19.1222C6.02144 19.0639 5.95883 19.0201 5.88793 18.9957C5.81704 18.9713 5.74072 18.9673 5.66767 18.9842C5.59462 19.0011 5.52779 19.0382 5.4748 19.0912L4.6456 19.92C4.56933 19.9924 4.46817 20.0328 4.363 20.0328C4.25783 20.0328 4.15667 19.9924 4.0804 19.92C4.00553 19.845 3.96349 19.7434 3.96349 19.6374C3.96349 19.5314 4.00553 19.4298 4.0804 19.3548L4.9088 18.526C4.96183 18.473 4.99891 18.4062 5.01582 18.3332C5.03273 18.2602 5.02879 18.1839 5.00444 18.113C4.98009 18.0421 4.93631 17.9795 4.8781 17.9323C4.81989 17.8851 4.74958 17.8552 4.6752 17.846L3.7812 17.7364C3.67555 17.7226 3.57958 17.6678 3.51401 17.5838C3.44845 17.4998 3.41856 17.3934 3.4308 17.2876C3.43714 17.2356 3.45378 17.1854 3.47974 17.14C3.50571 17.0945 3.54047 17.0547 3.582 17.0228C3.62347 16.9902 3.67097 16.9662 3.72177 16.952C3.77257 16.9379 3.82567 16.9339 3.878 16.9404L6.0104 17.206C6.07083 17.2136 6.13218 17.2072 6.18979 17.1875C6.24739 17.1677 6.29973 17.1351 6.3428 17.092L10.3516 13.0828C10.4075 13.0269 10.4456 12.9556 10.461 12.878C10.4765 12.8004 10.4685 12.72 10.4383 12.6469C10.408 12.5739 10.3567 12.5114 10.291 12.4674C10.2252 12.4235 10.1479 12.4 10.0688 12.4H4.4C4.33911 12.4 4.27903 12.4139 4.22434 12.4407C4.16965 12.4675 4.12179 12.5063 4.0844 12.5544L2.7644 14.2496C2.73225 14.2912 2.69223 14.326 2.64662 14.3521C2.60101 14.3782 2.5507 14.3951 2.49857 14.4018C2.44644 14.4084 2.39351 14.4048 2.34279 14.391C2.29208 14.3772 2.24458 14.3535 2.203 14.3214C2.16142 14.2893 2.12659 14.2492 2.10048 14.2036C2.07437 14.158 2.0575 14.1077 2.05083 14.0556C2.04416 14.0034 2.04783 13.9505 2.06162 13.8998C2.07541 13.8491 2.09905 13.8016 2.1312 13.76L2.6872 13.0476C2.73374 12.9885 2.7627 12.9176 2.77075 12.8428C2.7788 12.7681 2.76561 12.6926 2.73271 12.6249C2.6998 12.5573 2.64851 12.5004 2.58471 12.4606C2.52091 12.4208 2.44719 12.3998 2.372 12.4H1.2C1.09391 12.4 0.992172 12.3579 0.917157 12.2828C0.842143 12.2078 0.8 12.1061 0.8 12C0.8 11.8939 0.842143 11.7922 0.917157 11.7172C0.992172 11.6421 1.09391 11.6 1.2 11.6H2.372C2.44691 11.6 2.5203 11.5789 2.58382 11.5392C2.64734 11.4995 2.69843 11.4427 2.73128 11.3754C2.76413 11.3081 2.77741 11.2329 2.76962 11.1584C2.76183 11.0839 2.73327 11.0131 2.6872 10.954L2.1328 10.2436C2.10036 10.2021 2.07641 10.1547 2.06232 10.1039C2.04822 10.0532 2.04425 10.0002 2.05064 9.94795C2.05703 9.89569 2.07365 9.8452 2.09955 9.79936C2.12545 9.75352 2.16013 9.71324 2.2016 9.6808C2.24307 9.64836 2.29053 9.62441 2.34125 9.61032C2.39198 9.59622 2.44499 9.59225 2.49725 9.59864C2.54951 9.60503 2.6 9.62165 2.64584 9.64755C2.69168 9.67345 2.73196 9.70813 2.7644 9.7496L4.0844 11.4456C4.12179 11.4937 4.16965 11.5325 4.22434 11.5593C4.27903 11.5861 4.33911 11.6 4.4 11.6H10.0688C10.1479 11.6 10.2252 11.5765 10.291 11.5326C10.3567 11.4886 10.408 11.4261 10.4383 11.3531C10.4685 11.28 10.4765 11.1996 10.461 11.122C10.4456 11.0444 10.4075 10.9731 10.3516 10.9172L6.3428 6.9088C6.29973 6.86575 6.24739 6.8331 6.18979 6.81334C6.13218 6.79359 6.07083 6.78724 6.0104 6.7948L3.88 7.0604C3.77407 7.07312 3.66741 7.04351 3.5832 6.978C3.54162 6.94608 3.50683 6.90618 3.48087 6.86064C3.45491 6.8151 3.43829 6.76484 3.432 6.7128C3.41972 6.60748 3.44925 6.50155 3.51425 6.41777C3.57925 6.334 3.67453 6.27907 3.7796 6.2648L4.6764 6.1548C4.75078 6.14561 4.82109 6.1157 4.8793 6.06849C4.93751 6.02128 4.98129 5.95866 5.00564 5.88778C5.02999 5.81689 5.03393 5.7406 5.01702 5.66758C5.00011 5.59456 4.96303 5.52776 4.91 5.4748L4.08 4.6456C4.00513 4.57061 3.96309 4.46897 3.96309 4.363C3.96309 4.25703 4.00513 4.1554 4.08 4.0804C4.15636 4.00816 4.25748 3.9679 4.3626 3.9679C4.46772 3.9679 4.56884 4.00816 4.6452 4.0804L5.4744 4.9088C5.52736 4.96183 5.59416 4.99891 5.66718 5.01582C5.7402 5.03273 5.81649 5.02879 5.88738 5.00444C5.95826 4.98009 6.02088 4.93631 6.06809 4.8781C6.1153 4.81989 6.14521 4.74958 6.1544 4.6752L6.264 3.7812C6.2773 3.67533 6.33198 3.57903 6.41608 3.51337C6.50018 3.44771 6.60687 3.41802 6.7128 3.4308C6.76521 3.43727 6.81581 3.45404 6.8617 3.48016C6.90759 3.50629 6.94785 3.54123 6.98017 3.58299C7.01248 3.62475 7.03621 3.6725 7.04998 3.72348C7.06375 3.77445 7.06729 3.82765 7.0604 3.88L6.7948 6.0124C6.78724 6.07283 6.79359 6.13418 6.81334 6.19179C6.8331 6.24939 6.86575 6.30173 6.9088 6.3448L10.9172 10.3516C10.9731 10.4075 11.0444 10.4456 11.122 10.461C11.1996 10.4765 11.28 10.4685 11.3531 10.4383C11.4261 10.408 11.4886 10.3567 11.5326 10.291C11.5765 10.2252 11.6 10.1479 11.6 10.0688V4.4C11.6 4.33911 11.5861 4.27903 11.5593 4.22434C11.5325 4.16965 11.4937 4.12179 11.4456 4.0844L9.7504 2.7644C9.66643 2.69948 9.6117 2.60385 9.59823 2.49857C9.58477 2.39329 9.61368 2.28697 9.6786 2.203C9.74353 2.11903 9.83915 2.0643 9.94443 2.05083C10.0497 2.03737 10.156 2.06628 10.24 2.1312L10.9524 2.6872C11.0115 2.73374 11.0824 2.7627 11.1572 2.77075C11.2319 2.7788 11.3075 2.76561 11.3751 2.73271C11.4427 2.6998 11.4996 2.64851 11.5394 2.58471C11.5792 2.52091 11.6002 2.44719 11.6 2.372V1.2C11.6 1.09391 11.6421 0.992172 11.7172 0.917157C11.7922 0.842143 11.8939 0.8 12 0.8C12.1061 0.8 12.2078 0.842143 12.2828 0.917157C12.3579 0.992172 12.4 1.09391 12.4 1.2V2.372C12.4 2.44691 12.4211 2.5203 12.4608 2.58382C12.5005 2.64734 12.5573 2.69843 12.6246 2.73128C12.6919 2.76413 12.7671 2.77741 12.8416 2.76962C12.9161 2.76183 12.9869 2.73327 13.046 2.6872L13.7564 2.1328C13.7979 2.10036 13.8453 2.07641 13.8961 2.06232C13.9468 2.04822 13.9998 2.04425 14.052 2.05064C14.1043 2.05703 14.1548 2.07365 14.2006 2.09955C14.2465 2.12545 14.2868 2.16013 14.3192 2.2016C14.3516 2.24307 14.3756 2.29053 14.3897 2.34125C14.4038 2.39198 14.4077 2.44499 14.4014 2.49725C14.395 2.54951 14.3784 2.6 14.3524 2.64584C14.3265 2.69168 14.2919 2.73196 14.2504 2.7644L12.5544 4.0844C12.5063 4.12179 12.4675 4.16965 12.4407 4.22434C12.4139 4.27903 12.4 4.33911 12.4 4.4V10.0688C12.4 10.1479 12.4235 10.2252 12.4674 10.291C12.5114 10.3567 12.5739 10.408 12.6469 10.4383C12.72 10.4685 12.8004 10.4765 12.878 10.461C12.9556 10.4456 13.0269 10.4075 13.0828 10.3516L17.0912 6.3428C17.1343 6.29973 17.1669 6.24739 17.1867 6.18979C17.2064 6.13218 17.2128 6.07083 17.2052 6.0104L16.9396 3.88C16.933 3.82756 16.9368 3.77434 16.9509 3.72339C16.965 3.67245 16.989 3.6248 17.0216 3.5832C17.0536 3.54166 17.0936 3.5069 17.1392 3.48094C17.1848 3.45499 17.2351 3.43835 17.2872 3.432C17.3925 3.41983 17.4984 3.4494 17.5821 3.51438C17.6659 3.57936 17.7208 3.67458 17.7352 3.7796L17.8452 4.6764C17.8544 4.75078 17.8843 4.82109 17.9315 4.8793C17.9787 4.93751 18.0413 4.98129 18.1122 5.00564C18.1831 5.02999 18.2594 5.03393 18.3324 5.01702C18.4054 5.00011 18.4722 4.96303 18.5252 4.91L19.3544 4.08C19.4307 4.00758 19.5318 3.9672 19.637 3.9672C19.7422 3.9672 19.8433 4.00758 19.9196 4.08C19.9945 4.15499 20.0365 4.25663 20.0365 4.3626C20.0365 4.46857 19.9945 4.57021 19.9196 4.6452L19.0912 5.4744C19.0382 5.52736 19.0011 5.59416 18.9842 5.66718C18.9673 5.7402 18.9712 5.81649 18.9956 5.88738C19.0199 5.95826 19.0637 6.02088 19.1219 6.06809C19.1801 6.1153 19.2504 6.14521 19.3248 6.1544L20.2188 6.264C20.3244 6.27779 20.4204 6.3326 20.486 6.41658C20.5516 6.50056 20.5814 6.60696 20.5692 6.7128C20.5629 6.76477 20.5462 6.81495 20.5203 6.86042C20.4943 6.90589 20.4595 6.94572 20.418 6.9776C20.3765 7.01017 20.329 7.03421 20.2782 7.04835C20.2274 7.0625 20.1743 7.06645 20.122 7.06L17.9896 6.7944C17.9292 6.78705 17.8679 6.7935 17.8103 6.81324C17.7527 6.83299 17.7004 6.86552 17.6572 6.9084L13.6484 10.9172C13.5925 10.9731 13.5544 11.0444 13.539 11.122C13.5235 11.1996 13.5315 11.28 13.5617 11.3531C13.592 11.4261 13.6433 11.4886 13.709 11.5326C13.7748 11.5765 13.8521 11.6 13.9312 11.6H19.6C19.6609 11.6 19.721 11.5861 19.7757 11.5593C19.8304 11.5325 19.8782 11.4937 19.9156 11.4456L21.2356 9.7504C21.3005 9.66643 21.3961 9.6117 21.5014 9.59823C21.6067 9.58477 21.713 9.61368 21.797 9.6786C21.881 9.74353 21.9357 9.83915 21.9492 9.94443C21.9626 10.0497 21.9337 10.156 21.8688 10.24L21.3128 10.9524C21.2663 11.0115 21.2373 11.0824 21.2293 11.1572C21.2212 11.2319 21.2344 11.3075 21.2673 11.3751C21.3002 11.4427 21.3515 11.4996 21.4153 11.5394C21.4791 11.5792 21.5528 11.6002 21.628 11.6H22.8C22.9061 11.6 23.0078 11.6421 23.0828 11.7172C23.1579 11.7922 23.2 11.8939 23.2 12C23.2 12.1061 23.1579 12.2078 23.0828 12.2828C23.0078 12.3579 22.9061 12.4 22.8 12.4Z"
-                                  fill="#B9C4D5"
-                                />
-                              </g>
-                              <defs>
-                                <clipPath id="clip0_3328_177">
-                                  <rect width="24" height="24" fill="white" />
-                                </clipPath>
-                              </defs>
-                            </svg>
-                          </div>
-                          {trip.category && (
-                            <div
-                              className={`rounded-full px-3 py-1 text-sm font-medium ${trip.category === "Comfort"
-                                  ? "bg-[#C2DEFF] text-primary" : trip.category === "Prime_Mix"
-                                    ? "bg-[#C2FBFF] text-[#00939C]" : trip.category === "First10"
-                                      ? "bg-[#FFC2E3] text-[#A50059]" : trip.category === "first_class"
-                                        ? "bg-[#FFC2C2] text-[#AE0000]" : trip.category === "Business 40"
-                                          ? "bg-[#FFE3C2] text-[#AD5E00]" : trip.category === "Economy"
-                                            ? "bg-[#E4FFC2] text-[#4C8900]"
-                                            : "bg-yellow-100 text-yellow-800"
-                                }`}
-                            >
-                              {trip.category}
-                            </div>
-                          )}
-                          {trip.available_seats !== 0 && (
-                            <div className="text-sm text-gray-600">
-                              {trip.available_seats} {t("busSearchTrips.seatsFree")}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4 justify-between w-full md:flex-row md:w-[220px]  md:items-end">
-                          <div className="text-start">
-                            <div className="text-lg font-bold text-gray-800 flex flex-row w-full">
-                              {trip.prices_start_with.final_price}{" "}
-                              {t("busSearchTrips.LE")}
-                            </div>
-                            <div className="text-[10px] text-gray-500 w-full">
-                              {t("busSearchTrips.pricePerPerson")}
-                            </div>
-                          </div>
-                          <button
-                            className="bg-primary hover:bg-prtext-primary text-white font-semibold py-2 px-6 rounded-md shadow transition duration-200"
-                            onClick={() => {
-                              handleTripSelection(
-                                trip.id,
-                                trip.cities_from[0].id,
-                                trip.cities_to[0].id,
-                                trip.stations_from[0].id,
-                                trip.stations_to[0].id,
-                                trip.date,
-                                arrival_Station,
-                                departure_Station
-                              );
-                            }}
-                          >
-                            {t("busSearchTrips.select")}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          );
-        })}
+        {finalTrips.map((trip) => (
+          <TripCard
+            key={trip.id}
+            trip={trip}
+            duration={duration}
+            onSelect={(departure, arrival) =>
+              handleTripSelection(
+                trip.id,
+                trip.cities_from[0].id,
+                trip.cities_to[0].id,
+                departure.id,
+                arrival.id,
+                trip.date,
+                arrival,
+                departure
+              )
+            }
+          />
+        ))}
       </div>
-
     </div>
   );
 };
