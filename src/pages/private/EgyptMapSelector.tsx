@@ -556,7 +556,7 @@ export default function EgyptMapSelector({
                 handleAddressSelect(String(loc.id));
                 setActiveInfoWindow(`address-${loc.id}`);
               }}
-              zIndex={isBoarding || isReturn || isSelected ? 100 : 10000}
+              zIndex={10000}
             >
               {activeInfoWindow === `address-${loc.id}` && (
                 <MemoizedInfoWindow

@@ -257,6 +257,26 @@ useEffect(() => {
 
     } 
 }, [addressesReturn])
+useEffect(() => {
+  if (addressesReturn) {
+      localStorage.setItem(STORAGE.BOARDING_ID, addressesReturn.id);
+      localStorage.setItem(STORAGE.BOARDING_ADDRESS, JSON.stringify(addressesReturn));
+
+    } 
+}, [addressesBoarding])
+useEffect(() => {
+  if (addressesReturn) {
+      localStorage.setItem(STORAGE.RETURN_ID, addressesReturn.id);
+      localStorage.setItem(STORAGE.RETURN_ADDRESS, JSON.stringify(addressesReturn));
+
+    } 
+
+  if (addressesReturn) {
+      localStorage.setItem(STORAGE.BOARDING_ID, addressesReturn.id);
+      localStorage.setItem(STORAGE.BOARDING_ADDRESS, JSON.stringify(addressesReturn));
+
+    } 
+}, [addresses])
 
   const addNewAddress = useCallback(async (payload: AddAddressPayload) => {
     try {
