@@ -250,32 +250,19 @@ export const PrivateTripDataProvider: React.FC<{ children: React.ReactNode }> = 
       }
     }
   }, [returnAddressId, addresses]);
-useEffect(() => {
-  if (addressesReturn) {
-      localStorage.setItem(STORAGE.RETURN_ID, addressesReturn.id);
-      localStorage.setItem(STORAGE.RETURN_ADDRESS, JSON.stringify(addressesReturn));
 
-    } 
-}, [addressesReturn])
 useEffect(() => {
-  if (addressesReturn) {
-      localStorage.setItem(STORAGE.BOARDING_ID, addressesReturn.id);
-      localStorage.setItem(STORAGE.BOARDING_ADDRESS, JSON.stringify(addressesReturn));
-
-    } 
-}, [addressesBoarding])
-useEffect(() => {
-  console.log(addressesBoarding);
-  console.log(boardingAddressId);
+  addToast({type:"info", message:` boarding id: ${boardingAddressId}`});
+  addToast({type:"info", message:` boarding name: ${addressesBoarding?.name}`});
   if (addressesReturn) {
       localStorage.setItem(STORAGE.RETURN_ID, addressesReturn.id);
       localStorage.setItem(STORAGE.RETURN_ADDRESS, JSON.stringify(addressesReturn));
 
     } 
 
-  if (addressesReturn) {
-      localStorage.setItem(STORAGE.BOARDING_ID, addressesReturn.id);
-      localStorage.setItem(STORAGE.BOARDING_ADDRESS, JSON.stringify(addressesReturn));
+  if (addressesBoarding) {
+      localStorage.setItem(STORAGE.BOARDING_ID, addressesBoarding.id);
+      localStorage.setItem(STORAGE.BOARDING_ADDRESS, JSON.stringify(addressesBoarding));
 
     } 
 }, [addresses,returnAddressId,boardingAddressId])
