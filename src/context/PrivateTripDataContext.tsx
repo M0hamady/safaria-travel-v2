@@ -250,22 +250,15 @@ export const PrivateTripDataProvider: React.FC<{ children: React.ReactNode }> = 
       }
     }
   }, [returnAddressId, addresses]);
-
 useEffect(() => {
-  addToast({type:"info", message:` boarding id: ${boardingAddressId}`});
+    addToast({type:"info", message:` boarding id: ${boardingAddressId}`});
   addToast({type:"info", message:` boarding name: ${addressesBoarding?.name}`});
   if (addressesReturn) {
       localStorage.setItem(STORAGE.RETURN_ID, addressesReturn.id);
       localStorage.setItem(STORAGE.RETURN_ADDRESS, JSON.stringify(addressesReturn));
 
     } 
-
-  if (addressesBoarding) {
-      localStorage.setItem(STORAGE.BOARDING_ID, addressesBoarding.id);
-      localStorage.setItem(STORAGE.BOARDING_ADDRESS, JSON.stringify(addressesBoarding));
-
-    } 
-}, [addresses,returnAddressId,boardingAddressId])
+}, [addressesReturn])
 
   const addNewAddress = useCallback(async (payload: AddAddressPayload) => {
     try {
