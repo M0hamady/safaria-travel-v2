@@ -46,7 +46,7 @@ const Header: React.FC = () => {
       {/* Trip Route */}
       <div className="flex gap-5 justify-center items-center translate-y-8  mx-auto max-sm:flex-col w-full  max-sm:mx-0 max-sm:justify-start max-sm:items-start  ">
         {/* Departure City */}
-         <div className="text-lg font-semibold w-fit  text-right max-sm:flex max-sm:flex-col max-sm:justify-start">
+         <div className="text-lg font-semibold w-fit  text-start max-sm:flex max-sm:flex-col max-sm:justify-start">
                   <span className="md:hidden"><PinDrop /> {t("busSearchTrips.departureStation")}: </span>
                   <span className="max-sm:text-lg max-sm:text-start ltr:max-sm:ml-8 rtl:max-sm:mr-8 ">
         
@@ -62,7 +62,7 @@ const Header: React.FC = () => {
         </div>
 
         {/* Destination City */}
-        <div className="text-lg font-semibold w-fit  text-right max-sm:flex max-sm:flex-col max-sm:justify-start max-sm:mb-8">
+        <div className="text-lg font-semibold w-fit   max-sm:flex max-sm:flex-col max-sm:justify-start max-sm:mb-8 text-start">
                   <span className="md:hidden"><PinDrop /> {t("busSearchTrips.arrivalStation")}: </span>
                   <span className="max-sm:text-lg max-sm:text-start ltr:max-sm:ml-8 rtl:max-sm:mr-8  ">
         
