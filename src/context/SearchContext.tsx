@@ -24,6 +24,7 @@ import { AuthContext } from "./AuthContext";
 import axios from "axios";
 import { TicketOrder, TicketOrderRound } from "../pages/bus/pages/ConfirmReservationPage";
 import { useToast } from "./ToastContext";
+import i18n from "../i18n";
 
 // Extended interface for filters including cities, stations, and time range
 interface TripFilters {
@@ -76,8 +77,8 @@ interface SearchContextType {
     fromLocationId: number,
     toLocationId: number,
     date: string,
-    station_from?:Station,
-    station_to?:Station,
+    station_from?: Station,
+    station_to?: Station,
   ) => void; // Add this line
   handleTripSelectionReturn: (
     tripId: number,
@@ -86,8 +87,8 @@ interface SearchContextType {
     fromLocationId: number,
     toLocationId: number,
     date: string,
-    station_from?:Station,
-    station_to?:Station,
+    station_from?: Station,
+    station_to?: Station,
   ) => void; // Add this line
   seatingStructure: SeatingStructure | null;
   seats: Seat[] | null;
@@ -101,8 +102,8 @@ interface SearchContextType {
   getSeatImage: (seat: Seat) => string;
   generateSalonLayout: () => JSX.Element[];
   generateSalonLayoutReturn: () => JSX.Element[];
-  tripStations?:TripStations;
-  tripStationsReturn?:TripStations;
+  tripStations?: TripStations;
+  tripStationsReturn?: TripStations;
 
 
   tripCycleStep: TripCycleStep;
@@ -119,16 +120,16 @@ interface SearchContextType {
   setReservationDataReturn: (TicketOrder: TicketOrderRound | undefined) => void;
   reservationDataReturn: TicketOrderRound | undefined;
   confirmationStatus: string | null;
-  confirmReservation: ( from_city_id: string,
+  confirmReservation: (from_city_id: string,
     to_city_id: string,
     from_location_id: string,
     to_location_id: string,
     date: string) => void;
-  confirmReservationReturn: (from_city_id: string,to_city_id: string,
+  confirmReservationReturn: (from_city_id: string, to_city_id: string,
     from_location_id: string,
     to_location_id: string,
     date: string) => void;
-  
+
 
 
 }
@@ -185,17 +186,19 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
 
   const [isConfirming, setIsConfirming] = useState<boolean>(false); // Track if reservation is being processed
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // Store error messages
-  const [reservationData, setReservationData] = useState<TicketOrder| undefined>();
+  const [reservationData, setReservationData] = useState<TicketOrder | undefined>();
   const [reservationDataReturn, setReservationDataReturn] = useState<TicketOrderRound | undefined>();
   const [confirmationStatus, setConfirmationStatus] = useState<string | null>(null); // Track reservation status
   const [isLoadingPayment, setIsLoadingPayment] = useState<boolean>(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const { user } = useContext(AuthContext);
+  const currentLang = i18n.language;
+
   const { addToast } = useToast();
   const clearAllFilters = () => {
     setTripFilters({});
   };
-  
+
   const fetchLocations = async () => {
     setLoading(true);
     try {
@@ -245,7 +248,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
     date: string) => {
     setIsConfirming(true);
     setErrorMessage(null);
-  
+
     try {
       // Prepare the reservation request data
       const reservationRequestData = {
@@ -257,7 +260,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         date: date,
         // Add any other required fields for the reservation
       };
-  
+
       // Make the API call to confirm the reservation
       const response = await fetch(
         `https://demo.telefreik.com/api/transports/trips/${selectedTrip?.id}/create-ticket`,
@@ -265,16 +268,16 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${user?.api_token || localStorage.getItem('authToken') }`, // Assuming you have user authentication
+            Authorization: `Bearer ${user?.api_token || localStorage.getItem('authToken')}`, // Assuming you have user authentication
           },
           body: JSON.stringify(reservationRequestData),
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Reservation failed");
       }
-  
+
       // Update trip cycle steps
       if (tripType === "one-way") {
         if (tripCycleStep === "SELECTING_SEATS") {
@@ -285,12 +288,12 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
           setRoundTripCycleStep("CONFIRMING_RESERVATION");
         }
       }
-  
+
       // Handle the response
       const data = await response.json();
       setReservationData(data.data);
       setConfirmationStatus("Reservation confirmed successfully!");
-  
+
       // Fetch payment link or navigate to the next step
       fetchPaymentLink(data.data.id); // Assuming you have a function to fetch the payment link
     } catch (error) {
@@ -306,20 +309,20 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
     date: string) => {
     setIsConfirming(true);
     setErrorMessage(null);
-  
+
     try {
       // Prepare the reservation request data
       const reservationRequestData = {
         seats: selectedSeatsReturn, // Selected seats
-        trip_id:reservationData?.id,
+        trip_id: reservationData?.id,
         from_city_id: from_city_id,
         to_city_id: to_city_id,
         from_location_id: from_location_id,
-        to_location_id: to_location_id ,
+        to_location_id: to_location_id,
         date: date,
         // Add any other required fields for the reservation
       };
-  
+
       // Make the API call to confirm the reservation
       const response = await fetch(
         `https://demo.telefreik.com/api/transports/buses/orders/${reservationData?.id}/return-ticket`,
@@ -332,11 +335,11 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
           body: JSON.stringify(reservationRequestData),
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Reservation failed");
       }
-  
+
       // Update trip cycle steps
       if (tripType === "one-way") {
         if (tripCycleStep === "SELECTING_SEATS") {
@@ -347,12 +350,12 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
           setRoundTripCycleStep("CONFIRMING_RESERVATION");
         }
       }
-  
+
       // Handle the response
       const data = await response.json();
       setReservationDataReturn(data.data);
       setConfirmationStatus("Reservation confirmed successfully!");
-  
+
       // Fetch payment link or navigate to the next step
       fetchPaymentLink(data.data.id); // Assuming you have a function to fetch the payment link
     } catch (error) {
@@ -370,15 +373,15 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
     setSearchValues((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: false }));
     if (reservationData) {
-      
+
       setReservationData(undefined)
     }
   };
 
-  const swapLocations = () =>{
+  const swapLocations = () => {
     setSearchValues((prev) => ({ ...prev, from: prev.to, to: prev.from }));
     if (reservationData) {
-      
+
       setReservationData(undefined)
     }
   }
@@ -386,12 +389,12 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
   const handleSearch = async () => {
     setLoading(true);
     if (reservationData) {
-      
+
       setReservationData(undefined)
     }
     try {
       const { from, to, departure, return: returnDate } = searchValues;
-  
+
       // Validate inputs
       if (!from || !to || !departure || (tripType === "round" && !returnDate)) {
         setErrors({
@@ -416,9 +419,12 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
       outboundUrl.searchParams.append("date", departure);
       outboundUrl.searchParams.append("page", "1");
       outboundUrl.searchParams.append("accept", "");
-  
+      console.log('+++++++++++++++++++++++++++++++++');
+      console.log(currentLang);
+
       const outboundResponse = await fetch(outboundUrl.toString(), {
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",            "Accept-Language": currentLang, // 👈 sends the current language
+ },
       });
       if (!outboundResponse.ok) {
         throw new Error(`Error: ${outboundResponse.statusText}`);
@@ -445,9 +451,14 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         returnUrl.searchParams.append("date", returnDate);
         returnUrl.searchParams.append("page", "1");
         returnUrl.searchParams.append("accept", "");
-  
+        console.log('++++++++++++++++++++++++');
+        console.log(currentLang);
         const returnResponse = await fetch(returnUrl.toString(), {
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Accept-Language": currentLang, // 👈 sends the current language
+
+          },
         });
         if (!returnResponse.ok) {
           throw new Error(`Error: ${returnResponse.statusText}`);
@@ -455,7 +466,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         const returnData = await returnResponse.json();
         setReturnTrips(returnData.data);
       }
-  
+
       // Navigate based on selected transport
 
     } catch (error) {
@@ -688,28 +699,28 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
       seat.class === "space" ||
       seat.class === "door" ||
       seat.class === "driver" ||
-      seat.class === "booked" 
+      seat.class === "booked"
 
-    ){
+    ) {
       console.log(seat);
       return;
-}
+    }
     setSelectedSeats((prevSelected) =>
       prevSelected.includes(seat.seat_no!)
         ? prevSelected.filter((s) => s !== seat.seat_no)
         : [...prevSelected, seat.seat_no!]
     );
 
-      // Advance the trip cycle step after selecting seats
-  if (tripType === "one-way") {
-    setTripCycleStep("SELECTING_SEATS");
-  } else if (tripType === "round") {
-    if (roundTripCycleStep === "SELECTING_OUTBOUND_SEATS") {
-      setRoundTripCycleStep("SELECTING_OUTBOUND_SEATS");
-    } else if (roundTripCycleStep === "SELECTING_RETURN_SEATS") {
-      setRoundTripCycleStep("SELECTING_RETURN_SEATS");
+    // Advance the trip cycle step after selecting seats
+    if (tripType === "one-way") {
+      setTripCycleStep("SELECTING_SEATS");
+    } else if (tripType === "round") {
+      if (roundTripCycleStep === "SELECTING_OUTBOUND_SEATS") {
+        setRoundTripCycleStep("SELECTING_OUTBOUND_SEATS");
+      } else if (roundTripCycleStep === "SELECTING_RETURN_SEATS") {
+        setRoundTripCycleStep("SELECTING_RETURN_SEATS");
+      }
     }
-  }
   };
   const handleSeatClickReturn = (seat: Seat | undefined) => {
     if (
@@ -719,7 +730,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
       seat.class === "door" ||
       seat.class === "driver" ||
       seat.class === "available" ||
-      seat.class === "booked" 
+      seat.class === "booked"
     )
       return;
 
@@ -729,16 +740,16 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         : [...prevSelected, seat.seat_no!]
     );
 
-      // Advance the trip cycle step after selecting seats
-  if (tripType === "one-way") {
-    setTripCycleStep("SELECTING_SEATS");
-  } else if (tripType === "round") {
-    if (roundTripCycleStep === "SELECTING_RETURN_SEATS") {
-      setRoundTripCycleStep("SELECTING_RETURN_SEATS");
-    } else {
-      setRoundTripCycleStep("SELECTING_RETURN_SEATS");
+    // Advance the trip cycle step after selecting seats
+    if (tripType === "one-way") {
+      setTripCycleStep("SELECTING_SEATS");
+    } else if (tripType === "round") {
+      if (roundTripCycleStep === "SELECTING_RETURN_SEATS") {
+        setRoundTripCycleStep("SELECTING_RETURN_SEATS");
+      } else {
+        setRoundTripCycleStep("SELECTING_RETURN_SEATS");
+      }
     }
-  }
   };
   useEffect(() => {
     const updatedSeats = selectedSeats.filter((s) => {
@@ -763,10 +774,10 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         return images.seat_notFree;
       case "available":
         return images.seatFree;
-      
+
       case "door":
         return images.door;
-      
+
       case "wc":
         return images.toilet_img;
       default:
@@ -792,29 +803,27 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         rowSeats.push(
           <div
             key={`${row}-${col}`}
-            className={`seat flex items-center relative justify-center w-16 h-16 m-1 rounded-lg transition-all duration-200 ${
-              seat?.class === "available"
+            className={`seat flex items-center relative justify-center w-16 h-16 m-1 rounded-lg transition-all duration-200 ${seat?.class === "available"
                 ? " hover:bg-green-200 cursor-pointer"
                 : seat?.class === "booked"
-                ? " cursor-not-allowed"
-                : seat?.class === "driver"
-                ? "cursor-not-allowed"
-                : seat?.class === "door"
-                ? "bg-transparent rounded-none cursor-not-allowed    "
-                : seat?.class === "wc"
-                ? "bg-transparent cursor-not-allowed    "
-                : "bg-transparent "
-            } ${
-              (selectedSeats.includes(seatNo) && seat.class === "available")
+                  ? " cursor-not-allowed"
+                  : seat?.class === "driver"
+                    ? "cursor-not-allowed"
+                    : seat?.class === "door"
+                      ? "bg-transparent rounded-none cursor-not-allowed    "
+                      : seat?.class === "wc"
+                        ? "bg-transparent cursor-not-allowed    "
+                        : "bg-transparent "
+              } ${(selectedSeats.includes(seatNo) && seat.class === "available")
                 ? "border-2 border-yellow-500 shadow-lg scale-105 bg-yellow-100"
                 : ""
-            }`}
+              }`}
             onClick={() => handleSeatClick(seat)}
             title={seatNo || ""}
           >
-            {seatImg  && (
+            {seatImg && (
               <img
-                src={ selectedSeats.includes(seatNo) ?  images.seat_reserved : seatImg}
+                src={selectedSeats.includes(seatNo) ? images.seat_reserved : seatImg}
                 alt={seatNo}
                 className="w-14 h-14 object-contain"
               />
@@ -857,28 +866,26 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
         rowSeats.push(
           <div
             key={`${row}-${col}`}
-            className={`seat flex items-center relative justify-center w-16 h-16 m-1 rounded-lg transition-all duration-200 ${
-              seat?.class === "available"
+            className={`seat flex items-center relative justify-center w-16 h-16 m-1 rounded-lg transition-all duration-200 ${seat?.class === "available"
                 ? " hover:bg-green-200 cursor-pointer"
                 : seat?.class === "booked"
-                ? "cursor-not-allowed"
-                : seat?.class === "driver"
-                ? " cursor-not-allowed"
-                : seat?.class === "door"
-                ? "cursor-not-allowed"
-                : "bg-transparent"
-            } ${
-              selectedSeatsReturn.includes(seatNo) && seat.class === "available"
+                  ? "cursor-not-allowed"
+                  : seat?.class === "driver"
+                    ? " cursor-not-allowed"
+                    : seat?.class === "door"
+                      ? "cursor-not-allowed"
+                      : "bg-transparent"
+              } ${selectedSeatsReturn.includes(seatNo) && seat.class === "available"
                 ? "border-2 border-yellow-500 shadow-lg scale-105 bg-yellow-100"
                 : ""
-            }`}
+              }`}
             onClick={() => handleSeatClickReturn(seat)}
             title={seatNo || ""}
           >
             {seatImg && (
               <img
-              src={ selectedSeats.includes(seatNo) ?  images.seat_reserved : seatImg}
-              alt={seatNo}
+                src={selectedSeats.includes(seatNo) ? images.seat_reserved : seatImg}
+                alt={seatNo}
                 className="w-14 h-14 object-contain"
               />
             )}
@@ -921,17 +928,17 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
     });
 
   }, [selectedSeats, seats]); // Run effect when selectedSeats or seats change
-useEffect(() => {
-  setSeatsSelectedReturn([])
-  setReservationDataReturn(undefined);
-  selectedSeatsReturn.forEach((selected) => {
-    const seat = seats?.find((seat) => seat.id === selected); // Find the seat by ID
-    if (seat) {
-      // Ensure seat is found (not undefined)
-      setSeatsSelectedReturn((prevSeats) => [...prevSeats, seat]);
-    }
-  });
-}, [selectedSeatsReturn,seats])
+  useEffect(() => {
+    setSeatsSelectedReturn([])
+    setReservationDataReturn(undefined);
+    selectedSeatsReturn.forEach((selected) => {
+      const seat = seats?.find((seat) => seat.id === selected); // Find the seat by ID
+      if (seat) {
+        // Ensure seat is found (not undefined)
+        setSeatsSelectedReturn((prevSeats) => [...prevSeats, seat]);
+      }
+    });
+  }, [selectedSeatsReturn, seats])
 
   const handleTripSelection = (
     tripId: number,
@@ -953,12 +960,12 @@ useEffect(() => {
     navigate(
       `/bus-search/trip/${tripId}?from_city_id=${fromCityId}&to_city_id=${toCityId}&from_location_id=${fromLocationId}&to_location_id=${toLocationId}&date=${date}`
     );
-      // Advance the trip cycle step
-  if (tripType === "one-way") {
-    setTripCycleStep("SELECTING_SEATS");
-  } else if (tripType === "round") {
-    setRoundTripCycleStep("SELECTING_OUTBOUND_SEATS");
-  }
+    // Advance the trip cycle step
+    if (tripType === "one-way") {
+      setTripCycleStep("SELECTING_SEATS");
+    } else if (tripType === "round") {
+      setRoundTripCycleStep("SELECTING_OUTBOUND_SEATS");
+    }
   };
   const handleTripSelectionReturn = (
     tripId: number,
@@ -981,12 +988,12 @@ useEffect(() => {
     navigate(
       `/bus-search-return/trip/${tripId}?from_city_id=${fromCityId}&to_city_id=${toCityId}&from_location_id=${fromLocationId}&to_location_id=${toLocationId}&date=${date}`
     );
-      // Advance the trip cycle step
-  if (tripType === "one-way") {
-    setTripCycleStep("SELECTING_SEATS");
-  } else if (tripType === "round") {
-    setRoundTripCycleStep("SELECTING_RETURN_SEATS");
-  }
+    // Advance the trip cycle step
+    if (tripType === "one-way") {
+      setTripCycleStep("SELECTING_SEATS");
+    } else if (tripType === "round") {
+      setRoundTripCycleStep("SELECTING_RETURN_SEATS");
+    }
   };
   // useMemo to only recalc filtered trips when trips or filters change
   const filteredTrips = useMemo(() => getFilteredTrips(), [trips, tripFilters]);
