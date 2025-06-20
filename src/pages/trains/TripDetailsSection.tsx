@@ -6,27 +6,14 @@ import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import i18n from "../../i18n";
 import {
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Divider,
-  Box,
-  Grid,
-  Chip
-} from "@mui/material";
-import {
   Train as TrainIcon,
   LocationOn as LocationIcon,
   Schedule as ScheduleIcon,
   Edit as EditIcon,
   Cancel as CancelIcon,
   Payments as PaymentsIcon,
-  Straighten as DistanceIcon
+  Straighten as DistanceIcon,
+  ArrowForward as ArrowForwardIcon
 } from "@mui/icons-material";
 
 type Props = {
@@ -44,23 +31,33 @@ const ClassSelector = ({
 }) => {
   const { t } = useTranslation();
 
+  const options = trip.train.classes.map((cls) => (
+    <option key={cls.id} value={cls.id}>
+      {cls.name} — {cls.cost} EGP
+    </option>
+  ));
+
   return (
-    <FormControl fullWidth sx={{ mt: 2 }}>
-      <InputLabel id="class-select-label">{t("tripDetails.selectClass")}</InputLabel>
-      <Select
-        labelId="class-select-label"
+    <div style={{ marginTop: "16px" }}>
+      <label htmlFor="class-select" style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
+        {t("tripDetails.selectClass")}
+      </label>
+      <select
         id="class-select"
         value={selected}
-        label={t("tripDetails.selectClass")}
         onChange={(e) => onSelect(e.target.value)}
+        style={{
+          width: "100%",
+          padding: "12px",
+          borderRadius: "8px",
+          border: "1px solid #ddd",
+          fontSize: "16px",
+          backgroundColor: "#fff"
+        }}
       >
-        {trip.train.classes.map((cls) => (
-          <MenuItem key={cls.id} value={cls.id}>
-            {cls.name} — {cls.cost} EGP
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+        {options}
+      </select>
+    </div>
   );
 };
 
@@ -109,109 +106,154 @@ export const TripDetailsSection = ({ trip }: Props) => {
         <meta name="keywords" content="train, booking, trip details, travel" />
       </Helmet>
 
-      <Card sx={{ maxWidth: 600, mx: 'auto', my: 4, boxShadow: 3 }}>
-        <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-            <Typography variant="h5" component="h2" fontWeight="bold">
-              {t("tripDetails.title")}
-            </Typography>
-            <Button
-              onClick={handleEditToggle}
-              startIcon={editing ? <CancelIcon /> : <EditIcon />}
-              variant="contained"
-              color={editing ? "error" : "primary"}
-            >
-              {editing ? t("tripDetails.cancel") : t("tripDetails.editClass")}
-            </Button>
-          </Box>
+      <div
+        style={{
+          maxWidth: "600px",
+          margin: "24px auto",
+          padding: "24px",
+          backgroundColor: "#fff",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          borderRadius: "12px",
+          border: "1px solid #eee"
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+          <h2 style={{ fontWeight: "600", fontSize: "20px", margin: 0 }}>
+            {t("tripDetails.title")}
+          </h2>
+          <button 
+            onClick={handleEditToggle}
+            style={{
+              padding: "8px 16px",
+              background: editing ? "#ff4444" : "#007bff",
+              color: "#fff",
+              border: "none",
+              borderRadius: "6px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              cursor: "pointer",
+              fontSize: "14px",
+              fontWeight: "500"
+            }}
+          >
+            {editing ? (
+              <>
+                <CancelIcon style={{ fontSize: "18px" }} />
+                {t("tripDetails.cancel")}
+              </>
+            ) : (
+              <>
+                <EditIcon style={{ fontSize: "18px" }} />
+                {t("tripDetails.editClass")}
+              </>
+            )}
+          </button>
+        </div>
 
-          <Grid container spacing={2}>
-            {/* Train Info */}
-            <Grid item xs={12}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <TrainIcon color="primary" />
-                <Typography variant="body1">
-                  <strong>{t("tripDetails.train")}:</strong> {trip.train.name}
-                </Typography>
-              </Box>
-            </Grid>
+        <div style={{ display: "grid", gap: "16px" }}>
+          {/* Train Info */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <TrainIcon style={{ color: "#007bff", fontSize: "20px" }} />
+            <div>
+              <strong style={{ fontWeight: "500" }}>{t("tripDetails.train")}:</strong> {trip.train.name}
+            </div>
+          </div>
 
-            {/* Stations */}
-            <Grid item xs={12} md={6}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <LocationIcon color="primary" />
-                <Typography variant="body1">
-                  <strong>{t("tripDetails.from")}:</strong> {trip.station_from.name}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <LocationIcon color="primary" />
-                <Typography variant="body1">
-                  <strong>{t("tripDetails.to")}:</strong> {trip.station_to.name}
-                </Typography>
-              </Box>
-            </Grid>
+          {/* Stations */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: "1 1 200px" }}>
+              <LocationIcon style={{ color: "#007bff", fontSize: "20px" }} />
+              <div>
+                <strong style={{ fontWeight: "500" }}>{t("tripDetails.from")}:</strong> {trip.station_from.name}
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0 8px" }}>
+              <ArrowForwardIcon style={{ color: "#666", fontSize: "20px" }} />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: "1 1 200px" }}>
+              <LocationIcon style={{ color: "#007bff", fontSize: "20px" }} />
+              <div>
+                <strong style={{ fontWeight: "500" }}>{t("tripDetails.to")}:</strong> {trip.station_to.name}
+              </div>
+            </div>
+          </div>
 
-            {/* Times */}
-            <Grid item xs={12} md={6}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <ScheduleIcon color="primary" />
-                <Typography variant="body1">
-                  <strong>{t("tripDetails.departure")}:</strong> {trip.start_time}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <ScheduleIcon color="primary" />
-                <Typography variant="body1">
-                  <strong>{t("tripDetails.arrival")}:</strong> {trip.finish_time}
-                </Typography>
-              </Box>
-            </Grid>
+          {/* Times */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: "1 1 200px" }}>
+              <ScheduleIcon style={{ color: "#007bff", fontSize: "20px" }} />
+              <div>
+                <strong style={{ fontWeight: "500" }}>{t("tripDetails.departure")}:</strong> {trip.start_time}
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: "1 1 200px" }}>
+              <ScheduleIcon style={{ color: "#007bff", fontSize: "20px" }} />
+              <div>
+                <strong style={{ fontWeight: "500" }}>{t("tripDetails.arrival")}:</strong> {trip.finish_time}
+              </div>
+            </div>
+          </div>
 
-            {/* Distance */}
-            <Grid item xs={12}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <DistanceIcon color="primary" />
-                <Typography variant="body1">
-                  <strong>{t("tripDetails.distance")}:</strong> {selectedTrip?.distance} km
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
+          {/* Distance */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <DistanceIcon style={{ color: "#007bff", fontSize: "20px" }} />
+            <div>
+              <strong style={{ fontWeight: "500" }}>{t("tripDetails.distance")}:</strong> {selectedTrip?.distance} km
+            </div>
+          </div>
+        </div>
 
-          <Divider sx={{ my: 3 }} />
+        <div style={{ height: "1px", background: "#eee", margin: "24px 0" }}></div>
 
-          {/* Class Selection */}
-          {editing ? (
-            <>
-              <ClassSelector
-                trip={trip}
-                selected={localClassId}
-                onSelect={handleClassChange}
-              />
-              <Box mt={1} display="flex" alignItems="center" gap={1}>
-                <PaymentsIcon color="info" />
-                <Typography variant="body2" color="text.secondary">
-                  {t("tripDetails.selectedClass")}: {isRTL ? selectedClass?.arDesc : selectedClass?.enDesc} — 
-                  <Chip label={`${selectedClass?.cost} EGP`} size="small" sx={{ ml: 1 }} />
-                </Typography>
-              </Box>
-            </>
-          ) : (
-            <Box display="flex" alignItems="center" gap={1}>
-              <PaymentsIcon color="primary" />
-              <Typography variant="body1">
-                <strong>{t("tripDetails.selectedClass")}:</strong> {selectedClass?.name} — 
-                <Chip label={`${selectedClass?.cost} EGP`} size="small" sx={{ ml: 1 }} />
-              </Typography>
-            </Box>
-          )}
-        </CardContent>
-      </Card>
+        {/* Class Selection */}
+        {editing ? (
+          <>
+            <ClassSelector
+              trip={trip}
+              selected={localClassId}
+              onSelect={handleClassChange}
+            />
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "16px" }}>
+              <PaymentsIcon style={{ color: "#007bff", fontSize: "20px" }} />
+              <div style={{ fontSize: "14px", color: "#666" }}>
+                {t("tripDetails.selectedClass")}: {isRTL ? selectedClass?.arDesc : selectedClass?.enDesc} — 
+                <span style={{
+                  display: "inline-block",
+                  background: "#e3f2fd",
+                  color: "#007bff",
+                  padding: "4px 8px",
+                  borderRadius: "12px",
+                  marginLeft: "8px",
+                  fontSize: "13px",
+                  fontWeight: "500"
+                }}>
+                  {selectedClass?.cost} EGP
+                </span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <PaymentsIcon style={{ color: "#007bff", fontSize: "20px" }} />
+            <div>
+              <strong style={{ fontWeight: "500" }}>{t("tripDetails.selectedClass")}:</strong> {selectedClass?.name} — 
+              <span style={{
+                display: "inline-block",
+                background: "#e3f2fd",
+                color: "#007bff",
+                padding: "4px 8px",
+                borderRadius: "12px",
+                marginLeft: "8px",
+                fontSize: "13px",
+                fontWeight: "500"
+              }}>
+                {selectedClass?.cost} EGP
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
     </>
   );
 };

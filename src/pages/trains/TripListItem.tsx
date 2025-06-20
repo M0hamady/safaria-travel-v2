@@ -46,31 +46,31 @@ const TripListItem: React.FC<Props> = ({ trip, onSelect, getMinPrice }) => {
         <div className="grid grid-cols-1 gap-4 text-center md:text-left w-full rtl:text-right">
           <div className='flex w-full justify-between  max-sm:flex-col'>
 
-          <h3 className="font-semibold text-lg max-sm:ltr:text-left  flex md:gap-3 max-sm:justify-between max-sm:w-full"><span className='w-full text-[0.85rem] flex ' > {t("train_number")}: </span> <span className='w-fit text-[1.0rem]' > {trip.train.name}</span> </h3>
-          {/* we will add container has routes of trip each route has id and name while hover preview list in drobdown miu=nue  */}
-          <div className="relative group">
-            <h3 className="font-semibold text-lg max-sm:ltr:text-left  px-2  ltr:max-sm:pl-0 ltr:max-sm:pr-5 rtl:max-sm:pr-0 rtl:max-sm:pl-5  py-2 rounded text-primary underline flex">
-              <span className='min-w-full'>{t("train_route")}  </span><span> <AltRoute/> </span>
-            </h3>
+            <h3 className="font-semibold text-lg max-sm:ltr:text-left  flex md:gap-3 max-sm:justify-between max-sm:w-full"><span className='w-full text-[0.85rem] flex ' > {t("train_number")}: </span> <span className='w-fit text-[1.0rem]' > {trip.train.name}</span> </h3>
+            {/* we will add container has routes of trip each route has id and name while hover preview list in drobdown miu=nue  */}
+            <div className="relative group">
+              <h3 className="font-semibold text-lg max-sm:ltr:text-left  px-2  ltr:max-sm:pl-0 ltr:max-sm:pr-5 rtl:max-sm:pr-0 rtl:max-sm:pl-5  py-2 rounded text-primary underline flex">
+                <span className='min-w-full text-[.75rem] '>{t("train_route")}  </span><span> <AltRoute /> </span>
+              </h3>
 
-            {/* Dropdown on hover */}
-            <div className="absolute ltr:max-sm:-left-[4.5rem] rtl:max-sm:-right-[4.5rem]  top-6 z-10 hidden group-hover:block bg-white  shadow-md border rounded-md mt-2 w-64 text-sm text-left rtl:text-right">
-              <ul className="p-2 max-h-60 overflow-y-auto">
-                {trip.route && trip.route.length > 0 ? (
-                  trip.route.map((route) => (
-                    <li
-                      key={route.id}
-                      className="py-1 px-2 hover:bg-gray-100  transition flex border-b-2 "
-                    >
-                       <span> <PinDrop /> </span> {route.name}
-                    </li>
-                  ))
-                ) : (
-                  <li className="py-1 px-2 text-gray-500">{t("no_routes")}</li>
-                )}
-              </ul>
+              {/* Dropdown on hover */}
+              <div className="absolute ltr:max-sm:-left-[4.5rem] rtl:max-sm:-right-[4.5rem]  top-6 z-10 hidden group-hover:block bg-white  shadow-md border rounded-md mt-2 w-64 text-sm text-left rtl:text-right">
+                <ul className="p-2 max-h-60 overflow-y-auto">
+                  {trip.route && trip.route.length > 0 ? (
+                    trip.route.map((route) => (
+                      <li
+                        key={route.id}
+                        className="py-1 px-2 hover:bg-gray-100  transition flex border-b-2 "
+                      >
+                        <span> <PinDrop /> </span> {route.name}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="py-1 px-2 text-gray-500">{t("no_routes")}</li>
+                  )}
+                </ul>
+              </div>
             </div>
-          </div>
           </div>
 
           <div className="flex justify-between flex-wrap gap-4 items-center">

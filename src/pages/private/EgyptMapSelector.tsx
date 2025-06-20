@@ -361,11 +361,11 @@ export default function EgyptMapSelector({
   }
 
   return (
-    <div className="relative w-full h-[40rem]  max-sm:h-[48rem] mx-auto rounded-lg overflow-hidden">
+    <div className="relative w-full h-[40rem] md:h-[30rem]  max-sm:h-[48rem] mx-auto rounded-lg overflow-hidden">
       <Fab
         onClick={locateMe}
         size="medium"
-        className="absolute md:top-4 left-4 z-10 bg-white shadow-lg hover:bg-gray-100 max-sm:top-[35rem]"
+        className="absolute md:top-[25rem]   ltr:left-4 rtl:right-4  z-10 bg-white shadow-lg hover:bg-gray-100 max-sm:top-[35rem]"
         aria-label="تحديد الموقع الحالي"
       >
         <GpsFixed className="text-blue-600" />
@@ -393,7 +393,7 @@ export default function EgyptMapSelector({
           />
           {query && (
             <button
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-2  rtl:left-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
               onClick={() => setQuery('')}
             >
               <Cancel fontSize="small" />
@@ -452,6 +452,7 @@ export default function EgyptMapSelector({
         {current && (
           <MemoizedMarker
             position={current.coords}
+            
             icon={{
               url: 'https://maps.google.com/mapfiles/kml/shapes/man.png',
               scaledSize: new google.maps.Size(48, 48),
@@ -553,7 +554,7 @@ export default function EgyptMapSelector({
                 handleAddressSelect(String(loc.id));
                 setActiveInfoWindow(`address-${loc.id}`);
               }}
-              zIndex={isBoarding || isReturn || isSelected ? 100 : 10}
+              zIndex={isBoarding || isReturn || isSelected ? 100 : 10000}
             >
               {activeInfoWindow === `address-${loc.id}` && (
                 <MemoizedInfoWindow

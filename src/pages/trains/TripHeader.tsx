@@ -48,7 +48,7 @@ export const TripHeader = () => {
           <span className="md:hidden"><PinDrop /> {t("busSearchTrips.departureStation")}: </span>
           <span className="max-sm:text-lg max-sm:text-start ltr:max-sm:ml-8 rtl:max-sm:mr-8 ">
 
-          {selectedDepartureStation?.name}({selectedDepartureLocation?.name})
+          {selectedDepartureStation?.name} - ({selectedDepartureLocation?.name})
           </span>
         </div>
 
@@ -61,7 +61,7 @@ export const TripHeader = () => {
           <span className="md:hidden"><PinDrop /> {t("busSearchTrips.arrivalStation")}: </span>
           <span className="max-sm:text-lg max-sm:text-start ltr:max-sm:ml-8 rtl:max-sm:mr-8  ">
 
-        {selectedArrivalStation?.name}({selectedArrivalLocation?.name})
+        {selectedArrivalStation?.name} - ({selectedArrivalLocation?.name})
           </span>
         </div>
       </div>
