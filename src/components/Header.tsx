@@ -3,6 +3,7 @@ import { useSearchContext } from "../context/SearchContext";
 import { useNavigate } from "react-router-dom";
 import { usePrivateSearchContext } from "../context/PrivateSearchContext";
 import { useTranslation } from "react-i18next";
+import { PinDrop } from "@mui/icons-material";
 
 const Header: React.FC = () => {
   const { selectedTrip } = useSearchContext();
@@ -43,21 +44,31 @@ const Header: React.FC = () => {
       </div>
 
       {/* Trip Route */}
-      <div className="flex gap-5 justify-center items-center translate-y-8  mx-auto  ">
+      <div className="flex gap-5 justify-center items-center translate-y-8  mx-auto max-sm:flex-col w-full  max-sm:mx-0 max-sm:justify-start max-sm:items-start  ">
         {/* Departure City */}
-        <div className="text-lg font-semibold w-[60px] max-w-[60px] text-right
-        ">{city_from?.name}</div>
+         <div className="text-lg font-semibold w-fit  text-right max-sm:flex max-sm:flex-col max-sm:justify-start">
+                  <span className="md:hidden"><PinDrop /> {t("busSearchTrips.departureStation")}: </span>
+                  <span className="max-sm:text-lg max-sm:text-start ltr:max-sm:ml-8 rtl:max-sm:mr-8 ">
+        
+                  {city_from?.name} - ({city_from?.name})
+                  </span>
+                </div>
 
         {/* Route Indicator */}
-        <div className="flex items-center justify-center   ">
+        <div className="flex items-center justify-center max-sm:hidden  ">
           <div className="w-2 h-2 rounded-full bg-white"></div>
           <div className="h-1 w-32 max-sm:w-20 bg-white"></div>
           <div className="w-2 h-2 rounded-full bg-white"></div>
         </div>
 
         {/* Destination City */}
-        <div className="text-lg font-semibold w-[60px] max-w-[60px] text-left
-        ">{city_to?.name}</div>
+        <div className="text-lg font-semibold w-fit  text-right max-sm:flex max-sm:flex-col max-sm:justify-start max-sm:mb-8">
+                  <span className="md:hidden"><PinDrop /> {t("busSearchTrips.arrivalStation")}: </span>
+                  <span className="max-sm:text-lg max-sm:text-start ltr:max-sm:ml-8 rtl:max-sm:mr-8  ">
+        
+                {city_to?.name} - ({city_to?.name})
+                  </span>
+                </div>
       </div>
       <div className="w-32 h-32 max-sm:w-20 max-sm:h-20  rotate-45 mx-auto translate-y-12 max-sm:translate-y-8  rounded-xl bg-primary ">
 

@@ -96,6 +96,7 @@ export default function EgyptMapSelector({
     boardingAddressId,
     returnAddressId,
     addressesReturn,
+    fetchAddresses
   } = usePrivateTripDataContext();
 
   const { addToast } = useToast();
@@ -172,6 +173,7 @@ export default function EgyptMapSelector({
         type: 'success',
       });
       setActiveInfoWindow(null);
+      fetchAddresses()
     } catch {
       addToast({ message: 'فشل حفظ الموقع', type: 'error' });
     }
@@ -255,7 +257,7 @@ export default function EgyptMapSelector({
           type: 'error',
         });
       }
-    }, 300);
+    }, 600);
 
     return () => {
       clearTimeout(timer);
