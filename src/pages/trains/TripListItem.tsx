@@ -54,7 +54,7 @@ const TripListItem: React.FC<Props> = ({ trip, onSelect, getMinPrice }) => {
             </h3>
 
             {/* Dropdown on hover */}
-            <div className="absolute max-sm:-left-[4.5rem] z-10 hidden group-hover:block bg-white  shadow-md border rounded-md mt-2 w-64 text-sm text-left rtl:text-right">
+            <div className="absolute max-sm:-left-[4.5rem] top-6 z-10 hidden group-hover:block bg-white  shadow-md border rounded-md mt-2 w-64 text-sm text-left rtl:text-right">
               <ul className="p-2 max-h-60 overflow-y-auto">
                 {trip.route && trip.route.length > 0 ? (
                   trip.route.map((route) => (
