@@ -144,7 +144,7 @@ const Footer: React.FC = () => {
   }, [i18n.language]); // Refetch when language changes
 
   return (
-    <footer className="w-full bg-[#0A162A] text-white py-8 px-4">
+    <footer className="w-full bg-[#0069d1] text-white py-8 px-4">
       <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {/* Logo Section */}
         <div className="flex flex-col items-center md:items-start">

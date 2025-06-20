@@ -18,10 +18,38 @@ import Secured from "./Images/Secured.png";
 import safariaMobile from "./Images/safariaMobile.png";
 import railWay from "./Images/RAILWAY.png";
 import trainSafaria from "./Images/TRAINSAFARIA.png";
+import listBg from "./Images/listBg.jpg";
+import listBg2 from "./Images/listBg2.jpg";
+import fawry from "./Images/fawry.jpg";
+import instapay from "./Images/instapay.jpg";
+import orangecash from "./Images/orangecash.jpg";
+import vodafonecash from "./Images/vodafonecash.jpg";
+import etisalat from "./Images/etisalat.jpg";
+import taka from "./Images/taka.jpg";
+import aman from "./Images/aman.jpg";
+import blnk from "./Images/blnk.jpg";
+import contact from "./Images/contact.jpg";
+import halan from "./Images/halan.jpg";
+import mastercard from "./Images/mastercard.jpg";
+import visa from "./Images/visa.jpg";
+import valw from "./Images/valw.jpg";
 
 const images = {
   bus_horizontal,
   safariabus,
+  fawry,
+  instapay,
+  orangecash,
+  vodafonecash,
+  etisalat,
+  taka,
+  aman,
+  blnk,
+  contact,
+  halan,
+  mastercard,
+  visa,
+  valw,
   appImage,
   SafariaLogo,
   Safaria_logo_white,
@@ -39,7 +67,9 @@ const images = {
   Secured,
   safariaMobile,
   trainSafaria,
-  railWay
+  railWay,
+  listBg,
+  listBg2
 };
 
 export default images;

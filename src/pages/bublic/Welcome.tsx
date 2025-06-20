@@ -8,6 +8,8 @@ import SectionDownloadApp from "../../components/SectionDowloadApp";
 import SectionFeatures from "../../components/SectionFeatures";
 import images from "../../assets/index";
 import { useTranslation } from "react-i18next";
+import StepsSection from "../../components/StepsSection";
+import PaymentGateways from "../../components/PaymentGateways";
 
 const WelcomePage = () => {
   const { t, i18n } = useTranslation(); // Ensure useTranslation hook includes i18n
@@ -82,42 +84,16 @@ const WelcomePage = () => {
         </motion.p>
         <Partners />
       </section>
-      {/* Features Section */}
-      <section className="-mt-44 max-sm:mt-96" id="features">
-        <motion.div className="w-full">
-          <FeaturesSection />
-        </motion.div>
-      </section>
-
+<section className="flex flex-col justify-center items-center bg-primary ">
+      {/* <h2 className="text-2xl font-semibold mb-4">Our Payment Gateways</h2> */}
+      <PaymentGateways />
+    </section>
       {/* Download App Section */}
       <section className="container mx-auto my-16" id="download">
         <SectionDownloadApp />
       </section>
+      <StepsSection />
 
-      {/* Steps Section */}
-      <section className="text-white pt-16 bg-primary" id="steps">
-        <motion.h2
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-          className="text-3xl font-bold text-center mb-8"
-        >
-          {t("Steps Title")} {/* Translation key for the section title */}
-        </motion.h2>
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-6 w-full">
-          <motion.div
-            whileHover={{ scale: 1.01 }}
-            className="w-fit mx-auto duration-700 ease-in-out"
-          >
-            <SectionFeatures />
-          </motion.div>
-          <motion.div className="w-full flex gap-5">
-            <div>
-              <img key={images.worldWelcome} src={images.worldWelcome} alt={t("welcome_image_alt")} />
-            </div>
-          </motion.div>
-        </div>
-      </section>
     </div>
   );
 };

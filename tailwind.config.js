@@ -8,8 +8,8 @@ module.exports = {
         ar: ["Cairo", "sans-serif"], // or any Arabic-friendly font
       },
       colors: {
-        primary: "#0069d1",
-        primary_dark: "#737373",
+        primary: "#11A4FF",
+        primary_dark: "#0069d1",
         secondary: "#e07354",
         boarder: "#E8ECF2",
         dark: "#0A162A",
