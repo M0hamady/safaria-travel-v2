@@ -688,12 +688,12 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
       seat.class === "space" ||
       seat.class === "door" ||
       seat.class === "driver" ||
-      seat.class === "available" ||
       seat.class === "booked" 
 
-    )
+    ){
+      console.log(seat);
       return;
-
+}
     setSelectedSeats((prevSelected) =>
       prevSelected.includes(seat.seat_no!)
         ? prevSelected.filter((s) => s !== seat.seat_no)
@@ -805,7 +805,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
                 ? "bg-transparent cursor-not-allowed    "
                 : "bg-transparent "
             } ${
-              selectedSeats.includes(seatNo) && seat.class === "available"
+              (selectedSeats.includes(seatNo) && seat.class === "available")
                 ? "border-2 border-yellow-500 shadow-lg scale-105 bg-yellow-100"
                 : ""
             }`}
