@@ -2,9 +2,32 @@ import React, { useContext, useEffect, useState } from "react";
 import { TrainsContext } from "../../context/TrainsContext";
 import { Trip, TrainClass } from "../../types/trainTypes";
 import TripNotFound from "./TripNotFound";
-import { useTranslation } from "react-i18next"; // Import useTranslation hook
+import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import i18n from "../../i18n";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Divider,
+  Box,
+  Grid,
+  Chip
+} from "@mui/material";
+import {
+  Train as TrainIcon,
+  LocationOn as LocationIcon,
+  Schedule as ScheduleIcon,
+  Edit as EditIcon,
+  Cancel as CancelIcon,
+  Payments as PaymentsIcon,
+  Straighten as DistanceIcon
+} from "@mui/icons-material";
 
 type Props = {
   trip: Trip | null;
@@ -19,37 +42,34 @@ const ClassSelector = ({
   selected: string;
   onSelect: (id: string) => void;
 }) => {
-
-  const { t } = useTranslation();  // Use the translation hook
-
-  const options = trip.train.classes.map((cls) => (
-    <option key={cls.id} value={cls.id}>
-      {cls.name} — {cls.cost} EGP
-    </option>
-  ));
+  const { t } = useTranslation();
 
   return (
-    <div style={{ marginTop: "16px" }}>
-      <label htmlFor="class-select">{t("tripDetails.selectClass")}</label>
-      <select
+    <FormControl fullWidth sx={{ mt: 2 }}>
+      <InputLabel id="class-select-label">{t("tripDetails.selectClass")}</InputLabel>
+      <Select
+        labelId="class-select-label"
         id="class-select"
         value={selected}
+        label={t("tripDetails.selectClass")}
         onChange={(e) => onSelect(e.target.value)}
-        style={{ width: "100%", padding: "8px", marginTop: "8px" }}
       >
-        {options}
-      </select>
-    </div>
+        {trip.train.classes.map((cls) => (
+          <MenuItem key={cls.id} value={cls.id}>
+            {cls.name} — {cls.cost} EGP
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
   );
 };
 
 export const TripDetailsSection = ({ trip }: Props) => {
-    const { selectedClass, selectedTrip, setSelectedClass } =
-    useContext(TrainsContext);
+  const { selectedClass, selectedTrip, setSelectedClass } = useContext(TrainsContext);
   const [editing, setEditing] = useState(false);
   const [localClassId, setLocalClassId] = useState(selectedClass?.id || "");
-  const { t } = useTranslation();  // Use the translation hook
-  const isRTL = i18n.language === "ar"; // Check if the current language is Arabic
+  const { t } = useTranslation();
+  const isRTL = i18n.language === "ar";
 
   useEffect(() => {
     if (!editing && selectedClass) {
@@ -89,60 +109,109 @@ export const TripDetailsSection = ({ trip }: Props) => {
         <meta name="keywords" content="train, booking, trip details, travel" />
       </Helmet>
 
-      <div
-        style={{
-          maxWidth: "500px",
-          margin: "auto",
-          padding: "24px",
-          backgroundColor: "#fff",
-          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-          borderRadius: "8px",
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h5 style={{ fontWeight: "bold" }}>{t("tripDetails.title")}</h5>
-          <button onClick={handleEditToggle} style={{ padding: "8px 16px", background: "#007bff", color: "#fff", border: "none", borderRadius: "4px" }}>
-            {editing ? t("tripDetails.cancel") : t("tripDetails.editClass")}
-          </button>
-        </div>
+      <Card sx={{ maxWidth: 600, mx: 'auto', my: 4, boxShadow: 3 }}>
+        <CardContent>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+            <Typography variant="h5" component="h2" fontWeight="bold">
+              {t("tripDetails.title")}
+            </Typography>
+            <Button
+              onClick={handleEditToggle}
+              startIcon={editing ? <CancelIcon /> : <EditIcon />}
+              variant="contained"
+              color={editing ? "error" : "primary"}
+            >
+              {editing ? t("tripDetails.cancel") : t("tripDetails.editClass")}
+            </Button>
+          </Box>
 
-        <p style={{ margin: "8px 0" }}>
-          <span style={{ marginRight: "8px" }}>🚆</span><strong>{t("tripDetails.train")}:</strong> {trip.train.name}
-        </p>
-        <p style={{ margin: "8px 0" }}>
-          <span style={{ marginRight: "8px" }}>📍</span><strong>{t("tripDetails.from")}:</strong> {trip.station_from.name}
-        </p>
-        <p style={{ margin: "8px 0" }}>
-          <span style={{ marginRight: "8px" }}>📍</span><strong>{t("tripDetails.to")}:</strong> {trip.station_to.name}
-        </p>
-        <p style={{ margin: "8px 0" }}>
-          <span style={{ marginRight: "8px" }}>⏳</span><strong>{t("tripDetails.departure")}:</strong> {trip.start_time}
-        </p>
-        <p style={{ margin: "8px 0" }}>
-          <span style={{ marginRight: "8px" }}>⏳</span><strong>{t("tripDetails.arrival")}:</strong> {trip.finish_time}
-        </p>
-        <p style={{ margin: "8px 0" }}>
-          <span style={{ marginRight: "8px" }}>⏰</span><strong>{t("tripDetails.distance")}:</strong> {selectedTrip?.distance} km
-        </p>
+          <Grid container spacing={2}>
+            {/* Train Info */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <TrainIcon color="primary" />
+                <Typography variant="body1">
+                  <strong>{t("tripDetails.train")}:</strong> {trip.train.name}
+                </Typography>
+              </Box>
+            </Grid>
 
-        {editing ? (
-          <>
-            <ClassSelector
-              trip={trip}
-              selected={localClassId}
-              onSelect={handleClassChange}
-            />
-            <p style={{ fontSize: "12px", color: "#6c757d", marginTop: "8px" }}>
-              {t("tripDetails.selectedClass")}: {isRTL ? selectedClass?.arDesc : selectedClass?.enDesc }  — {selectedClass?.cost} EGP
-            </p>
-          </>
-        ) : (
-          <p style={{ margin: "8px 0" }}>
-            <span style={{ marginRight: "8px" }}>💲</span><strong>{t("tripDetails.selectedClass")}:</strong>{" "}
-            <span>{selectedClass?.name} ({selectedClass?.cost} EGP)</span>
-          </p>
-        )}
-      </div>
+            {/* Stations */}
+            <Grid item xs={12} md={6}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <LocationIcon color="primary" />
+                <Typography variant="body1">
+                  <strong>{t("tripDetails.from")}:</strong> {trip.station_from.name}
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <LocationIcon color="primary" />
+                <Typography variant="body1">
+                  <strong>{t("tripDetails.to")}:</strong> {trip.station_to.name}
+                </Typography>
+              </Box>
+            </Grid>
+
+            {/* Times */}
+            <Grid item xs={12} md={6}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <ScheduleIcon color="primary" />
+                <Typography variant="body1">
+                  <strong>{t("tripDetails.departure")}:</strong> {trip.start_time}
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <ScheduleIcon color="primary" />
+                <Typography variant="body1">
+                  <strong>{t("tripDetails.arrival")}:</strong> {trip.finish_time}
+                </Typography>
+              </Box>
+            </Grid>
+
+            {/* Distance */}
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <DistanceIcon color="primary" />
+                <Typography variant="body1">
+                  <strong>{t("tripDetails.distance")}:</strong> {selectedTrip?.distance} km
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* Class Selection */}
+          {editing ? (
+            <>
+              <ClassSelector
+                trip={trip}
+                selected={localClassId}
+                onSelect={handleClassChange}
+              />
+              <Box mt={1} display="flex" alignItems="center" gap={1}>
+                <PaymentsIcon color="info" />
+                <Typography variant="body2" color="text.secondary">
+                  {t("tripDetails.selectedClass")}: {isRTL ? selectedClass?.arDesc : selectedClass?.enDesc} — 
+                  <Chip label={`${selectedClass?.cost} EGP`} size="small" sx={{ ml: 1 }} />
+                </Typography>
+              </Box>
+            </>
+          ) : (
+            <Box display="flex" alignItems="center" gap={1}>
+              <PaymentsIcon color="primary" />
+              <Typography variant="body1">
+                <strong>{t("tripDetails.selectedClass")}:</strong> {selectedClass?.name} — 
+                <Chip label={`${selectedClass?.cost} EGP`} size="small" sx={{ ml: 1 }} />
+              </Typography>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 };
