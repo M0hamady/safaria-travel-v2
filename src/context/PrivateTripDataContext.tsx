@@ -265,6 +265,8 @@ useEffect(() => {
     } 
 }, [addressesBoarding])
 useEffect(() => {
+  console.log(addressesBoarding);
+  console.log(boardingAddressId);
   if (addressesReturn) {
       localStorage.setItem(STORAGE.RETURN_ID, addressesReturn.id);
       localStorage.setItem(STORAGE.RETURN_ADDRESS, JSON.stringify(addressesReturn));
@@ -276,7 +278,7 @@ useEffect(() => {
       localStorage.setItem(STORAGE.BOARDING_ADDRESS, JSON.stringify(addressesReturn));
 
     } 
-}, [addresses])
+}, [addresses,returnAddressId,boardingAddressId])
 
   const addNewAddress = useCallback(async (payload: AddAddressPayload) => {
     try {
