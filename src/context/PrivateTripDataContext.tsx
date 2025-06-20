@@ -35,7 +35,7 @@ type Address = {
 
 type AddAddressPayload = {
   name: string;
-  for?: string;
+  for?: "boarding" | "return";
   map_location: {
     lat: string;
     lng: string;
@@ -77,7 +77,6 @@ type PrivateTripDataContextType = {
   getFormattedDistance: () => string;
   getFormattedDuration: () => string;
 };
-
 
 const PrivateTripDataContext = createContext<PrivateTripDataContextType | undefined>(undefined);
 
@@ -127,15 +126,14 @@ export const PrivateTripDataProvider: React.FC<{ children: React.ReactNode }> = 
 
   const [addressesLoading, setAddressesLoading] = useState(false);
   const [isCreatingTicket, setIsCreatingTicket] = useState(false);
-  const [isMapExpanded, setIsMapExpanded] = useState(false);
+  const [isMapExpanded] = useState(false);
   
-  // Route information state
   const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(() => {
     const saved = localStorage.getItem(STORAGE.ROUTE_INFO);
     return saved ? JSON.parse(saved) : null;
   });
 
-  // Persist relevant state
+  // Persist state to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE.ADDRESSES, JSON.stringify(addresses));
   }, [addresses]);
@@ -178,6 +176,25 @@ export const PrivateTripDataProvider: React.FC<{ children: React.ReactNode }> = 
     }
   }, [routeInfo]);
 
+  // Update boarding/return addresses when IDs or addresses list changes
+  useEffect(() => {
+    if (boardingAddressId) {
+      const found = addresses.find(addr => addr.id === boardingAddressId);
+      if (found) {
+        setAddressesBoarding(found);
+      }
+    }
+  }, [boardingAddressId, addresses]);
+
+  useEffect(() => {
+    if (returnAddressId) {
+      const found = addresses.find(addr => addr.id === returnAddressId);
+      if (found) {
+        setAddressesReturn(found);
+      }
+    }
+  }, [returnAddressId, addresses]);
+
   const fetchData = useCallback(async (tripId: string) => {
     try {
       const privateTrip = await fetchTripById(tripId);
@@ -190,79 +207,59 @@ export const PrivateTripDataProvider: React.FC<{ children: React.ReactNode }> = 
 
   const fetchAddresses = useCallback(async () => {
     setAddressesLoading(true);
-    const token_m = localStorage.getItem("authToken");
     
-    if (token_m) {
-      try {
-        const res = await fetch("https://demo.telefreik.com/api/transports/profile/address-book", {
-          headers: { Authorization: `Bearer ${token_m}` },
-        });
-
-        if (!res.ok) {
-          if (res.status === 401 || res.status === 403) {
-            navigate("/login", { replace: true });
-          }
-          throw new Error("Failed to fetch addresses");
-        }
-
-        const json = await res.json();
-        const enriched = json.data.map((addr: Address) => ({
-          ...addr,
-          id: String(addr.id), // force id to be string
-          value: `${addr.name} - ${addr.map_location?.address_name ?? ""}`,
-        }));
-
-        setAddresses(enriched);
-        localStorage.setItem(`${STORAGE.ADDRESSES}_time`, Date.now().toString());
-      } catch (err) {
-        console.error(err);
-        addToast({
-          message: "❌ Failed to fetch addresses.",
-          type: "error",
-        });
-      } finally {
-        setAddressesLoading(false);
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        navigate("/login", { replace: true });
+        return;
       }
+
+      const res = await fetch("https://demo.telefreik.com/api/transports/profile/address-book", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          navigate("/login", { replace: true });
+        }
+        throw new Error("Failed to fetch addresses");
+      }
+
+      const json = await res.json();
+      const enrichedAddresses = json.data.map((addr: Address) => ({
+        ...addr,
+        id: String(addr.id),
+        value: `${addr.name} - ${addr.map_location?.address_name ?? ""}`,
+      }));
+      console.log('responce');
+      console.log(json.data);
+      console.log('enrichedAddresses');
+      console.log(enrichedAddresses);
+      setAddresses(enrichedAddresses);
+    } catch (err) {
+      console.error(err);
+      addToast({
+        message: "❌ Failed to fetch addresses.",
+        type: "error",
+      });
+    } finally {
+      setAddressesLoading(false);
     }
-  }, []);
+  }, [navigate, addToast]);
 
   useEffect(() => {
     fetchAddresses();
-  }, [token]);
-
-  useEffect(() => {
-    if (boardingAddressId) {
-      const found = addresses.find(addr => `${addr.id}` === boardingAddressId);
-      setAddressesBoarding(found);
-      setBoardingAddressId(`${found?.id}`);
-      if (addressesBoarding?.id !== `${found?.id}`) {
-        // window.location.reload();
-      }
-    }
-  }, [boardingAddressId, addresses]);
-
-  useEffect(() => {
-    if (returnAddressId) {
-      const found = addresses.find(addr => `${addr.id}` === returnAddressId);
-      setAddressesReturn(found);
-      if (addressesReturn?.id !== `${found?.id}`) {
-        // window.location.reload();
-      }
-    }
-  }, [returnAddressId, addresses]);
-useEffect(() => {
-    addToast({type:"info", message:` boarding id: ${boardingAddressId}`});
-  addToast({type:"info", message:` boarding name: ${addressesBoarding?.name}`});
-  if (addressesReturn) {
-      localStorage.setItem(STORAGE.RETURN_ID, addressesReturn.id);
-      localStorage.setItem(STORAGE.RETURN_ADDRESS, JSON.stringify(addressesReturn));
-
-    } 
-}, [addressesReturn])
+  }, [boardingAddressId]);
 
   const addNewAddress = useCallback(async (payload: AddAddressPayload) => {
     try {
       const token = localStorage.getItem("authToken");
+      if (!token) {
+        navigate("/login", { replace: true });
+        throw new Error("Not authenticated");
+      }
+
       const res = await fetch("https://demo.telefreik.com/api/transports/profile/address-book", {
         method: "POST",
         headers: {
@@ -276,21 +273,30 @@ useEffect(() => {
       if (!res.ok || json.status !== 200 || !json.data) {
         throw new Error(json.message || "Unexpected server response");
       }
+const newAddress = {
+  ...json.data,
+  id: String(json.data.id),
+  value: `${json.data.name} - ${json.data.map_location?.address_name ?? ""}`,
+};
 
-      fetchAddresses();
-      const newAddress = {
-        ...json.data,
-        value: `${json.data.name} - ${json.data.map_location?.address_name ?? ""}`,
-      };
+// Create the new list by adding the new address
+const newList = [...addresses, newAddress];
 
+// Update the state
+setAddresses(newList);
+
+// Optional: If you want to verify the result immediately (but note setState is async)
+console.log("Updated List:", newList);
+console.log("New Address:", newAddress);
+      // Set as boarding or return address if specified
       if (payload.for === 'boarding') {
-        setBoardingAddressId(`${newAddress.id}`);
+        setBoardingAddressId(newAddress.id);
         setAddressesBoarding(newAddress);
       } else if (payload.for === 'return') {
-        setReturnAddressId(`${newAddress.id}`);
+        setReturnAddressId(newAddress.id);
         setAddressesReturn(newAddress);
       }
-      
+
       addToast({ message: "✅ Address added successfully", type: "success" });
       return newAddress;
     } catch (err) {
@@ -298,9 +304,8 @@ useEffect(() => {
       addToast({ message: "❌ Could not add address", type: "error" });
       throw err;
     }
-  }, [tripType, boardingAddressId, returnAddressId, addToast]);
+  }, [navigate, addToast]);
 
-  // Calculate route between boarding and return points
   const calculateRoute = useCallback(async () => {
     if (!addressesBoarding || !addressesReturn) {
       addToast({ message: "Please select both boarding and return points", type: "warning" });
@@ -323,8 +328,8 @@ useEffect(() => {
       
       const route = data.routes[0];
       const newRouteInfo: RouteInfo = {
-        distance: route.distance, // in meters
-        duration: route.duration, // in seconds
+        distance: route.distance,
+        duration: route.duration,
         polyline: route.geometry
       };
       
@@ -336,7 +341,6 @@ useEffect(() => {
     }
   }, [addressesBoarding, addressesReturn, addToast]);
 
-  // Format distance for display
   const getFormattedDistance = useCallback(() => {
     if (!routeInfo) return "N/A";
     
@@ -346,7 +350,6 @@ useEffect(() => {
     return `${(routeInfo.distance / 1000).toFixed(1)} km`;
   }, [routeInfo]);
 
-  // Format duration for display
   const getFormattedDuration = useCallback(() => {
     if (!routeInfo) return "N/A";
     
@@ -360,28 +363,25 @@ useEffect(() => {
   }, [routeInfo]);
 
   const handleCreateTicket = useCallback(async () => {
+    if (!trip || !boardingAddressId || !boardingDateTime) {
+      addToast({ message: "Missing boarding data", type: "error" });
+      return;
+    }
+
+    if (tripType === "round" && (!returnAddressId || !returnDateTime)) {
+      addToast({ message: "Missing return data", type: "error" });
+      return;
+    }
+
+    setIsCreatingTicket(true);
+
     try {
-      const boardingDate = localStorage.getItem(STORAGE.BOARDING_DATETIME);
-      const returnDate = localStorage.getItem(STORAGE.RETURN_DATETIME);
-      const boardingId = boardingAddressId || localStorage.getItem(STORAGE.BOARDING_ID);
-      const returnId = returnAddressId || localStorage.getItem(STORAGE.RETURN_ID);
-
-      if (!trip || !boardingId || !boardingDate) {
-        throw new Error("Missing boarding data");
-      }
-
-      if (tripType === "round" && (!returnId || !returnDate)) {
-        throw new Error("Missing return data");
-      }
-
-      setIsCreatingTicket(true);
-
       const ticketPayload: CreateTicketPayload = {
         round: tripType === "round" ? 2 : 1,
-        boarding: { date: boardingDate, address_id: boardingId },
+        boarding: { date: boardingDateTime, address_id: boardingAddressId },
         return: {
-          date: tripType === "round" ? returnDate! : boardingDate,
-          address_id: returnId ?? boardingId,
+          date: tripType === "round" ? returnDateTime : boardingDateTime,
+          address_id: returnAddressId ?? boardingAddressId,
         },
       };
 
@@ -410,7 +410,16 @@ useEffect(() => {
     } finally {
       setIsCreatingTicket(false);
     }
-  }, [trip, boardingAddressId, returnAddressId, tripType, createTicket, addToast]);
+  }, [
+    trip,
+    boardingAddressId,
+    returnAddressId,
+    boardingDateTime,
+    returnDateTime,
+    tripType,
+    createTicket,
+    addToast
+  ]);
 
   return (
     <PrivateTripDataContext.Provider
@@ -423,7 +432,7 @@ useEffect(() => {
         returnAddressId,
         boardingDateTime,
         returnDateTime,
-        isMapExpanded: false,
+        isMapExpanded,
         addressesLoading,
         isCreatingTicket,
         routeInfo,

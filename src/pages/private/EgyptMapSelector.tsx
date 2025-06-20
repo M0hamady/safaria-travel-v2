@@ -109,10 +109,15 @@ export default function EgyptMapSelector({
   const [openAdd, setOpenAdd] = useState(false);
   const [newLabel, setNewLabel] = useState('');
   const [activeInfoWindow, setActiveInfoWindow] = useState<string | null>(null);
+  const [effectiveLocations, setEffectiveLocations] = useState<any[]>([]);
 
   const mapRef = useRef<google.maps.Map | null>(null);
-  const effectiveLocations = locations.length ? locations : addresses;
-
+  useEffect(() => {
+    setEffectiveLocations(locations.length ? locations : addresses);
+  }, [locations, addresses]);
+  useEffect(() => {
+    setEffectiveLocations(locations.length ? locations : addresses);
+  }, []);
   const handleSuggestion = useCallback((item: any) => {
     const lat = parseFloat(item.lat),
       lng = parseFloat(item.lon);

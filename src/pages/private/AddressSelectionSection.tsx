@@ -37,17 +37,17 @@ const AddressSelectionSection: React.FC<Props> = ({ addresses }) => {
     tripType,
     fetchLocations
   } = usePrivateSearchContext();
-    const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
 
   const [mapDialogType, setMapDialogType] = useState<"boarding" | "return" | null>(null);
   const [boardingAddress, setBoardingAddress] = useState<Address | undefined>();
   const [returnAddress, setReturnAddress] = useState<Address | undefined>();
-useEffect(() => {
-  if (mapDialogType && dialogRef.current) {
-    dialogRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-}, [mapDialogType]);
+  useEffect(() => {
+    if (mapDialogType && dialogRef.current) {
+      dialogRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [mapDialogType]);
   // Initial datetime setup
   useEffect(() => {
     fetchAddresses()
@@ -79,16 +79,72 @@ useEffect(() => {
     }
   }, [boardingAddressId, returnAddressId, addresses]);
 
-  const handleMapSelect = (id: string) => {
+  const handleMapSelect = async (id: string) => {
+      const savedString = localStorage.getItem('privateAddresses');
+
+    let saved: Address[] = [];
+      if (savedString) {
+        try {
+          saved = JSON.parse(savedString) as Address[];
+        } catch (e) {
+          console.error('Failed to parse privateAddresses from localStorage', e);
+          saved = [];
+        }
+      }
     if (mapDialogType === "boarding") {
+      await fetchAddresses(); // Wait until addresses are updated
+
       setBoardingAddressId(id);
+
+      // OPTIONAL: Add small artificial delay if needed
+      await new Promise(res => setTimeout(res, 1000));
+
+     
+      let selectedAddress : Address | undefined;
+      if (saved !== addresses){
+
+         selectedAddress = saved.find(address_ => String(address_.id) === String(id));
+      }else {
+         selectedAddress = addresses.find(address_ => String(address_.id) === String(id));
+
+      }
+
+      if (selectedAddress) {
+        console.log("--------------------");
+        setBoardingAddress(selectedAddress);
+      }
+
       addToast({ message: t("address.boardingSet"), type: "success" });
     } else {
       setReturnAddressId(id);
-      addToast({ message: t("address.returnSet"), type: "success", });
+      await new Promise(res => setTimeout(res, 1000));
+
+
+let selectedAddress : Address | undefined;
+      if (saved !== addresses){
+        
+         selectedAddress = saved.find(address_ => String(address_.id) === String(id));
+      }else {
+         selectedAddress = addresses.find(address_ => String(address_.id) === String(id));
+
+      }
+      if (selectedAddress) {
+        console.log("--------------------");
+        setReturnAddress(selectedAddress);
+      }
+
+      addToast({ message: t("address.returnSet"), type: "success" });
+    }
+    console.log(saved[0].id  === saved[0].id );
+    console.log(addresses[0].id, saved[0].id );
+    if (saved[0].id !== addresses[0].id) {
+            await new Promise(res => setTimeout(res, 300));
+
+      window.location.reload();
     }
     setMapDialogType(null);
   };
+
   const renderDateTimeInput = (
     value: string,
     onChange: (v: string) => void,
@@ -269,7 +325,7 @@ useEffect(() => {
 
       {/* Map Dialog */}
       {mapDialogType && (
-<div
+        <div
           ref={dialogRef}
           className="fixed inset-0 inset-y-8 z-50 flex items-center mt-5 max-sm:items-start justify-center bg-black bg-opacity-50 overflow-y-auto"
         >          {/* if this run scroll to it auutomaticaaly by giving it is  */}
