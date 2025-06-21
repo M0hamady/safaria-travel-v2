@@ -13,11 +13,11 @@ interface TrainOrderCardProps {
   onReview?: (orderId: string) => void;
 }
 
-const TrainOrderCard: React.FC<TrainOrderCardProps> = ({ 
-  order, 
-  className = "", 
-  onCancel, 
-  onReview 
+const TrainOrderCard: React.FC<TrainOrderCardProps> = ({
+  order,
+  className = "",
+  onCancel,
+  onReview
 }) => {
   const { t } = useTranslation();
   const { openModal, closeModal } = useModal();
@@ -27,16 +27,16 @@ const TrainOrderCard: React.FC<TrainOrderCardProps> = ({
   const getOrderStatus = () => {
     const now = new Date();
     const orderDate = new Date(order.date_time);
-    
+
     if (order.status_code === "canceled") return "canceled";
     if (order.payment_data?.status_code === "pending") return "pendingPayment";
-    
+
     if (order.payment_data?.status === "paid") {
       const isToday = orderDate.toDateString() === now.toDateString();
       if (orderDate < now) return isToday ? "todayAndPaid" : "pastAndPaid";
       return "futureAndPaid";
     }
-    
+
     return "default";
   };
 
@@ -107,7 +107,7 @@ const TrainOrderCard: React.FC<TrainOrderCardProps> = ({
       });
 
       if (!response.ok) throw new Error("Payment initiation failed");
-      
+
       const data = await response.json();
       if (data.status === 200 && data.data?.url) {
         window.location.href = data.data.url;
@@ -134,7 +134,7 @@ const TrainOrderCard: React.FC<TrainOrderCardProps> = ({
   };
 
   // Action buttons based on status
-const renderActionButtons = () => {
+  const renderActionButtons = () => {
     const buttons: Record<string, JSX.Element | null> = {
       pendingPayment: (
         <>
@@ -225,12 +225,14 @@ const renderActionButtons = () => {
           </div>
         </div>
         <div className="text-right">
-          <p className="text-base font-bold text-primary">{order.total} {t('price_unit')}</p>
+          <p className="text-base font-bold text-primary">
+            {order.total?.slice(3) ?? '0'} {t('price_unit')}
+          </p>
         </div>
       </div>
 
       {/* Body */}
-      <div className="flex justify-between border-t pt-4 text-sm text-gray-700 border-b-2">
+      <div className="flex justify-between border-t pt-4 text-sm text-gray-700 border-b-2 pb-4">
         <div className="flex flex-col gap-4">
           <div className="text-base text-stone-900 flex flex-col w-full">
             <span className="text-bold text-lg w-full text-start flex">
