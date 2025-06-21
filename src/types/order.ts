@@ -1,3 +1,5 @@
+import { Address } from "./privateTypes";
+
 interface CompanyData {
     name: string;
     avatar: string;
@@ -164,8 +166,8 @@ export interface PrivateOrder {
   to_location: location | null;
   bus: BusData;
   address: string | null;
-  from_address: string | null;
-  to_address: string | null;
+  from_address: Address  | null;
+  to_address: Address  | null;
   can_pay: boolean;
   can_be_cancel: boolean;
   company: string | null;

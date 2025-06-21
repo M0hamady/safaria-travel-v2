@@ -7,6 +7,7 @@ import ReviewModal from "./ReviewModalPrivate";
 import { useModal } from "../../../context/ModalContext";
 import { usePrivateOrder } from "../../../context/PrivateOrderContext";
 import DateTimeDisplay from "../../utilies/DateTimeDisplay";
+import { useOrder } from "../../../context/OrderContext";
 
 interface PrivateOrderCardProps {
   order: PrivateOrder;
@@ -15,9 +16,11 @@ interface PrivateOrderCardProps {
 
 const PrivateOrderCard: React.FC<PrivateOrderCardProps> = ({ order, className = "" }) => {
   const { t } = useTranslation();
-  const { openModal } = useModal();
+  const { openModal ,closeModal} = useModal();
   const { cancelPrivateOrder } = usePrivateOrder(); // ✅ Hook for canceling
   const [loading, setLoading] = useState(false);
+  const {  downloadTicket } = useOrder();
+
 
   const now = new Date();
   const orderDate = new Date(order.date_time);
@@ -26,13 +29,48 @@ const PrivateOrderCard: React.FC<PrivateOrderCardProps> = ({ order, className = 
   const isPaid = order.payment_data?.status === "paid";
   const isFuture = orderDate > now;
   const canPay = order.can_pay;
+    // Payment status helpers
+  const isOrderPaid = () => order.payment_data?.status === "paid";
+  const isOrderPending = () => order.payment_data?.status_code === "pending";
+  const isOrderCanceled = () => order.status_code === "canceled";
 
+  // Time-related helpers
+  const isOrderInPast = () => new Date(order.date_time) < new Date();
+  const isOrderToday = () => {
+    const today = new Date();
+    const orderDate = new Date(order.date_time);
+    return (
+      orderDate.getDate() === today.getDate() &&
+      orderDate.getMonth() === today.getMonth() &&
+      orderDate.getFullYear() === today.getFullYear()
+    );
+  };
+ const determineOrderStatus = (): string => {
+    if (isOrderCanceled()) return "canceled";
+    if (isOrderPending()) return "pendingPayment";
+    if (isOrderPaid()) {
+      if (isOrderInPast())
+        return isOrderToday() ? "todayAndPaid" : "pastAndPaid";
+      return "futureAndPaid";
+    }
+    return "default";
+  };
   const getBorderStyle = () => {
-    if (isCanceled) return "border-red-500 border-2 border-dashed opacity-70";
-    if (canPay) return "border-primary border-2 border-dashed";
-    if (isPaid && isFuture) return "border-green-400 border-2 border-dashed";
-    if (isPaid && !isFuture) return "border-green-700 border-2 border-dashed opacity-80";
-    return "border-yellow-400 border-2 border-dashed";
+     const status = determineOrderStatus();
+    switch (status) {
+      case "pendingPayment":
+        return "border-2 border-dashed border-red-400";
+      case "todayAndPaid":
+        return "border-2 border-primary";
+      case "futureAndPaid":
+        return "border-2 border-green-400";
+      case "pastAndPaid":
+        return "border-sky-600";
+      case "canceled":
+        return "border-2 border-dashed border-gray-400 opacity-70";
+      default:
+        return "border-2 border-dashed border-gray-400";
+    }
   };
 
   const handleReviewSubmit = async (rating: number, comment: string) => {
@@ -61,7 +99,7 @@ const PrivateOrderCard: React.FC<PrivateOrderCardProps> = ({ order, className = 
       button1Action: async () => {
         if (triggerSubmit) triggerSubmit();
       },
-      button2Action: () => {},
+      button2Action: () => {closeModal()},
     });
   };
   const handleCancelOrder = async () => {
@@ -103,6 +141,110 @@ const PrivateOrderCard: React.FC<PrivateOrderCardProps> = ({ order, className = 
     setLoading(false);
   }
 };
+  const handleDownloadTicket = () => {
+    openModal({
+      title: t("order.downloadTicket"),
+      message: t("order.downloadConfirmation"),
+      button1Label: t("download"),
+      button2Label: t("cancel"),
+      button1Action: () => downloadTicket(order.id),
+      button2Action: () => {}, // Just closes the modal
+    });
+  };
+  const renderActionButtons = () => {
+    const status = determineOrderStatus();
+    const isLoading = loading ;
+
+    switch (status) {
+      case "pendingPayment":
+        return (
+          <>
+            <a
+              href={order.payment_data?.invoice_url}
+              className="inline-flex h-12 px-2 items-center justify-center rounded-[9px] bg-primary text-white text-lg max-sm:text-sm max-sm:py-2 font-medium shadow hover:bg-primary transition-colors"
+            >
+              💰 {t("order.pay")}
+            </a>
+            {order.can_be_cancel && (
+              <button
+                onClick={handleCancelOrder}
+                disabled={isLoading}
+                className="inline-flex h-12 px-2 items-center justify-center rounded-[9px] bg-red-500 text-white text-lg max-sm:text-sm max-sm:py-2 font-medium shadow hover:bg-red-600 transition-colors disabled:opacity-75 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                ) : (
+                  <>❌ {t("order.cancel")}</>
+                )}
+              </button>
+            )}
+
+          </>
+        );
+
+      case "todayAndPaid":
+      case "futureAndPaid":
+        return (
+          <Link
+            to={`/trips/trip/${order.id}`}
+            className="inline-flex h-12 px-2 items-center justify-center rounded-[9px] border border-sky-600 bg-white text-lg font-medium text-sky-600 shadow hover:bg-sky-50 transition-colors"
+          >
+            {t("order.viewTrip")}
+          </Link>
+        );
+
+      case "pastAndPaid":
+        return (
+          <>
+                       <button
+              onClick={handleDownloadTicket}
+              className="inline-flex h-12 px-2 items-center justify-center rounded-[9px] border border-sky-600 bg-white text-lg font-medium text-sky-600 shadow hover:bg-sky-50 transition-colors"
+            >
+              {t("order.viewTicket")}
+            </button>
+            <button
+              onClick={handleAddReview}
+              className="inline-flex h-12 px-2 items-center justify-center rounded-[9px] bg-purple-500 text-white text-lg max-sm:text-sm max-sm:py-2 font-medium shadow hover:bg-purple-600 transition-colors"
+            >
+              {t("order.feedback")}
+            </button>
+          </>
+        );
+
+      case "canceled":
+        return (
+          <button
+            disabled
+            className="inline-flex h-12 px-2 items-center justify-center rounded-[9px] bg-gray-400 text-white text-lg max-sm:text-sm max-sm:py-2 font-medium shadow cursor-not-allowed"
+          >
+            {t("order.canceled")}
+          </button>
+        );
+
+      default:
+        return null;
+    }
+  };
+
 
   return (
     <div
@@ -130,61 +272,39 @@ const PrivateOrderCard: React.FC<PrivateOrderCardProps> = ({ order, className = 
       </div>
 
       {/* Body */}
-      <div className="flex justify-between border-t pt-4 text-sm text-gray-700">
-        <div className="flex-1">
-          <p>📍 {t("tripDetails.from")}: <strong>{order.from_location?.name}</strong></p>
-          <p className="mt-2">📌 {t("tripDetails.to")}: <strong>{order.to_location?.name}</strong></p>
-        </div>
-        <div className="text-right">
-          <p><DateTimeDisplay  value={order.date_time} /></p>
-          {order.date ? (
-            <p className="mt-2"><DateTimeDisplay  value={order.date} /></p>
-          ) : (
-            <p className="mt-2"><DateTimeDisplay  value={order.date_time} /></p>
-          )}
+      <div className="flex justify-between border-t pt-4 text-sm text-gray-700 border-b-2">
+             <div className="flex flex-col gap-4">
+          <div className="text-base text-stone-900 flex flex-col w-full ">
+            <span className="text-bold text-lg w-full text-start flex">
+
+              <span > {order.from_location?.name} {" "}  </span>
+              -
+              <span >
+                ({order.from_address?.name})
+              </span>
+            </span>
+            <div className="text-base text-stone-900">
+              <DateTimeDisplay isLined={true} value={order.date_time} />
+            </div>
+          </div>
+          <div className="text-base text-stone-900 flex flex-col">
+            <span className="text-bold text-lg flex">
+
+              <span >{order.to_location?.name}  </span>
+              -
+
+              <span >({order.from_location?.name}) </span>
+            </span>
+            <div className="text-base text-stone-900">
+              <DateTimeDisplay value={order.date_time} />
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {/* Footer Buttons */}
-      <div className="mt-4 flex flex-wrap gap-2">
-        {order.can_be_cancel && !isCanceled && (
-          <button
-            onClick={handleCancelOrder}
-            disabled={loading}
-            className="h-10 px-4 inline-flex items-center justify-center rounded-md border border-red-500 text-red-600 hover:bg-red-50 text-sm font-medium"
-          >
-            {loading ? t("loading") : t("tripDetails.cancel")}
-          </button>
-        )}
-
-        {canPay && !isCanceled && (
-          <button
-            onClick={handlePayNow}
-            disabled={loading}
-            className="h-10 px-4 inline-flex items-center justify-center rounded-md bg-primary text-white hover:bg-primary-dark text-sm font-medium"
-          >
-            {loading ? t("loading") : t("tripDetails.pay")}
-          </button>
-        )}
-
-        {isPaid && !isCanceled && (
-          <Link
-            to={`/private/trip/${order.id}`}
-            className="h-10 px-4 inline-flex items-center justify-center rounded-md bg-gray-800 text-white hover:bg-gray-700 text-sm font-medium"
-          >
-            {t("tripDetails.viewTrip")}
-          </Link>
-        )}
-
-        {isFuture && isPaid && !isCanceled && (
-          <button
-            onClick={handleAddReview}
-            className="h-10 px-4 rounded-md border border-yellow-600 text-yellow-800 hover:bg-yellow-50 text-sm font-medium"
-          >
-            {t("tripDetails.leaveReview")}
-          </button>
-        )}
-      </div>
+      {/* Action Buttons */}
+      <div className="mt-4 flex gap-3">{renderActionButtons()}</div>
     </div>
   );
 };

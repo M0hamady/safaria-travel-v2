@@ -355,7 +355,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, className = "" }) => {
       </div>
 
       {/* Trip Details */}
-      <div className="mt-4 flex justify-between border-t border-slate-200 p-4 max-sm:gap-4">
+      <div className="mt-4 flex justify-between border-t border-slate-200 p-4 max-sm:gap-4 border-b-2">
         <div className="flex flex-col gap-4">
           <div className="text-base text-stone-900 flex flex-col w-full ">
             <span className="text-bold text-lg w-full text-start flex">
