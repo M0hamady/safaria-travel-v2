@@ -11,6 +11,8 @@ interface OrderContextType {
   getOrderById: (orderId: number) => Promise<Order | null>;
   addReview: (orderId: number, rating: number, comment: string) => Promise<boolean>;
   cancelOrder: (orderId: number) => Promise<boolean>;
+    downloadTicket: (orderId: number) => Promise<void>; // ✅ Add this
+
 }
 
 // Create Order Context
@@ -87,9 +89,33 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return false;
     }
   };
+// Download ticket PDF or file
+const downloadTicket = async (orderId: number): Promise<void> => {
+  if (!user?.api_token) return;
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/transports/profile/tickets/${orderId}`, {
+      headers: {
+        Authorization: `Bearer ${user.api_token}`,
+      },
+    });
+
+    if (!response.ok) throw new Error("Download failed");
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ticket-${orderId}.pdf`; // name as needed
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Failed to download ticket:", error);
+  }
+};
 
   return (
-    <OrderContext.Provider value={{ orders, loading, fetchOrders, getOrderById, addReview, cancelOrder }}>
+    <OrderContext.Provider value={{ orders, loading, fetchOrders, getOrderById, addReview, cancelOrder,downloadTicket }}>
       {children}
     </OrderContext.Provider>
   );

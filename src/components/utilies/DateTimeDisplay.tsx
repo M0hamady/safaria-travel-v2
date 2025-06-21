@@ -5,6 +5,7 @@ import i18next from 'i18next';
 
 interface DateTimeDisplayProps {
   value: string;
+  isLined?: boolean;
   type?: 'datetime' | 'date' | 'time';
   locale?: 'en-US' | 'ar-EG'; // ممكن نحذفه نهائياً لو هنعتمد كلياً على i18next
 }
@@ -47,6 +48,7 @@ const formatArabicDate = (date: Date, type: 'datetime' | 'date' | 'time') => {
 
 const DateTimeDisplay: React.FC<DateTimeDisplayProps> = ({
   value,
+  isLined= false,
   type = 'datetime',
   locale, // قابل للإزالة لو مش هتستخدمه
 }) => {
@@ -74,7 +76,7 @@ const DateTimeDisplay: React.FC<DateTimeDisplayProps> = ({
 
   return (
     <div
-      className={`inline-flex items-center gap-2 text-sm text-gray-800 ${
+      className={`inline-flex items-center gap-2 text-sm text-gray-800${isLined && 'text-nowrap items-start w-full flex-nowrap'} ${
         isArabic ? 'rtl text-right' : 'ltr text-left'
       }`}
       dir={isArabic ? 'rtl' : 'ltr'}
@@ -84,7 +86,7 @@ const DateTimeDisplay: React.FC<DateTimeDisplayProps> = ({
       ) : (
         <CalendarTodayIcon fontSize="small" className="text-green-600" />
       )}
-      <span>{formatted}</span>
+      <span className={`${isLined && 'text-nowrap items-start w-full flex-nowrap'}`}>{formatted}</span>
     </div>
   );
 };

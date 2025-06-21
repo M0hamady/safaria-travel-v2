@@ -8,16 +8,20 @@ import { useTranslation } from "react-i18next";
 import { useModal } from "../../../context/ModalContext";
 import { Star } from "@mui/icons-material";
 import ReviewModal from "./ReviewModal";
+import DateTimeDisplay from "../../utilies/DateTimeDisplay";
+import images from "../../../assets";
+
+// ... (keep all your existing interfaces and constants)
 
 interface OrderCardProps {
   order: Order;
   className?: string;
 }
-
 const OrderCard: React.FC<OrderCardProps> = ({ order, className = "" }) => {
-  const { cancelOrder, loading, addReview } = useOrder();
+  // ... (keep all your existing state and hooks)
+  const { cancelOrder, loading, addReview, downloadTicket } = useOrder();
   const { t } = useTranslation();
-  const { openModal } = useModal();
+  const { openModal, closeModal } = useModal();
   const [localLoading, setLocalLoading] = useState(false);
 
   // Local state for review form inputs
@@ -56,7 +60,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, className = "" }) => {
     return "default";
   };
   useEffect(() => {
-  
+
     if (order?.review && order.review) {
       setReviewRating(order.review.rating);
     }
@@ -84,44 +88,77 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, className = "" }) => {
         return "border-2 border-dashed border-gray-400";
     }
   };
-
-  // Handler for order cancellation
+  // Handler for order cancellation with confirmation modal
   const handleCancel = async () => {
-    setLocalLoading(true);
-    try {
-      await cancelOrder(order.id);
-    } finally {
-      setLocalLoading(false);
-    }
+    openModal({
+      title: t("order.confirmCancel"),
+      message: t("order.cancelConfirmationMessage"),
+      button1Label: t("confirm"),
+      button2Label: t("cancel"),
+      button1Action: async () => {
+        setLocalLoading(true);
+        try {
+          await cancelOrder(order.id);
+        } finally {
+          setLocalLoading(false);
+        }
+      },
+       button2Action: () => {
+        console.log('closing');
+        closeModal()
+      }, // Just closes the modal
+    });
   };
 
-  // Open review modal using our custom modal hook
+  // Improved review modal handler
   const handleAddReview = () => {
     let triggerSubmit: () => void;
 
     openModal({
       title: t("order.addReview"),
+          scrollToModal: true ,// Explicitly enable auto-scroll
+
       children: (
         <ReviewModal
           orderId={order.id}
           setTriggerSubmit={(fn: any) => {
             triggerSubmit = fn;
           }}
-          onSubmit={async (rating, comment) => {
+          onSubmit={async (rating: number, comment: string) => {
             await addReview(order.id, rating, comment);
           }}
+          
+          initialRating={reviewRating}
+          initialComment={reviewComment}
         />
       ),
       button1Label: t("submit"),
       button2Label: t("cancel"),
       button1Action: async () => {
-        if (triggerSubmit) triggerSubmit();
+        if (triggerSubmit) {
+          triggerSubmit();
+        }
       },
-      button2Action: () => {},
+      button2Action: () => {
+        console.log('closing');
+        closeModal()
+      }, // Just closes the modal
     });
   };
 
-  // Determine which action buttons to show based on order status
+  // Add a download confirmation modal
+  const handleDownloadTicket = () => {
+    openModal({
+      title: t("order.downloadTicket"),
+      message: t("order.downloadConfirmation"),
+      button1Label: t("download"),
+      button2Label: t("cancel"),
+      button1Action: () => downloadTicket(order.id),
+      button2Action: () => {}, // Just closes the modal
+    });
+  };
+
+  // Update your renderActionButtons to use the new handlers
   const renderActionButtons = () => {
     const status = determineOrderStatus();
     const isLoading = loading || localLoading;
@@ -168,7 +205,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, className = "" }) => {
                 )}
               </button>
             )}
- 
+
           </>
         );
 
@@ -186,12 +223,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, className = "" }) => {
       case "pastAndPaid":
         return (
           <>
-            <Link
-              to={`/trips/trip/${order.id}`}
+                       <button
+              onClick={handleDownloadTicket}
               className="inline-flex h-12 px-2 items-center justify-center rounded-[9px] border border-sky-600 bg-white text-lg font-medium text-sky-600 shadow hover:bg-sky-50 transition-colors"
             >
               {t("order.viewTicket")}
-            </Link>
+            </button>
             <button
               onClick={handleAddReview}
               className="inline-flex h-12 px-2 items-center justify-center rounded-[9px] bg-purple-500 text-white text-lg max-sm:text-sm max-sm:py-2 font-medium shadow hover:bg-purple-600 transition-colors"
@@ -218,7 +255,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, className = "" }) => {
 
   return (
     <div
-      className={`rounded-2xl border bg-white shadow-lg duration-300 ease-in-out ${getBorderClass()} p-4 mb-6 hover:shadow-xl transition-shadow ${className} `}
+      className={`rounded-2xl border bg-white shadow-lg duration-300 ease-in-out ${getBorderClass()} p-4  mb-6 hover:shadow-xl transition-shadow ${className} `}
     >
       {/* Header */}
       <div className="flex justify-between ">
@@ -271,32 +308,46 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, className = "" }) => {
           </div>
         </div>
 
-        <div className="flex gap-3 items-center justify-center max-sm:gap-1">
-          <div className="font-Cairo mx-2 text-xl max-sm:text-sm text-neutral-500 flex items-center justify-center gap-3">
-            {order.tickets.map((ticket) => (
-              <span
-                key={ticket.id}
-                className="flex rtl:flex-row-reverse rtl:ml-4 items-center gap-1 "
+        <div className="flex gap-3 items-center justify-center max-sm:gap-1  ">
+          <div className="relative font-Cairo mx-2 text-xl max-sm:text-sm text-neutral-500 flex items-center justify-center gap-3 group">
+            {/* Show ticket count */}
+            <div className="flex items-center gap-1 cursor-default">
+              <svg
+                width="18"
+                height="20"
+                viewBox="0 0 18 22"
+                className="mt-1"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <svg
-                  width="18"
-                  height="20"
-                  viewBox="0 0 18 22"
-                  className="mt-1"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12.749 5C12.749 5.99456 12.3539 6.94839 11.6507 7.65165C10.9474 8.35491 9.99356 8.75 8.999 8.75C8.00444 8.75 7.05061 8.35491 6.34735 2.34835C5.64409 3.05161 5.249 4.00544 5.249 5C5.249 4.00544 5.64409 3.05161 6.34735 2.34835C7.05061 1.64509 8.00444 1.25 8.999 1.25C9.99356 1.25 10.9474 1.64509 11.6507 2.34835C12.3539 3.05161 12.749 4.00544 12.749 5ZM1.5 19.118C1.53213 17.1504 2.33634 15.2742 3.73918 13.894C5.14202 12.5139 7.03109 11.7405 8.999 11.7405C10.9669 11.7405 12.856 12.5139 14.2588 13.894C15.6617 15.2742 16.4659 17.1504 16.498 19.118C14.1454 20.1968 11.5871 20.7535 8.999 20.75C6.323 20.75 3.783 20.166 1.5 19.118Z"
-                    stroke="#69696A"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                {ticket.seat_number}
-              </span>
-            ))}
+                <path
+                  d="M12.749 5C12.749 5.99456 12.3539 6.94839 11.6507 7.65165C10.9474 8.35491 9.99356 8.75 8.999 8.75C8.00444 8.75 7.05061 8.35491 6.34735 2.34835C5.64409 3.05161 5.249 4.00544 5.249 5C5.249 4.00544 5.64409 3.05161 6.34735 2.34835C7.05061 1.64509 8.00444 1.25 8.999 1.25C9.99356 1.25 10.9474 1.64509 11.6507 2.34835C12.3539 3.05161 12.749 4.00544 12.749 5ZM1.5 19.118C1.53213 17.1504 2.33634 15.2742 3.73918 13.894C5.14202 12.5139 7.03109 11.7405 8.999 11.7405C10.9669 11.7405 12.856 12.5139 14.2588 13.894C15.6617 15.2742 16.4659 17.1504 16.498 19.118C14.1454 20.1968 11.5871 20.7535 8.999 20.75C6.323 20.75 3.783 20.166 1.5 19.118Z"
+                  stroke="#69696A"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span>{order.tickets.length} مقعد</span>
+            </div>
+
+            {/* Chair icons on hover */}
+            <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white text-neutral-700 border rounded-lg shadow-md p-3 w-max opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+              <div className="text-sm font-medium mb-2">المقاعد:</div>
+              <ul className="flex flex-wrap gap-2">
+                {order.tickets.map((ticket) => (
+                  <li key={ticket.id} className="flex flex-col items-center text-[10px] text-center">
+                    <img
+                      src={images.seat_reserved} // Replace with your chair image path
+                      alt={`Chair ${ticket.seat_number}`}
+                      className="w-8 h-8"
+                    />
+                    {ticket.seat_number}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
+
           <div className="text-xl max-sm:text-sm font-medium text-sky-600">
             {order.total.slice(0, 3)} {order.total.slice(4)}
           </div>
@@ -304,22 +355,38 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, className = "" }) => {
       </div>
 
       {/* Trip Details */}
-      <div className="mt-4 flex justify-between border-t border-slate-200 p-4">
-        <div>
-          <div className="text-base text-stone-900">
-            {order.station_from.city_name} ({order.station_from.name})
+      <div className="mt-4 flex justify-between border-t border-slate-200 p-4 max-sm:gap-4">
+        <div className="flex flex-col gap-4">
+          <div className="text-base text-stone-900 flex flex-col w-full ">
+            <span className="text-bold text-lg w-full text-start flex">
+
+              <span > {order.station_from.city_name} {" "}  </span>
+              -
+              <span >
+                ({order.station_from.name})
+              </span>
+            </span>
+            <div className="text-base text-stone-900">
+              <DateTimeDisplay isLined={true} value={order.station_from.arrival_at} />
+            </div>
           </div>
-          <div className="text-base text-stone-900">
-            {order.station_to.city_name} ({order.station_to.name})
+          <div className="text-base text-stone-900 flex flex-col">
+            <span className="text-bold text-lg flex">
+
+              <span >{order.station_to.city_name}  </span>
+              -
+
+              <span >({order.station_to.name}) </span>
+            </span>
+            <div className="text-base text-stone-900">
+              <DateTimeDisplay value={order.station_to.arrival_at} />
+            </div>
           </div>
+
         </div>
-        <div>
-          <div className="text-base text-stone-900">
-            {formatTime(order.station_from.arrival_at)}
-          </div>
-          <div className="text-base text-stone-900">
-            {formatTime(order.station_to.arrival_at)}
-          </div>
+        <div className="flex flex-col justify-evenly">
+
+
         </div>
       </div>
 

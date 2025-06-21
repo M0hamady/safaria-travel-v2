@@ -14,7 +14,7 @@ const BusAllBookings : React.FC = () => {
   }, []);
 
   return (
-    <div className="p-4">
+    <div className="p-4 max-sm:px-0">
       <h2 className="text-xl font-bold mb-4">{t("bookings.allBookings")}</h2>
 
       {orders.length === 0 ? (

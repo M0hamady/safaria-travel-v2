@@ -43,7 +43,7 @@ const BookingPage: React.FC = () => {
           <Link
             key={type}
             to={`/dashboard/booking/${type}/all`}
-            className={`px-4 py-2 ${
+            className={`px-4  py-2 ${
               currentType === type ? "border-b-2 border-orange-500" : ""
             }`}
           >
@@ -62,7 +62,7 @@ const BookingPage: React.FC = () => {
           <Link
             key={sub}
             to={`/dashboard/booking/${currentType}/${sub}`}
-            className={`px-4 py-2 ${
+            className={`px-4 py-2  ${
               currentSub === sub ? "border-b-2 border-orange-500" : ""
             }`}
           >

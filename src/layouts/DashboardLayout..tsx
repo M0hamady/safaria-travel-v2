@@ -13,15 +13,15 @@ const DashboardLayout: React.FC = () => {
   return (
     <div className="grid grid-cols-2 gap-3 bg-boarder">
       <DashboardHeader />
-      <div className="bg-boarder w-full col-span-2 grid grid-cols-12">
-        <div className="col-span-1"></div>
-        <div className="col-span-4 max-sm:hidden sm:block rounded-xl bg-white p-4   mx-4 my-4 -translate-y-14 ">
+      <div className="bg-boarder w-full col-span-2 grid grid-cols-12 ">
+        <div className="col-span-1 max-sm:hidden"></div>
+        <div className="col-span-4 max-sm:hidden sm:block rounded-xl bg-white p-4    mx-4 my-4 -translate-y-14 ">
           <DashboardSidebar />
         </div>
-        <div className="col-span-10 rounded-xl sm:hidden bg-white p-4   mx-4 my-4 -translate-y-14 ">
+        <div className="col-span-12 rounded-xl sm:hidden bg-white p-4    mx-4 my-4  max-sm:mx-1 -translate-y-14 ">
           <DashboardSidebar />
         </div>
-        <div className="max-sm:hidden sm:block col-span-6 p-4 bg-white rounded-xl shadow  mt-4">
+        <div className="max-sm:hidden sm:block col-span-6 p-4  bg-white rounded-xl shadow  mt-4">
           <Routes>
             <Route path="profile" element={<ProfilePage />} />
             <Route path="booking/*" element={<BookingPage />} />
@@ -31,9 +31,9 @@ const DashboardLayout: React.FC = () => {
             <Route path="settings" element={<SettingsPage />} />
           </Routes>
         </div>
-        <div className="col-span-1"></div>
-        <div className="col-span-1 sm:hidden"></div>
-        <div className="sm:hidden max-sm:col-span-10 p-4 bg-white rounded-xl shadow  mt-4">
+        <div className="col-span-1 max-sm:hidden"></div>
+        <div className="col-span-1 sm:hidden "></div>
+        <div className="sm:hidden max-sm:px-0 max-sm:col-span-12 p-4 bg-white rounded-xl shadow  mt-4 max-sm:mx-1">
           <Routes>
             <Route path="profile" element={<ProfilePage />} />
             <Route path="booking/*" element={<BookingPage />} />

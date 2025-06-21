@@ -6,12 +6,13 @@ import { Button } from "@mui/material";
 import { useOrder } from "../../../context/OrderContext";
 import { useToast } from "../../../context/ToastContext";
 
-type ReviewModalProps = {
+interface ReviewModalProps {
   orderId: number;
+  setTriggerSubmit: (fn: () => void) => void;
   onSubmit: (rating: number, comment: string) => Promise<void>;
-  setTriggerSubmit?: (submitFn: () => void) => void;
-};
-
+  initialRating?: number;  // Make these optional if needed
+  initialComment?: string;
+}
 const ReviewModal: React.FC<ReviewModalProps> = ({
   orderId,
   onSubmit,

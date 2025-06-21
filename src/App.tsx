@@ -18,7 +18,6 @@ import { ModalProvider } from "./context/ModalContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ToastContainer from "./components/ToastContainer";
-import ModalContainer from "./components/ModalContainer";
 import AuthRoute from "./components/AuthRoute";
 import DashboardLayout from "./layouts/DashboardLayout.";
 
@@ -67,6 +66,7 @@ import { TrainOrderProvider } from "./context/TrainOrderContext";
 import { PrivateOrderProvider } from "./context/PrivateOrderContext";
 import PrivateTripDetailsPageData from "./pages/private/PrivateTripDetailsPageData";
 import { PrivateTripDataProvider } from "./context/PrivateTripDataContext";
+import { ModalComponent } from "./components/ModalContainer";
 
 const App: React.FC = () => {
   const currentLanguage = i18next.language;
@@ -91,7 +91,7 @@ const App: React.FC = () => {
                             <PrivateTripDataProvider>
                               <Navbar />
                               {/* <ToastContainer /> */}
-                              <ModalContainer />
+                              <ModalComponent  />
 
                               <Routes>
                                 {/* ------------------- Public Routes ------------------- */}
