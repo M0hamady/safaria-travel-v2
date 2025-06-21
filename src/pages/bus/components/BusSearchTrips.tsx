@@ -53,7 +53,7 @@ interface TripCardProps {
   onSelect: (departure: Station, arrival: Station) => void;
 }
 
-const TripCard: React.FC<TripCardProps> = ({ trip, duration, onSelect }) => {
+export const TripCard: React.FC<TripCardProps> = ({ trip, duration, onSelect }) => {
   const { t } = useTranslation();
   const departureStations = trip.stations_from || [];
   const arrivalStations = trip.stations_to || [];

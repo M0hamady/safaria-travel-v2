@@ -4,6 +4,7 @@ import images from '../assets';
 const paymentGateways = [
   { name: 'Fawry', logo: images.fawry },
   { name: 'Vodafone Cash', logo: images.vodafonecash },
+  { name: 'valw', logo: images.valw },
   { name: 'EtisalatCash', logo: images.etisalat },
   { name: 'Aman', logo: images.aman },
   { name: 'mastercard', logo: images.mastercard },
@@ -26,7 +27,7 @@ const PaymentGateways: React.FC = () => {
               />
             </div>
             {index !== paymentGateways.length - 1 && (
-              <div className="hidden sm:block h-8 sm:h-10 md:h-12 border-r-2 border-black/30" />
+              <div className=" sm:block h-4 sm:h-5 md:h-6 border-r-2 border-black/30" />
             )}
           </React.Fragment>
         ))}
