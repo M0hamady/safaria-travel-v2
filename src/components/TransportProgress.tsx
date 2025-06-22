@@ -35,7 +35,7 @@ export const TransportProgress = ({
           }
         }}
         disabled={currentIndex === 0}
-        className="p-2 bg-gray-200 hover:bg-gray-300 rounded-full disabled:opacity-50"
+        className="p-2 bg-gray-200 hover:bg-gray-300 rounded-full disabled:opacity-50 rtl:rotate-180"
       >
         <ChevronLeftOutlined />
       </button>
@@ -46,7 +46,7 @@ export const TransportProgress = ({
           }
         }}
         disabled={currentIndex === transportOptions.length - 1}
-        className="p-2 bg-gray-200 hover:bg-gray-300 rounded-full disabled:opacity-50"
+        className="p-2 bg-gray-200 hover:bg-gray-300 rounded-full disabled:opacity-50 rtl:rotate-180"
       >
         <ChevronRightOutlined />
       </button>

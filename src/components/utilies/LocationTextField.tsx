@@ -151,11 +151,11 @@ useEffect(() => {
       {showDropdown && (
         <div
           ref={dropdownRef}
-          className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+          className="absolute z-[1000] w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
           role="listbox"
         >
           {loading ? (
-            <div className="px-4 py-2 text-gray-500">Loading...</div>
+            <div className="px-4 py-2 text-gray-500 z-50">Loading...</div>
           ) : filteredLocations.length > 0 ? (
             <ul>
               {filteredLocations.map((location, index) => (

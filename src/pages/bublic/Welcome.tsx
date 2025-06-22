@@ -19,9 +19,9 @@ const WelcomePage = () => {
   const isRTL = currentLanguage === "ar"; // RTL for Arabic
 
   return (
-    <div className={`bg-boarder ${isRTL ? "rtl" : "ltr"}`} dir={isRTL ? "rtl" : "ltr"}>
+    <div className={`bg-boarder z ${isRTL ? "rtl" : "ltr"}`} dir={isRTL ? "rtl" : "ltr"}>
       {/* Hero Section with Search */}
-      <section className="relative h-screen w-full" id="hero">
+      <section className="relative z-40 h-screen w-full" id="hero">
         <Hero />
         <motion.div
           initial={{ opacity: 0, y: 50 }}

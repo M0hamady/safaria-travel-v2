@@ -14,11 +14,11 @@ const FeatureCardComponent: React.FC<{ card: FeatureCard }> = ({ card }) => {
     const { t, i18n } = useTranslation();
   
   return (
-    <div className="w-[200px] h-[152px] relative rounded-lg shadow-[0_4px_4px_0_rgba(217,217,217,0.25)] bg-white">
+    <div className="w-[200px] h-[152px] relative rounded-lg shadow-[0_4px_4px_0_rgba(217,217,217,0.25)] bg-white z-0">
       {/* Background SVG */}
 
       {/* Foreground content */}
-      <div className="relative z-10 flex flex-col justify-center items-center gap-4 h-full">
+      <div className="relative z-0 flex flex-col justify-center items-center gap-4 h-full ">
         <div data-svg-wrapper>{card.icon}</div>
         <div className="text-secondary text-base font-semibold font-cairo text-center">
           {t(card.title)}
@@ -133,7 +133,7 @@ const featureCards: FeatureCard[] = [
 // 4. Create a container component for the cards
 const FeatureCardsContainer: React.FC = () => {
   return (
-    <div className="w-full flex flex-wrap justify-center gap-6 py-8 -translate-y-24">
+    <div className="w-full flex flex-wrap justify-center gap-6 py-8 -translate-y-24 z-0">
       {featureCards.map((card) => (
         <FeatureCardComponent key={card.id} card={card} />
       ))}
@@ -146,7 +146,7 @@ const FeaturesSection: React.FC = () => {
   const { t, i18n } = useTranslation();
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full flex flex-col items-center z-0">
       {/* Header Section */}
       <div className="w-full bg-primary px-24 pt-12 pb-36">
         <div className="mx-auto flex flex-col gap-4">
