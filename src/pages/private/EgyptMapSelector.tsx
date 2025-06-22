@@ -17,6 +17,47 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import NotesIcon from '@mui/icons-material/Notes';
 import { useGoogleMaps } from '../../context/GoogleMapsProvider';
 
+// Styles for EgyptMapSelector component
+const styles = {
+  errorContainer: "flex flex-col items-center justify-center h-full bg-red-50 p-4 rounded-lg text-center",
+  errorIcon: "text-red-600 mb-3",
+  errorHeading: "text-xl font-bold text-red-700 mb-2",
+  errorText: "text-gray-600 mb-4",
+  errorDetail: "text-sm text-gray-500",
+  retryButton: "mt-4",
+
+  loadingContainer: "flex items-center justify-center h-[40rem] bg-gray-50 rounded-lg",
+  loadingSpinner: "animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto",
+  loadingText: "mt-4 text-gray-600",
+
+  mapContainer: "relative w-full h-[40rem] md:h-[30rem] max-sm:h-[48rem] mx-auto rounded-lg overflow-hidden",
+  locateButton: "absolute md:top-[25rem] ltr:left-4 rtl:right-4 z-10 bg-white shadow-lg hover:bg-gray-100 max-sm:top-[35rem]",
+
+  searchContainer: "absolute md:top-12 max-sm:top-[5rem] right-4 z-50 w-full max-w-xs sm:max-w-sm",
+  searchInput: "bg-white shadow-md rounded-lg pr-9",
+  searchClearButton: "absolute right-2 rtl:left-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600",
+  suggestionsContainer: "bg-white shadow-lg rounded-lg mt-1 max-h-60 overflow-auto border border-gray-200",
+  suggestionItem: "px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors",
+  suggestionContent: "mr-2",
+
+  currentLocationButton: "mt-2 bg-blue-600 hover:bg-blue-700",
+
+  addressInfoContainer: "max-w-xs",
+  addressBadge: (color: string) => `px-2 py-0.5 text-xs font-medium bg-${color}-100 text-${color}-800 rounded-full whitespace-nowrap`,
+  addressDetails: "mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200",
+  addressNotes: "mt-3 p-2 bg-yellow-50 rounded-lg border border-yellow-100 text-sm text-gray-700",
+  coordinatesContainer: "mt-3 flex justify-between items-center pt-2 border-t border-gray-200",
+  copyButton: "text-xs flex items-center text-blue-600 hover:text-blue-800",
+
+  candidateButton: "bg-purple-600 hover:bg-purple-700",
+
+  dialogTitle: "bg-blue-50 text-blue-700 text-lg font-semibold",
+  dialogContent: "pt-4",
+  locationPreview: "mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200",
+  cancelButton: "text-gray-600 hover:text-gray-800",
+  saveButton: "bg-blue-600 hover:bg-blue-700"
+};
+
 // Custom map styles for EgyptMapSelector
 const mapStyles = [
   {
@@ -112,12 +153,11 @@ export default function EgyptMapSelector({
   const [effectiveLocations, setEffectiveLocations] = useState<any[]>([]);
 
   const mapRef = useRef<google.maps.Map | null>(null);
+  
   useEffect(() => {
     setEffectiveLocations(locations.length ? locations : addresses);
   }, [locations, addresses]);
-  useEffect(() => {
-    setEffectiveLocations(locations.length ? locations : addresses);
-  }, []);
+
   const handleSuggestion = useCallback((item: any) => {
     const lat = parseFloat(item.lat),
       lng = parseFloat(item.lon);
@@ -322,8 +362,8 @@ export default function EgyptMapSelector({
 
   if (loadError) {
     return (
-      <div className="flex flex-col items-center  justify-center h-full bg-red-50 p-4 rounded-lg text-center">
-        <div className="text-red-600 mb-3">
+      <div className={styles.errorContainer}>
+        <div className={styles.errorIcon}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-12 w-12 mx-auto"
@@ -339,15 +379,15 @@ export default function EgyptMapSelector({
             />
           </svg>
         </div>
-        <h3 className="text-xl font-bold text-red-700 mb-2">خطأ في تحميل الخريطة</h3>
-        <p className="text-gray-600 mb-4">
+        <h3 className={styles.errorHeading}>خطأ في تحميل الخريطة</h3>
+        <p className={styles.errorText}>
           تعذر تحميل خدمة خرائط جوجل. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.
         </p>
-        <p className="text-sm text-gray-500">التفاصيل الفنية: {loadError.message}</p>
+        <p className={styles.errorDetail}>التفاصيل الفنية: {loadError.message}</p>
         <Button
           variant="contained"
           color="error"
-          className="mt-4"
+          className={styles.retryButton}
           onClick={() => window.location.reload()}
         >
           إعادة المحاولة
@@ -358,32 +398,32 @@ export default function EgyptMapSelector({
 
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center h-[40rem] bg-gray-50 rounded-lg">
+      <div className={styles.loadingContainer}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">جاري تحميل الخريطة...</p>
+          <div className={styles.loadingSpinner}></div>
+          <p className={styles.loadingText}>جاري تحميل الخريطة...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-[40rem] md:h-[30rem]  max-sm:h-[48rem] mx-auto rounded-lg overflow-hidden">
+    <div className={styles.mapContainer}>
       <Fab
         onClick={locateMe}
         size="medium"
-        className="absolute md:top-[25rem]   ltr:left-4 rtl:right-4  z-10 bg-white shadow-lg hover:bg-gray-100 max-sm:top-[35rem]"
+        className={styles.locateButton}
         aria-label="تحديد الموقع الحالي"
       >
         <GpsFixed className="text-blue-600" />
       </Fab>
 
-      <div className="absolute md:top-12 max-sm:top-[5rem] right-4 z-50 w-full max-w-xs sm:max-w-sm">
+      <div className={styles.searchContainer}>
         <div className="relative">
           <TextField
             fullWidth
             size="small"
-            className="bg-white shadow-md rounded-lg"
+            className={styles.searchInput}
             placeholder="ابحث عن موقع..."
             value={query || ''}
             onChange={(e) => setQuery(e.target.value)}
@@ -400,7 +440,7 @@ export default function EgyptMapSelector({
           />
           {query && (
             <button
-              className="absolute right-2  rtl:left-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className={styles.searchClearButton}
               onClick={() => setQuery('')}
             >
               <Cancel fontSize="small" />
@@ -408,16 +448,16 @@ export default function EgyptMapSelector({
           )}
         </div>
         {suggestions.length > 0 && (
-          <div className="bg-white shadow-lg rounded-lg mt-1 max-h-60 overflow-auto border border-gray-200">
+          <div className={styles.suggestionsContainer}>
             {suggestions.map((s, i) => (
               <div
                 key={i}
-                className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors"
+                className={styles.suggestionItem}
                 onClick={() => handleSuggestion(s)}
               >
                 <div className="flex items-start">
                   <Place className="mt-0.5 text-blue-500" fontSize="small" />
-                  <div className="mr-2">
+                  <div className={styles.suggestionContent}>
                     <div className="font-medium text-gray-800">{s.display_name.split(',')[0]}</div>
                     <div className="text-xs text-gray-500 truncate">{s.display_name}</div>
                   </div>
@@ -459,7 +499,6 @@ export default function EgyptMapSelector({
         {current && (
           <MemoizedMarker
             position={current.coords}
-            
             icon={{
               url: 'https://maps.google.com/mapfiles/kml/shapes/man.png',
               scaledSize: new google.maps.Size(48, 48),
@@ -495,7 +534,7 @@ export default function EgyptMapSelector({
                     fullWidth
                     onClick={handleSaveCurrentLocation}
                     startIcon={<Save />}
-                    className="mt-2 bg-blue-600 hover:bg-blue-700"
+                    className={styles.currentLocationButton}
                   >
                     حفظ هذا الموقع
                   </Button>
@@ -568,7 +607,7 @@ export default function EgyptMapSelector({
                   onCloseClick={() => setActiveInfoWindow(null)}
                   options={{ maxWidth: 320, minWidth: 280 }}
                 >
-                  <div className="max-w-xs">
+                  <div className={styles.addressInfoContainer}>
                     <div className="flex items-start gap-3">
                       <div
                         className={`flex-shrink-0 w-6 h-6 rounded-full mt-1 ${
@@ -585,23 +624,23 @@ export default function EgyptMapSelector({
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="text-lg font-bold text-gray-800">{loc.name}</h3>
                           {isBoarding && (
-                            <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full whitespace-nowrap">
+                            <span className={styles.addressBadge('green')}>
                               نقطة الركوب
                             </span>
                           )}
                           {isReturn && (
-                            <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full whitespace-nowrap">
+                            <span className={styles.addressBadge('blue')}>
                               نقطة العودة
                             </span>
                           )}
                           {isSelected && !isBoarding && !isReturn && (
-                            <span className="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full whitespace-nowrap">
+                            <span className={styles.addressBadge('yellow')}>
                               محددة
                             </span>
                           )}
                         </div>
 
-                        <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className={styles.addressDetails}>
                           <div className="flex items-start">
                             <Place className="flex-shrink-0 mt-0.5 text-gray-400" fontSize="small" />
                             <div className="mr-2">
@@ -619,7 +658,7 @@ export default function EgyptMapSelector({
                         </div>
 
                         {loc.notes && (
-                          <div className="mt-3 p-2 bg-yellow-50 rounded-lg border border-yellow-100 text-sm text-gray-700">
+                          <div className={styles.addressNotes}>
                             <div className="flex items-start">
                               <NotesIcon className="text-yellow-500 mr-1" fontSize="small" />
                               <div>
@@ -631,12 +670,12 @@ export default function EgyptMapSelector({
                       </div>
                     </div>
 
-                    <div className="mt-3 flex justify-between items-center pt-2 border-t border-gray-200">
+                    <div className={styles.coordinatesContainer}>
                       <span className="text-xs text-gray-500">
                         {pos.lat.toFixed(6)}, {pos.lng.toFixed(6)}
                       </span>
                       <button
-                        className="text-xs flex items-center text-blue-600 hover:text-blue-800"
+                        className={styles.copyButton}
                         onClick={(e) => {
                           e.stopPropagation();
                           copyToClipboard(`${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`);
@@ -688,7 +727,7 @@ export default function EgyptMapSelector({
                     size="small"
                     onClick={() => setOpenAdd(true)}
                     startIcon={<AddLocation />}
-                    className="bg-purple-600 hover:bg-purple-700"
+                    className={styles.candidateButton}
                   >
                     إضافة هذا الموقع
                   </Button>
@@ -708,11 +747,11 @@ export default function EgyptMapSelector({
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle className="bg-blue-50 text-blue-700 text-lg font-semibold">
+        <DialogTitle className={styles.dialogTitle}>
           {mapDialogType === 'boarding' ? '➕ إضافة عنوان الركوب' : '➕ إضافة عنوان العودة'}
         </DialogTitle>
-        <DialogContent className="pt-4">
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+        <DialogContent className={styles.dialogContent}>
+          <div className={styles.locationPreview}>
             <div className="flex items-center text-sm text-gray-600">
               <Place fontSize="small" className="text-blue-500 mr-2" />
               <span>{candidate?.label}</span>
@@ -738,7 +777,7 @@ export default function EgyptMapSelector({
             }}
             startIcon={<Cancel />}
             variant="outlined"
-            className="text-gray-600 hover:text-gray-800"
+            className={styles.cancelButton}
           >
             إلغاء
           </Button>
@@ -748,7 +787,7 @@ export default function EgyptMapSelector({
             variant="contained"
             color="primary"
             disabled={!newLabel.trim()}
-            className="bg-blue-600 hover:bg-blue-700"
+            className={styles.saveButton}
           >
             حفظ العنوان
           </Button>
