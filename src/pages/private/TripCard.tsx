@@ -145,7 +145,7 @@ export const TripCard: FC<{ trip: Trip }> = ({ trip }) => {
             <div className="w-[110px] flex justify-start items-start">
               <div
                 onClick={handleSelect} // ✅ Navigate on click
-                className="flex-1 h-[54px] p-4 bg-[#0074c3] rounded-[9px] shadow-[0px_4px_4px_rgba(217,217,217,0.25)] flex justify-center items-center gap-2 cursor-pointer hover:brightness-90 transition"
+                className="flex-1 h-[54px] p-4 bg-primary rounded-[9px] shadow-[0px_4px_4px_rgba(217,217,217,0.25)] flex justify-center items-center gap-2 cursor-pointer hover:brightness-90 transition"
               >
                 <div className="text-white text-xl font-medium leading-[30px] font-cairo">
                   {t("select")}

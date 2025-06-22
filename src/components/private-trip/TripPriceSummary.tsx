@@ -27,7 +27,7 @@ export const TripPriceSummary: React.FC<TripPriceSummaryProps> = ({
         <span className="text-[#1e1e1e] text-base font-normal font-cairo">
           {t("priceSummary.discount")}
         </span>
-        <span className="text-[#0074c3] text-base font-medium font-cairo">
+        <span className="text-primary text-base font-medium font-cairo">
           {discount} {t("price_unit")}
         </span>
       </div>
@@ -37,7 +37,7 @@ export const TripPriceSummary: React.FC<TripPriceSummaryProps> = ({
         <span className="text-[#1e1e1e] text-base font-normal font-cairo">
           {t("priceSummary.taxIncluded")}
         </span>
-        <span className="text-[#0074c3] text-base font-medium font-cairo">
+        <span className="text-primary text-base font-medium font-cairo">
           {tax} {t("price_unit")}
         </span>
       </div>
@@ -47,7 +47,7 @@ export const TripPriceSummary: React.FC<TripPriceSummaryProps> = ({
         <span className="text-[#1e1e1e] text-xl font-medium font-cairo">
           {t("priceSummary.total")}
         </span>
-        <span className="text-[#0074c3] text-base font-semibold font-cairo">
+        <span className="text-primary text-base font-semibold font-cairo">
           {total} {t("price_unit")}
         </span>
       </div>

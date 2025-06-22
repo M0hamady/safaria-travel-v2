@@ -71,7 +71,7 @@ export default function PrivateTripSearchResults() {
   return (
     <div className="  bg-gray-100 md:min-h-screen ">
       <section
-        className="w-full h-fit md:max-h-[600px] mb-6 2xl:mb-20  max-sm:mb-8"
+        className="w-full h-fit md:max-h-[600px] mb-6 2xl:mb-20  max-sm:mb-8 z-40"
         id="hero"
       >
         <Hero />
@@ -108,7 +108,7 @@ export default function PrivateTripSearchResults() {
           <SearchBar />
         </motion.div>
       </section>
-      <section className="flex flex-col md:flex-row p-4 bg-gray-100 min-h-screen "  id="results" >
+      <section className="flex flex-col md:flex-row p-4 bg-gray-100 min-h-screen  z-20"  id="results" >
         <div className="md:w-1/4">
           <div className="md:hidden mb-4 flex space-x-2">
             <button

@@ -191,7 +191,7 @@ const SearchBar = () => {
   }, [currentTripType, currentSearchValues.return, t]);
 
   return (
-    <div className="bg-white w-full md:h-44 shadow-lg rounded-xl p-6 md:px-6 md:py-2 space-y-2 -translate-y-96 max-sm:-translate-y-36">
+    <div className="bg-white w-full md:h-44 shadow-lg rounded-xl p-6 md:px-6 md:py-2 space-y-2 -translate-y-96 max-sm:-translate-y-36 z-50">
       <TransportSelector
         selectedTransport={searchType}
         setSelectedTransport={setSearchType}

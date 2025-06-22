@@ -22,18 +22,18 @@ export const TripTypeSelector = ({
         <div className="w-6 h-6 relative flex items-center justify-center">
           <div
             className={`w-3.5 h-3.5 rounded-full ${
-              tripType === "one-way" ? "bg-[#0074c3]" : "bg-transparent"
+              tripType === "one-way" ? "bg-primary" : "bg-transparent"
             }`}
           />
           <div
             className={`w-6 h-6 rounded-full border ${
-              tripType === "one-way" ? "border-[#0074c3]" : "border-[#b9c4d5]"
+              tripType === "one-way" ? "border-primary" : "border-[#b9c4d5]"
             } absolute inset-0`}
           />
         </div>
         <div
           className={`text-base font-normal font-['Cairo'] leading-normal ${
-            tripType === "one-way" ? "text-[#0074c3]" : "text-[#68696a]"
+            tripType === "one-way" ? "text-primary" : "text-[#68696a]"
           }`}
         >
           {t("tripType.oneWay")}
@@ -48,18 +48,18 @@ export const TripTypeSelector = ({
           <div className="w-6 h-6 relative flex items-center justify-center">
             <div
               className={`w-3.5 h-3.5 rounded-full ${
-                tripType === "round" ? "bg-[#0074c3]" : "bg-transparent"
+                tripType === "round" ? "bg-primary" : "bg-transparent"
               }`}
             />
             <div
               className={`w-6 h-6 rounded-full border ${
-                tripType === "round" ? "border-[#0074c3]" : "border-[#b9c4d5]"
+                tripType === "round" ? "border-primary" : "border-[#b9c4d5]"
               } absolute inset-0`}
             />
           </div>
           <div
             className={`text-base font-normal font-['Cairo'] leading-normal ${
-              tripType === "round" ? "text-[#0074c3]" : "text-[#68696a]"
+              tripType === "round" ? "text-primary" : "text-[#68696a]"
             }`}
           >
             {t("tripType.round")}

@@ -148,14 +148,14 @@ const [open, setopen] = useState(visible)
 
             {/* Thumbs */}
             <div
-              className="absolute w-[22px] h-[22px] top-0 bg-[#0074c3] rounded-full border-2 border-white shadow-md pointer-events-none"
+              className="absolute w-[22px] h-[22px] top-0 bg-primary rounded-full border-2 border-white shadow-md pointer-events-none"
               style={{
                 left: `calc(${(min / 10000) * 100}% - 11px)`,
                 bottom: "16px",
               }}
             />
             <div
-              className="absolute w-[22px] h-[22px] bottom-0 bg-[#0074c3] rounded-full border-2 border-white shadow-md pointer-events-none"
+              className="absolute w-[22px] h-[22px] bottom-0 bg-primary rounded-full border-2 border-white shadow-md pointer-events-none"
               style={{
                 left: `calc(${(max / 10000) * 100}% - 11px)`,
                 bottom: "16px",

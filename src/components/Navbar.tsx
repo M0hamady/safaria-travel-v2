@@ -111,7 +111,7 @@ const Navbar: React.FC = () => {
                 to="dashboard/profile"
                 className="flex items-center gap-2 cursor-pointer"
               >
-                <PersonOutlineIcon className="text-[#0074C3] text-2xl" />
+                <PersonOutlineIcon className="text-primary text-2xl" />
                 <span className="text-primary text-base font-normal">
                   {formatUserName(user?.name) || t("profile")}
                 </span>
@@ -120,7 +120,7 @@ const Navbar: React.FC = () => {
                 onClick={handleLogout}
                 className="flex items-center gap-2 cursor-pointer"
               >
-                <ExitToAppIcon className="text-[#0074C3] text-2xl" />
+                <ExitToAppIcon className="text-primary text-2xl" />
                 <span className="text-primary text-base font-normal">
                 {t("logout")}
                 </span>
@@ -132,7 +132,7 @@ const Navbar: React.FC = () => {
                 to="/login"
                 className="flex items-center gap-2 cursor-pointer"
               >
-                <PersonOutlineIcon className="text-[#0074C3] text-2xl" />
+                <PersonOutlineIcon className="text-primary text-2xl" />
                 <span className="text-primary text-base font-normal">
                   {t("signIn")}
                 </span>
@@ -141,7 +141,7 @@ const Navbar: React.FC = () => {
                 to="/register"
                 className="flex items-center gap-2 cursor-pointer"
               >
-                <GroupAddIcon className="text-[#0074C3] text-2xl" />
+                <GroupAddIcon className="text-primary text-2xl" />
                 <span className="text-primary text-base font-normal">
                   {t("joinUs")}
                 </span>

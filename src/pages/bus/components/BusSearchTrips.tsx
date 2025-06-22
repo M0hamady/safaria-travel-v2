@@ -182,7 +182,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, duration, onSelect }) 
                   alt="Bus"
                 />
                 {/* <div className="flex justify-center items-start gap-4">
-                  <div className="w-5 h-0 outline outline-1 outline-[#0074c3]" />
+                  <div className="w-5 h-0 outline outline-1 outline-primary" />
                   <div className="w-5 h-0 outline outline-1 outline-[#b9c4d5]" />
                   <div className="w-5 h-0 outline outline-1 outline-[#b9c4d5]" />
                 </div> */}

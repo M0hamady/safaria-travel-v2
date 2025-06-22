@@ -41,7 +41,7 @@ const TripProgressTracker: React.FC<TripProgressTrackerProps> = ({
           const isUpcoming = index > currentStepIndex;
           const bgColor =
             isCompleted || isCurrent
-              ? "bg-[#0074C3] text-white"
+              ? "bg-primary text-white"
               : "bg-[#F59E0B] text-black";
           const borderColor =
             isCompleted || isCurrent
