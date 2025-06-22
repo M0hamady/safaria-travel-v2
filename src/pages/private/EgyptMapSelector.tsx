@@ -746,6 +746,7 @@ export default function EgyptMapSelector({
         }}
         maxWidth="sm"
         fullWidth
+        className=' h-[30rem]'
       >
         <DialogTitle className={styles.dialogTitle}>
           {mapDialogType === 'boarding' ? '➕ إضافة عنوان الركوب' : '➕ إضافة عنوان العودة'}

@@ -212,13 +212,13 @@ let selectedAddress : Address | undefined;
   );
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 space-y-6 max-w-2xl mx-auto w-full">
+    <div className="bg-white rounded-xl shadow-lg p-6 space-y-6 max-w-2xl mx-auto w-full z-50">
       <h2 className="text-xl font-bold text-gray-800">{t("address.sectionTitle")}</h2>
 
       {/* Boarding Section */}
-      <div className="space-y-4">
+      <div className="space-y-4 max-">
         <div className="flex justify-between items-center">
-          <label className="text-base text-gray-700">{t("address.boardingLabel")}</label>
+          <label className="text-base text-gray-700 ">{t("address.boardingLabel")}</label>
           {boardingAddressId && (
             <button
               onClick={() =>
