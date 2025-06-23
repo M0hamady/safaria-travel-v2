@@ -4,6 +4,7 @@ import { TripHeader } from "../../components/private-trip/TripHeader";
 import { TripDetailsCard } from "../../components/private-trip/TripDetailsCard";
 import { TripPriceSummary } from "../../components/private-trip/TripPriceSummary";
 import { usePrivateSearchContext } from "../../context/PrivateSearchContext";
+import { usePrivateTripDataContext } from "../../context/PrivateTripDataContext";
 
 interface TripBookingSectionProps {
   trip: PrivateTrip;
@@ -19,7 +20,13 @@ const TripBookingSection: React.FC<TripBookingSectionProps> = ({
   const {
     searchValues,
     tripType,
+    
   } = usePrivateSearchContext();
+  const {
+  
+      boardingAddressId,
+      returnAddressId
+    } = usePrivateTripDataContext();
   return (
     <div className="px-4 py-5 bg-white rounded-2xl shadow-[0px_4px_4px_0px_rgba(217,217,217,0.25)] inline-flex flex-col justify-start items-end gap-5">
       <TripHeader companyName={trip.company_name} companyImage={trip.company_logo} />
@@ -59,6 +66,7 @@ const TripBookingSection: React.FC<TripBookingSectionProps> = ({
         total={tripType === 'one-way' ? `${trip.price}` : `${trip.round_price}`}
         onPayNow={onCreateTicket}
         isCreatingTicket={isCreatingTicket}
+        isDataCompleted={boardingAddressId && returnAddressId? true : false}
       />
     </div>
   );

@@ -8,6 +8,7 @@ interface TripPriceSummaryProps {
   total: string;
   onPayNow: () => void;
   isCreatingTicket: boolean;
+  isDataCompleted?: boolean;
 }
 
 export const TripPriceSummary: React.FC<TripPriceSummaryProps> = ({
@@ -15,6 +16,7 @@ export const TripPriceSummary: React.FC<TripPriceSummaryProps> = ({
   tax,
   total,
   onPayNow,
+  isDataCompleted = false,
   isCreatingTicket,
 }) => {
   const { t } = useTranslation();
@@ -58,6 +60,7 @@ export const TripPriceSummary: React.FC<TripPriceSummaryProps> = ({
           <ConfirmAndAuthCheck
             onConfirm={onPayNow}
             loading={isCreatingTicket}
+            isDataCompleted={isDataCompleted}
             label={t("priceSummary.payNow")}
           />
         </div>

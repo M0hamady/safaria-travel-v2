@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -6,12 +6,14 @@ import { Link, useNavigate } from "react-router-dom";
 interface ConfirmAndAuthCheckProps {
   onConfirm: () => void;
   loading?: boolean;
+  isDataCompleted?: boolean;
   label?: string;
 }
 
 const ConfirmAndAuthCheck: React.FC<ConfirmAndAuthCheckProps> = ({
   onConfirm,
   loading = false,
+  isDataCompleted = false,
   label,
 }) => {
   const { t } = useTranslation();
@@ -20,6 +22,9 @@ const ConfirmAndAuthCheck: React.FC<ConfirmAndAuthCheckProps> = ({
   const [agreed, setAgreed] = useState(false);
 
   const currentPath = window.location.pathname + window.location.search;
+useEffect(() => {
+  console.log(isDataCompleted);
+}, [agreed])
 
   if (!isAuthenticated) {
     return (
@@ -52,9 +57,9 @@ const ConfirmAndAuthCheck: React.FC<ConfirmAndAuthCheckProps> = ({
 
       <button
         onClick={onConfirm}
-        disabled={!agreed || loading}
+        disabled={!agreed || loading || !isDataCompleted}
         className={`w-full text-white py-2 rounded font-medium transition ${
-          !agreed || loading
+          !agreed || loading || !isDataCompleted
             ? "bg-blue-400 cursor-not-allowed"
             : "bg-blue-600 hover:bg-blue-700"
         }`}
