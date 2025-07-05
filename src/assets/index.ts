@@ -33,6 +33,17 @@ import halan from "./Images/halan.jpg";
 import mastercard from "./Images/mastercard.jpg";
 import visa from "./Images/visa.jpg";
 import valw from "./Images/valw.jpg";
+import Cairo_1 from "./Images/Cairo-1.png";
+import Cairo_2 from "./Images/cairo-1 (1).png";
+import Sharm_1 from "./Images/Sharm-1.png";
+import Sharm_2 from "./Images/Sharm-2.png";
+import luxor from "./Images/luxor1.png";
+import luxor2 from "./Images/luxor 2.png";
+import hurghada from "./Images/hurghada-.png";
+import hurghada3 from "./Images/hurghada-3.png";
+import dahap from "./Images/Dahab-.png";
+import dahap2 from "./Images/dahab 2.png";
+import alex from "./Images/alex-1.png";
 
 const images = {
   bus_horizontal,
@@ -69,7 +80,18 @@ const images = {
   trainSafaria,
   railWay,
   listBg,
-  listBg2
+  listBg2,
+  Cairo_1,
+Cairo_2,
+Sharm_1,
+Sharm_2,
+luxor,
+luxor2,
+hurghada,
+hurghada3,
+dahap,
+dahap2,
+alex
 };
 
 export default images;
