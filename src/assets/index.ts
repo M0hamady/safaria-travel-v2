@@ -36,7 +36,7 @@ import valw from "./Images/valw.jpg";
 import Cairo_1 from "./Images/Cairo-1.png";
 import Cairo_2 from "./Images/cairo-1 (1).png";
 import Sharm_1 from "./Images/Sharm-1.png";
-import Sharm_2 from "./Images/Sharm-2.png";
+import Sharm_2 from "./Images/sharm-2.png";
 import luxor from "./Images/luxor1.png";
 import luxor2 from "./Images/luxor 2.png";
 import hurghada from "./Images/hurghada-.png";
