@@ -10,12 +10,12 @@ interface TripCardData {
 }
 
 const tripCards: TripCardData[] = [
-  { title: "from Cairo to Alexandria", image: images.Cairo_1 },
-  { title: "from Cairo to Hurghada", image: images.hurghada },
-  { title: "from Cairo to Sohag", image: images.luxor },
-  { title: "from Alexandria to Cairo", image: images.alex },
-  { title: "from Alexandria to Hurghada", image: images.hurghada3 },
-  { title: "from Alexandria to Sohag", image: images.Cairo_2 },
+  { title: "Cairo ", image: images.Cairo_1 },
+  { title: "Hurghada", image: images.hurghada },
+  { title: "Luxor", image: images.luxor },
+  { title: "Alexandria", image: images.alex },
+  { title: "Marsa ALam", image: images.hurghada3 },
+  { title: "Sohag", image: images.Cairo_2 },
 ];
 
 const StepsSection: React.FC = () => {
