@@ -44,6 +44,7 @@ import hurghada3 from "./Images/hurghada-3.png";
 import dahap from "./Images/Dahab-.png";
 import dahap2 from "./Images/dahab 2.png";
 import alex from "./Images/alex-1.png";
+import sohag from "./Images/sohag,-sohag-city,-sohag-travel.jpg";
 
 const images = {
   bus_horizontal,
@@ -91,7 +92,8 @@ hurghada,
 hurghada3,
 dahap,
 dahap2,
-alex
+alex,
+sohag
 };
 
 export default images;
