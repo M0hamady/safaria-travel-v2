@@ -14,7 +14,7 @@ const tripCards: TripCardData[] = [
   { title: "Hurghada", image: images.hurghada },
   { title: "Luxor", image: images.luxor },
   { title: "Alexandria", image: images.alex },
-  { title: "Marsa ALam", image: images.hurghada3 },
+  { title: "Dahab", image: images.dahap2 },
   { title: "Sohag", image: images.Cairo_2 },
 ];
 
