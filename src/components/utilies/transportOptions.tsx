@@ -14,18 +14,18 @@ export const transportOptions: TransportOption[] = [
     value: "bus",
     hasRoundTrip: true,
   },
-  {
-    id: 2,
-    label: "transport.private",
-    icon: <DirectionsCar />,
-    value: "private",
-    hasRoundTrip: true,
-  },
-  {
-    id: 3,
-    label: "transport.train",
-    icon: <DirectionsRailway />,
-    value: "train",
-    hasRoundTrip: true,
-  },
+  // {
+  //   id: 2,
+  //   label: "transport.private",
+  //   icon: <DirectionsCar />,
+  //   value: "private",
+  //   hasRoundTrip: true,
+  // },
+  // {
+  //   id: 3,
+  //   label: "transport.train",
+  //   icon: <DirectionsRailway />,
+  //   value: "train",
+  //   hasRoundTrip: true,
+  // },
 ];
