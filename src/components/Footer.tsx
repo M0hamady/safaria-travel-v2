@@ -109,7 +109,7 @@ const Footer: React.FC = () => {
   useEffect(() => {
     const fetchPages = async () => {
       try {
-        const response = await fetch("https://demo.telefreik.com/api/v1/pages", {
+        const response = await fetch("https://portal.safaria.travel/api/v1/pages", {
           headers: {
             "Accept-Language": i18n.language, // Fetch pages based on current language
           },

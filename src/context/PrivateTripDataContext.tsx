@@ -215,7 +215,7 @@ export const PrivateTripDataProvider: React.FC<{ children: React.ReactNode }> = 
         return;
       }
 
-      const res = await fetch("https://demo.telefreik.com/api/transports/profile/address-book", {
+      const res = await fetch("https://portal.safaria.travel/api/transports/profile/address-book", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -260,7 +260,7 @@ export const PrivateTripDataProvider: React.FC<{ children: React.ReactNode }> = 
         throw new Error("Not authenticated");
       }
 
-      const res = await fetch("https://demo.telefreik.com/api/transports/profile/address-book", {
+      const res = await fetch("https://portal.safaria.travel/api/transports/profile/address-book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -148,7 +148,7 @@ export const usePrivateTripData = (tripId: string | undefined) => {
             const token = localStorage.getItem("authToken");
             if (!token) throw new Error("Missing token");
 
-            const res = await fetch("https://demo.telefreik.com/api/transports/profile/address-book", {
+            const res = await fetch("https://portal.safaria.travel/api/transports/profile/address-book", {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -181,7 +181,7 @@ export const usePrivateTripData = (tripId: string | undefined) => {
             const token = localStorage.getItem("authToken");
             if (!token) throw new Error("Missing token");
 
-            const res = await fetch("https://demo.telefreik.com/api/transports/profile/address-book", {
+            const res = await fetch("https://portal.safaria.travel/api/transports/profile/address-book", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

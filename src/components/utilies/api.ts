@@ -1,6 +1,6 @@
 // src/utils/api.ts
 
-export const BASE_URL = "https://demo.telefreik.com";
+export const BASE_URL = "https://portal.safaria.travel";
 
 export const apiFetch = async <T>(url: string, options: RequestInit = {}): Promise<T> => {
   try {

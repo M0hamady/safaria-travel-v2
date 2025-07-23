@@ -94,7 +94,7 @@ const ConfirmReservationPageReturn: React.FC = () => {
     setErrorMessage(null);
     try {
       const response: any = await fetch(
-        `https://demo.telefreik.com/api/v2/transports/buses/create-ticket`,
+        `https://portal.safaria.travel/api/v2/transports/buses/create-ticket`,
         {
           method: "POST",
           headers: {
@@ -134,7 +134,7 @@ const ConfirmReservationPageReturn: React.FC = () => {
         },
       };
 
-      const paymentUrl = `https://demo.telefreik.com/api/v2/transports/orders/${reservationId}/pay`;
+      const paymentUrl = `https://portal.safaria.travel/api/v2/transports/orders/${reservationId}/pay`;
       const response = await axios.post(paymentUrl, null, config);
       const { url } = response?.data?.data;
 

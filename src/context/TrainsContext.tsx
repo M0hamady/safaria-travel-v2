@@ -17,7 +17,7 @@ import { TicketOrder } from "../pages/bus/pages/ConfirmReservationPage";
 // -------------------------
 // API Base
 // -------------------------
-const API_BASE_URL = "https://demo.telefreik.com/api/transports/trains";
+const API_BASE_URL = "https://portal.safaria.travel/api/transports/trains";
 
 // -------------------------
 // Interfaces
